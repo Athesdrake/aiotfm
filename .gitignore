@@ -10,5 +10,6 @@ build/*
 # Sublime text stuff
 *.sublime-*
 
-#config
+# personnal
 *.config
+upload.py

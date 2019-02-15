@@ -1,6 +1,6 @@
 import asyncio
 
-from .utils import Packet
+from .packet import Packet
 
 class Socket:
 	def __init__(self, host, port, loop=None):
