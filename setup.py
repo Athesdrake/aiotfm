@@ -18,7 +18,7 @@ setuptools.setup(
 	description="An asynchronous event based client for Transformice.",
 	long_description=README,
 	long_description_content_type='text/markdown',
-	url='https://github.com/Athesdrake/Fromage.py',
+	url='https://github.com/Athesdrake/aiotfm',
 	install_requires=requirements,
 	python_requires='>=3.5.3',
 	keywords=['TRANFORMICE', 'CLIENT', 'ASYNC', 'ATELIER801', 'EVENT'],
