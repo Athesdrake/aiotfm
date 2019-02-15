@@ -4,7 +4,8 @@ __pycache__/
 
 # dist
 dist/
-dist/*
+aiotfm.egg-info/
+build/*
 
 # Sublime text stuff
 *.sublime-*
