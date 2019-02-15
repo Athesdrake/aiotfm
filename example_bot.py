@@ -1,7 +1,7 @@
 import asyncio
 import json
 
-from transformice.client import Client
+from aiotfm.client import Client
 
 with open('bot.config') as f:
 	config = json.load(f)
