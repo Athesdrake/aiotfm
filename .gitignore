@@ -1,0 +1,10 @@
+# Byte-compiled
+__pycache__/
+*.pyc
+
+# Sublime text stuff
+*.sublime-*
+
+#config
+*.config
+*.sublime-project
