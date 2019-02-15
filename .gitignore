@@ -2,9 +2,12 @@
 __pycache__/
 *.pyc
 
+# dist
+dist/
+dist/*
+
 # Sublime text stuff
 *.sublime-*
 
 #config
 *.config
-*.sublime-project

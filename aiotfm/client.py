@@ -1,6 +1,6 @@
 import asyncio
 
-from .utils import Packet
+from .packet import Packet
 from .get_keys import get_keys
 from .connection import Connection
 
