@@ -3,6 +3,7 @@ import asyncio
 from .packet import Packet
 
 class Socket:
+	"""A socket class with asyncio."""
 	def __init__(self, host, port, loop=None):
 		self.loop = loop or asyncio.get_event_loop()
 
@@ -12,24 +13,28 @@ class Socket:
 		self.connected = False
 
 	async def connect(self):
-		"""Connect the socket to the host."""
+		"""|coro|
+		Connect the socket to the host."""
 		self._reader, self._writer = await self.__socket
 		self.connected = True
 
 		del self.__socket
 
 	async def recv(self, size):
-		"""Receive up to :size: bytes from the socket."""
+		"""|coro|
+		Receive up to size bytes from the socket."""
 		return await self._reader.read(size)
 
 	async def send(self, data):
-		"""Send a data string to the socket."""
+		"""|coro|
+		Send a data string to the socket."""
 		rval = self._writer.write(data)
 		await self.flush()
 		return rval
 
 	async def flush(self):
-		"""Flush send buffer."""
+		"""|coro|
+		Flush send buffer."""
 		await self._writer.drain()
 
 	def close(self):
@@ -38,6 +43,7 @@ class Socket:
 		self._writer.close()
 
 class Connection:
+	"""Represents the connection between the client and the host."""
 	def __init__(self, name, client, loop=None):
 		self.name = name
 		self.client = client
@@ -50,8 +56,9 @@ class Connection:
 		self.open = False
 
 	async def connect(self, host, port):
-		"""coro
-		Connect the client to the server host:port"""
+		"""|coro|
+		Connect the client to the host:port
+		"""
 		self.address = (host, port)
 		self.socket = Socket(host, port, self.loop)
 
@@ -63,26 +70,27 @@ class Connection:
 		asyncio.ensure_future(self._recv_loop())
 
 	async def _recv_loop(self):
+		"""|coro|
+		The loop that receives data and send it to the Client.received_data method."""
 		while self.open:
 			lensize = await self.socket.recv(1)
 			if len(lensize)==0:
-				self.close()
 				if self.open:
 					raise EOFError('The connection "{.name}" has been closed.'.format(self))
+				self.close()
 				break
 			length = int.from_bytes(await self.socket.recv(lensize[0]), 'big')
 			data = await self.socket.recv(length)
-			await self.client.receive_packet(Packet(data), self)
+			await self.client.received_data(data, self)
 
 	async def send(self, packet):
-		"""coro
-		Send a packet to the socket"""
-
-		# print('sending', packet.export(self.fingerprint))
-
+		"""|coro|
+		Send a packet to the socket
+		"""
 		await self.socket.send(packet.export(self.fingerprint))
 		self.fingerprint = (self.fingerprint + 1) % 100
 
-	async def close(self): # nothing is asynchronous but idc
+	def close(self):
+		"""Closes the connection."""
 		self.open = False
 		self.socket.close()
