@@ -23,7 +23,7 @@ class Socket:
 	async def recv(self, size):
 		"""|coro|
 		Receive up to size bytes from the socket."""
-		return await self._reader.read(size)
+		return await self._reader.readexactly(size)
 
 	async def send(self, data):
 		"""|coro|
@@ -79,14 +79,23 @@ class Connection:
 					raise EOFError('The connection "{.name}" has been closed.'.format(self))
 				self.close()
 				break
+			elif lensize[0]>3:
+				raise TypeError('The connection {.name} receive a non-valid type of {} bytes.'.format(self, lensize[0]))
+
 			length = int.from_bytes(await self.socket.recv(lensize[0]), 'big')
 			data = await self.socket.recv(length)
 			await self.client.received_data(data, self)
 
-	async def send(self, packet):
+	async def send(self, packet, cipher=False):
 		"""|coro|
 		Send a packet to the socket
+
+		:param packet: :class:`aiotfm.Packet` the packet to send.
+		:param cipher: :class:`bool` whether or not the packet should be ciphered before sending it.
 		"""
+		if cipher:
+			packet.xor_cipher(self.client.keys.msg, self.fingerprint)
+
 		await self.socket.send(packet.export(self.fingerprint))
 		self.fingerprint = (self.fingerprint + 1) % 100
 

@@ -11,7 +11,10 @@ class Packet:
 		self.exported = False
 
 	def __repr__(self):
-		return '<Packet {!r}>'.format(bytes(self.buffer))
+		return '<Packet {!r}>'.format(bytes(self))
+
+	def __bytes__(self):
+		return bytes(self.buffer)
 
 	@classmethod
 	def new(cls, c, cc=None):
@@ -23,8 +26,11 @@ class Packet:
 
 		return msg
 
-	def copy(self):
-		return Packet(self.buffer[:])
+	def copy(self, pos=False):
+		p = Packet(self.buffer[:])
+		if pos:
+			p.pos = self.pos
+		return p
 
 	def unpack(self, fmt):
 		results = []
@@ -84,7 +90,10 @@ class Packet:
 		return self.readString().decode()
 
 	def writeBytes(self, bytes):
-		self.buffer.extend(bytes)
+		if isinstance(bytes, Packet):
+			self.buffer.extend(bytes.buffer)
+		else:
+			self.buffer.extend(bytes)
 		return self
 
 	def writeCode(self, c, cc):

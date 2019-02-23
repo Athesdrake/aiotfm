@@ -13,3 +13,5 @@ build/*
 # personnal
 *.config
 upload.py
+bot.py
+regex

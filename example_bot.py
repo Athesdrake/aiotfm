@@ -8,6 +8,8 @@ with open('bot.config') as f:
 
 bot = Client()
 
+boot_time = bot.loop.time()
+
 @bot.event
 async def on_login_ready(*a):
 	print('Logging in ...')
@@ -15,7 +17,7 @@ async def on_login_ready(*a):
 
 @bot.event
 async def on_ready():
-	print('READY')
+	print('Connected to the community platform in {:.2f} seconds'.format(bot.loop.time()-boot_time))
 	await bot.enterTribe()
 
 @bot.event

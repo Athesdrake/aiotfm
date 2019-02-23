@@ -3,6 +3,8 @@ import asyncio
 from .packet import Packet
 from .get_keys import get_keys
 from .connection import Connection
+from .player import Profile
+from .tribe import Tribe
 
 
 class Client:
@@ -27,8 +29,10 @@ class Client:
 		self.main = Connection('main', self, self.loop)
 		self.bulle = None
 
+		self._waiters = {}
+
 		self.community = community # EN
-		self.whisper_id = 0
+		self.cp_fingerprint = 0
 
 	async def received_data(self, data, connection):
 		"""|coro|
@@ -61,7 +65,38 @@ class Client:
 		:return: True if the packet got handled, False otherwise.
 		"""
 		CCC = packet.readCode()
-		if CCC==(26, 3): # Handshake OK
+		if CCC == (1, 1): # Old packets
+			data = packet.readBytes().split(b'\x01')
+			oldCCC = tuple(data.pop(0)[:2])
+			self.dispatch('old_packet', connection, oldCCC, data)
+			return await self.handle_old_packet(connection, oldCCC, data)
+
+		elif CCC==(5, 21): # Joined room
+			private = packet.readBool()
+			room_name = packet.readString() # Decode it at your own risk
+			self.dispatch('joined_room', room_name, private)
+
+		elif CCC==(6, 6): # Room message
+			player_id, username, commu, message = packet.unpack('LsBs')
+			self.dispatch('room_message', username, message)
+
+		elif CCC==(8, 16): # profile
+			self.dispatch('profile', Profile(packet))
+
+		elif CCC==(16, 2): # Tribe invitation received
+			author = packet.readUTF()
+			tribe = packet.readUTF()
+			self.dispatch('tribe_inv', author, tribe)
+
+		elif CCC==(26, 2): # Logged in successfully
+			player_id = packet.read32()
+			username = packet.readUTF()
+			played_time = packet.read32()
+			community = packet.read8()
+			pid = packet.read32()
+			self.dispatch('logged', player_id, username, played_time, community, pid)
+
+		elif CCC==(26, 3): # Handshake OK
 			online_players = packet.read32() # online players
 			connection.fingerprint = packet.read8()
 			community = packet.readString() # community
@@ -78,19 +113,11 @@ class Client:
 			await connection.send(os_info)
 			self.dispatch('login_ready', online_players, community, country)
 
-		elif CCC==(5, 21): # Joined room
-			private = packet.readBool()
-			room_name = packet.readString() # Decode it at your own risk
-			self.dispatch('joined_room', room_name, private)
+		elif CCC==(26, 12):
+			self.dispatch('login_result', packet.read8(), packet.readUTF())
 
-		elif CCC==(16, 2): # Tribe invitation received
-			author = packet.readUTF()
-			tribe = packet.readUTF()
-			self.dispatch('tribe_inv', author, tribe)
-
-		elif CCC==(6, 6): # Room message
-			player_id, username, commu, message = packet.unpack('LsBs')
-			self.dispatch('room_message', username, message)
+		elif CCC==(28, 6): # pong
+			self.dispatch('ping', packet.read8())
 
 		elif CCC==(44, 1): # Bulle switching
 			bulle_id = packet.read32()
@@ -108,18 +135,31 @@ class Client:
 
 		elif CCC==(60, 3): # Community platform
 			TC = packet.read16()
+			self.dispatch('raw_cp', TC, packet.copy(True))
 			if TC==3: # Connected to the community platform
 				self.dispatch('ready')
+			elif TC==65:
+				author, message = packet.readUTF(), packet.readString()
+				self.dispatch('tribe_message', author, message)
 			elif TC==66: # Whisper
 				author, commu, receiver, message = packet.readUTF(), packet.read32(), packet.readUTF(), packet.readUTF()
 				self.dispatch('whisper', author, commu, receiver, message)
+			elif TC==88: # tribe member connected
+				self.dispatch('member_connected', packet.readUTF())
+			elif TC==90: # tribe member disconnected
+				self.dispatch('member_disconnected', packet.readUTF())
 			else:
+				if self.LOG_UNHANDLED_PACKETS:
+					print(CCC, TC, bytes(packet.buffer)[4:])
 				return False
 		else:
 			if self.LOG_UNHANDLED_PACKETS:
 				print(CCC, bytes(packet.buffer)[2:])
 			return False
 		return True
+
+	async def handle_old_packet(self, connection:Connection, oldCCC:tuple, data:list):
+		return False
 
 	async def _heartbeat_loop(self):
 		"""|coro|
@@ -135,32 +175,10 @@ class Client:
 				last_heartbeat = self.loop.time()
 			await asyncio.sleep(.5)
 
-	async def start(self, api_tfmid, api_token):
-		"""|coro|
-		Starts the client.
-
-		:param api_tfmid: :class:`int` or :class:`str` your Transformice id.
-		:param api_token: :class:`str` your token to access the API.
-		"""
-		self.keys = keys = await get_keys(api_tfmid, api_token)
-
-		await self.main.connect('164.132.202.12', 5555)
-
-		while not self.main.socket.connected:
-			await asyncio.sleep(.1)
-
-		packet = Packet.new(28, 1).write16(keys.version).writeString(keys.connection)
-		packet.writeString('Desktop').writeString('-').write32(0x1fbd).writeString('')
-		packet.writeString('74696720697320676f6e6e61206b696c6c206d7920626f742e20736f20736164')
-		packet.writeString("A=t&SA=t&SV=t&EV=t&MP3=t&AE=t&VE=t&ACC=t&PR=t&SP=f&SB=f&DEB=f&V=LNX 29,0,0,140&M=Adobe Linux&R=1920x1080&COL=color&AR=1.0&OS=Linux&ARCH=x86&L=en&IME=t&PR32=t&PR64=t&LS=en-US&PT=Desktop&AVD=f&LFD=f&WD=f&TLS=t&ML=5.1&DP=72")
-		packet.write32(0).write32(0x6257).writeString('')
-
-		await self.main.send(packet)
-
 	def event(self, coro):
 		"""A decorator that registers an event.
 
-		More about events later.
+		More about events [here](Events.md).
 		"""
 		name = coro.__name__
 		if not name.startswith('on_'):
@@ -170,6 +188,36 @@ class Client:
 
 		setattr(self, name, coro)
 		return coro
+
+	def wait_for(self, event, condition=None, timeout=None):
+		"""Wait for an event.
+
+		Example: ::
+			@client.event
+			async def on_room_message(author, message):
+				if message=='id':
+					await client.sendCommand('profile '+author)
+					profile = await client.wait_for('on_profile', lambda p: p.username==author)
+					await client.sendRoomMessage('Your id: {}'.format(profile.id))
+
+		:param event: :class:`str` the event name.
+		:param condition: Optionnal[:class:`function`] A predicate to check what to wait for. The arguments must meet the parameters of the event being waited for.
+		:param timeout: Optionnal[:class:`int`] the number of seconds before raise asyncio.TimeoutError
+		:return: :class:`asyncio.Future` a future that you must await.
+		"""
+		event = event.lower()
+		future = self.loop.create_future()
+
+		if condition is None:
+			def condition(*a):
+				return True
+
+		if event not in self._waiters:
+			self._waiters[event] = []
+
+		self._waiters[event].append((condition, future))
+
+		return asyncio.wait_for(future, timeout, loop=self.loop)
 
 	async def _run_event(self, coro, event_name, *args, **kwargs):
 		"""|coro|
@@ -204,20 +252,63 @@ class Client:
 		"""
 		method = 'on_' + event
 
-		# add wait_for handling
+		if method in self._waiters:
+			to_remove = []
+			waiters = self._waiters[method]
+			for i, (cond, fut) in enumerate(waiters):
+				if fut.cancelled():
+					to_remove.append(i)
+					continue
+
+				try:
+					result = bool(cond(*args))
+				except Exception as e:
+					fut.set_exception(e)
+				else:
+					if result:
+						to_remove.append(i)
+						fut.set_result(args if len(args) else None)
+
+			if len(to_remove)==len(waiters):
+				del self._waiters[method]
+			else:
+				for i in to_remove[::-1]:
+					del waiters[i]
 
 		coro = getattr(self, method, None)
 		if coro is not None:
 			asyncio.ensure_future(self._run_event(coro, method, *args, **kwargs), loop=self.loop)
 
-	async def login(self, username, password, room='1', encrypted=True):
+	async def start(self, api_tfmid, api_token):
+		"""|coro|
+		Connects the client to the game.
+
+		:param api_tfmid: :class:`int` or :class:`str` your Transformice id.
+		:param api_token: :class:`str` your token to access the API.
+		"""
+		self.keys = keys = await get_keys(api_tfmid, api_token)
+
+		await self.main.connect('164.132.202.12', 5555)
+
+		while not self.main.socket.connected:
+			await asyncio.sleep(.1)
+
+		packet = Packet.new(28, 1).write16(keys.version).writeString(keys.connection)
+		packet.writeString('Desktop').writeString('-').write32(0x1fbd).writeString('')
+		packet.writeString('74696720697320676f6e6e61206b696c6c206d7920626f742e20736f20736164')
+		packet.writeString("A=t&SA=t&SV=t&EV=t&MP3=t&AE=t&VE=t&ACC=t&PR=t&SP=f&SB=f&DEB=f&V=LNX 29,0,0,140&M=Adobe Linux&R=1920x1080&COL=color&AR=1.0&OS=Linux&ARCH=x86&L=en&IME=t&PR32=t&PR64=t&LS=en-US&PT=Desktop&AVD=f&LFD=f&WD=f&TLS=t&ML=5.1&DP=72")
+		packet.write32(0).write32(0x6257).writeString('')
+
+		await self.main.send(packet)
+
+	async def login(self, username, password, encrypted=True, room='1'):
 		"""|coro|
 		Log in the game.
 
 		:param username: :class:`str` the client username.
 		:param password: :class:`str` the client password.
-		:param room: Optional[:class:`str`] the room where the client will be logged in.
 		:param encrypted: Optional[:class:`bool`] whether the password is already encrypted or not.
+		:param room: Optional[:class:`str`] the room where the client will be logged in.
 		"""
 		if not encrypted:
 			from .utils import shakikoo
@@ -230,6 +321,42 @@ class Client:
 
 		await self.main.send(packet)
 
+	def run(self, api_tfmid, api_token, username, password, **kwargs):
+		"""A blocking call that do the event loop initialization for you.
+
+		Equivalent to ::
+			@bot.event
+			async def on_login_ready(*a):
+				await bot.login(username, password)
+
+			loop = asyncio.get_event_loop()
+			loop.create_task(bot.start(api_id, api_token))
+			loop.run_forever()
+		"""
+		asyncio.ensure_future(self.start(api_tfmid, api_token), loop=self.loop)
+		asyncio.gather((self.wait_for('on_login_ready'),), loop=self.loop)
+		asyncio.ensure_future(self.login(username, password, **kwargs), loop=self.loop)
+
+		try:
+			self.loop.run_forever()
+		except Exception as e:
+			# add self.close
+			# asyncio.ensure_future(self.close())
+			raise e
+
+	async def sendCP(self, code, data=b''):
+		"""|coro|
+		Send a packet to the community platform.
+
+		:param code: :class:`int` the community platform code.
+		:param data: :class:`Packet` or :class:`bytes` the data.
+		"""
+		self.cp_fingerprint = (self.cp_fingerprint + 1) % 0XFFFFFFFF
+
+		packet = Packet.new(60, 3).write16(code)
+		packet.write32(self.cp_fingerprint).writeBytes(data)
+		await self.main.send(packet, cipher=True)
+
 	async def sendRoomMessage(self, message):
 		"""|coro|
 		Send a message to the room.
@@ -237,9 +364,16 @@ class Client:
 		:param message: :class:`str` the content of the message.
 		"""
 		packet = Packet.new(6, 6).writeString(message)
-		packet.xor_cipher(self.keys.msg, self.bulle.fingerprint)
 
-		await self.bulle.send(packet)
+		await self.bulle.send(packet, cipher=True)
+
+	async def sendTribeMessage(self, message):
+		"""|coro|
+		Send a message to the tribe.
+
+		:param message: :class:`str` the content of the message.
+		"""
+		await self.sendCP(50, Packet().writeString(message))
 
 	async def whisper(self, username, message):
 		"""|coro|
@@ -248,13 +382,27 @@ class Client:
 		:param username: :class:`str` the player to whisper.
 		:param message: :class:`str` the content of the whisper.
 		"""
-		self.whisper_id = (self.whisper_id + 1) % 0XFFFFFFFF
+		await self.sendCP(52, Packet().writeString(username).writeString(message))
 
-		packet = Packet.new(60, 3).write16(52).write32(self.whisper_id)
-		packet.writeString(username).writeString(message)
-		packet.xor_cipher(self.keys.msg, self.main.fingerprint)
+	async def getTribe(self, disconnected=True):
+		"""|coro|
+		Gets the client's :class:`Tribe` and return it
 
-		await self.main.send(packet)
+		:param disconnected: :class:`bool` if True retrieves also the disconnected members.
+		:return: :class:`Tribe` or ``None``.
+		"""
+		sid = self.cp_fingerprint + 1
+		await self.sendCP(108, Packet().writeBool(disconnected))
+		tc, packet = await self.wait_for('on_raw_cp', lambda tc, p: (tc==109 and p.read32()==sid) or tc==130)
+		if tc==109:
+			result = packet.readByte()
+			if result==1:
+				tc, packet = await self.wait_for('on_raw_cp', lambda tc, p: tc==130)
+			elif result==17:
+				return None
+			else:
+				raise Exception('Internal error: 118-{}'.format(result))
+		return Tribe(packet)
 
 	async def sendPrivateMessage(self, username, message):
 		"""|coro|
@@ -311,9 +459,8 @@ class Client:
 		:param command: :class:`str` the command to send.
 		"""
 		packet = Packet.new(6, 26).writeString(command)
-		packet.xor_cipher(self.keys.msg, self.main.fingerprint)
 
-		await self.main.send(packet)
+		await self.main.send(packet, cipher=True)
 
 	async def enterTribe(self):
 		"""|coro|
@@ -343,3 +490,11 @@ class Client:
 		:param author: :class:`str` the author's username who sent the invitation.
 		"""
 		await self.main.send(Packet.new(16, 2).writeString(author))
+
+	async def recruit(self, player):
+		"""|coro|
+		Send a recruit request to a player.
+
+		:param player: :class:`str` the player's username you want to recruit.
+		"""
+		await self.sendCP(78, Packet().writeString(player), cipher=True)
