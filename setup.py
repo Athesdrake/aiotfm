@@ -13,7 +13,7 @@ with open('README.md') as f:
 setuptools.setup(
 	name='aiotfm',
 	version=version,
-	packages=['aiotfm'],
+	packages=['aiotfm', 'aiotfm.utils'],
 	author='Athesdrake',
 	description="An asynchronous event based client for Transformice.",
 	long_description=README,
