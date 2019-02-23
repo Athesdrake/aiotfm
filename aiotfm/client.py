@@ -334,7 +334,7 @@ class Client:
 			loop.run_forever()
 		"""
 		asyncio.ensure_future(self.start(api_tfmid, api_token), loop=self.loop)
-		asyncio.gather((self.wait_for('on_login_ready'),), loop=self.loop)
+		self.loop.run_until_complete(self.wait_for('on_login_ready'))
 		asyncio.ensure_future(self.login(username, password, **kwargs), loop=self.loop)
 
 		try:
