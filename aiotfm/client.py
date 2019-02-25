@@ -44,7 +44,7 @@ class Client:
 		self.dispatch('raw_socket', connection, Packet(data))
 		await self.handle_packet(connection, Packet(data))
 
-	async def handle_packet(self, connection:Connection, packet:Packet):
+	async def handle_packet(self, connection, packet):
 		"""|coro|
 		Handles the known packets and dispatches events.
 		Subclasses should handle only the unhandled packets from this method.
@@ -158,7 +158,7 @@ class Client:
 			return False
 		return True
 
-	async def handle_old_packet(self, connection:Connection, oldCCC:tuple, data:list):
+	async def handle_old_packet(self, connection, oldCCC, data):
 		return False
 
 	async def _heartbeat_loop(self):

@@ -23,7 +23,7 @@ class Profile:
 	orbs `set` the list of unlocked orbs.
 	adventurePoints `int` number of adventure points the player has.
 	"""
-	def __init__(self, packet:Packet):
+	def __init__(self, packet):
 		self.username = packet.readUTF()
 		self.id = packet.read32()
 

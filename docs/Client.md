@@ -22,7 +22,7 @@ Dispatches the received data.
 * **connection** `aiotfm.connection.Connection` the connection that received the data.
 
 
-### _coroutine_ handle_packet(self, connection:Connection, packet:Packet)
+### _coroutine_ handle_packet(self, connection, packet)
 This function is a *coroutine*.
 
 Handles the known packets and dispatches events.
