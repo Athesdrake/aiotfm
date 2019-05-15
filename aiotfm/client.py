@@ -474,14 +474,18 @@ class Client:
 		"""
 		await self.enterTribe()
 
-	async def joinRoom(self, room_name):
+	async def joinRoom(self, room_name, community=None, auto=False):
 		"""|coro|
 		Join a room.
 		The event 'on_joined_room' is dispatched when the client has successfully joined the room.
 
 		:param room_name: :class:`str` the room's name.
+		:param community: Optional[:class:`int`] the room's community.
+		:param auto: Optional[:class:`bool`] joins a random room (I think).
 		"""
-		await self.main.send(Packet.new(5, 35).write8(255).writeString(room_name))
+		packet = Packet.new(5, 38).write8(community or self.community)
+		packet.writeString(room_name).writeBool(auto)
+		await self.main.send(packet)
 
 	async def enterInvTribeHouse(self, author):
 		"""|coro|

@@ -254,6 +254,8 @@ The event 'on_joined_room' is dispatched when the client has successfully joined
 
 **Parameters**
 * **room_name** `str` the room's name.
+* **community** Optional[`int`] the room's community.
+* **auto** Optional[`bool`] joins a random room (I think).
 
 
 ### _coroutine_ enterInvTribeHouse(self, author)
