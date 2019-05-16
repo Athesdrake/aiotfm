@@ -66,7 +66,7 @@ class Client:
 		"""
 		CCC = packet.readCode()
 		if CCC == (1, 1): # Old packets
-			data = packet.readBytes().split(b'\x01')
+			data = packet.readString().split(b'\x01')
 			oldCCC = tuple(data.pop(0)[:2])
 			self.dispatch('old_packet', connection, oldCCC, data)
 			return await self.handle_old_packet(connection, oldCCC, data)
