@@ -416,15 +416,6 @@ class Client:
 				raise Exception('Internal error: 118-{}'.format(result))
 		return Tribe(packet)
 
-	async def sendPrivateMessage(self, username, message):
-		"""|coro|
-		Deprecated alias for `Client.whisper`.
-
-		:param username: :class:`str` the player to whisper.
-		:param message: :class:`str` the content of the whisper.
-		"""
-		await self.whisper(username, message)
-
 	async def playEmote(self, id, flag='be'):
 		"""|coro|
 		Play an emote.
