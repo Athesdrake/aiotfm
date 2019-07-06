@@ -53,9 +53,7 @@ class Client:
 		Example: ::
 			class SubClient(aiotfm.Client):
 				async def handle_packet(self, conn, packet):
-					tmp = packet.copy()
-					handled = await super().handle_packet(conn, packet)
-					packet = tmp
+					handled = await super().handle_packet(conn, packet.copy())
 
 					if not handled:
 						# Handle here the unhandled packets.
