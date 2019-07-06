@@ -461,7 +461,7 @@ class Client:
 
 		:param command: :class:`str` the command to send.
 		"""
-		packet = Packet.new(6, 26).writeString(command)
+		packet = Packet.new(6, 26).writeString(command[:255])
 
 		await self.main.send(packet, cipher=True)
 
