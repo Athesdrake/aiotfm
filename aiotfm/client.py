@@ -288,7 +288,15 @@ class Client:
 		"""
 		self.keys = keys = await get_keys(api_tfmid, api_token)
 
-		await self.main.connect('164.132.202.12', 5555)
+		for port in [3724, 6112, 44444, 44440, 5555]:
+			try:
+				await self.main.connect('164.132.202.12', port)
+			except:
+				pass
+			else:
+				break
+		else:
+			raise Exception('Unable to connect to the server.')
 
 		while not self.main.socket.connected:
 			await asyncio.sleep(.1)
