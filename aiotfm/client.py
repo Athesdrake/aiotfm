@@ -1,4 +1,5 @@
 import asyncio
+import time
 
 from .packet import Packet
 from .get_keys import get_keys
@@ -163,15 +164,18 @@ class Client:
 
 	async def _heartbeat_loop(self):
 		"""|coro|
-		Send a packet every ten seconds to stay connected to the game.
+		Send a packet every fifteen seconds to stay connected to the game.
 		"""
 		last_heartbeat = 0
 		while self.main.open:
-			if self.loop.time()-last_heartbeat>=10:
+			if self.loop.time()-last_heartbeat>=15:
+				t = time.clock()
+				await self.main.send(Packet.new(26, 26))
 				await self.main.send(Packet.new(26, 26))
 				if self.bulle is not None and self.bulle.open:
 					await self.bulle.send(Packet.new(26, 26))
 
+				self.dispatch('heartbeat', (time.clock()-t)*1000)
 				last_heartbeat = self.loop.time()
 			await asyncio.sleep(.5)
 
