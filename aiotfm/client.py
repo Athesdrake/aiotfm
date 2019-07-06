@@ -99,8 +99,8 @@ class Client:
 		elif CCC==(26, 3): # Handshake OK
 			online_players = packet.read32() # online players
 			connection.fingerprint = packet.read8()
-			community = packet.readString() # community
-			country = packet.readString() # country
+			community = packet.readUTF() # community
+			country = packet.readUTF() # country
 			self.authkey = packet.read32()
 
 			self.loop.create_task(self._heartbeat_loop())
