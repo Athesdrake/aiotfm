@@ -1,3 +1,5 @@
+import struct
+
 class Packet:
 	def __init__(self, buffer=None):
 		if buffer is None:
@@ -19,12 +21,11 @@ class Packet:
 	@classmethod
 	def new(cls, c, cc=None):
 		msg = cls()
+		if isinstance(c, (tuple, list)):
+			c, cc = c
 		if cc is None:
-			msg.write16(c)
-		else:
-			msg.write8(c).write8(cc)
-
-		return msg
+			return msg.write16(c)
+		return msg.write8(c).write8(cc)
 
 	def copy(self, pos=False):
 		p = Packet(self.buffer[:])
