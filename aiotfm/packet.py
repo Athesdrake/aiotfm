@@ -33,27 +33,12 @@ class Packet:
 		return p
 
 	def unpack(self, fmt):
-		results = []
-		formats = {
-			'B': self.read8,
-			'H': self.read16,
-			'I': self.read24,
-			'L': self.read32,
-			's': self.readString
-		}
-		times = 1
-		for c in fmt:
-			if c.isdigit():
-				if times==1:
-					times = int(c)
-				else:
-					times = times * 10 + int(c)
-			else:
-				for i in range(times):
-					results.append(formats[c]())
-				times = 1
-
-		return results
+		fmt = '>'+fmt
+		buf = self.readBytes(struct.calcsize(fmt))
+		result = struct.unpack(fmt, buf)
+		if len(result)==1:
+			return result[0]
+		return result
 
 	def readBytes(self, nbr=1):
 		self.pos += nbr
