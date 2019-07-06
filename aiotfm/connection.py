@@ -23,7 +23,13 @@ class Socket:
 	async def recv(self, size):
 		"""|coro|
 		Receive up to size bytes from the socket."""
-		return await self._reader.readexactly(size)
+		try:
+			return await self._reader.readexactly(size)
+		except asyncio.streams.IncompleteReadError as e:
+			if e.partial==b'':
+				raise EOFError() # EOF found
+			else:
+				return b'\x00' # Return dummy packet to prevent crash while parsing.
 
 	async def send(self, data):
 		"""|coro|
