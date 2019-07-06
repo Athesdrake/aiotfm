@@ -56,13 +56,13 @@ class Packet:
 			return 0
 
 	def read16(self):
-		return (self.read8() << 8) + self.read8()
+		return (self.read8() << 8) | self.read8()
 
 	def read24(self):
-		return (self.read16() << 8) + self.read8()
+		return (self.read16() << 8) | self.read8()
 
 	def read32(self):
-		return (self.read24() << 8) + self.read8()
+		return (self.read24() << 8) | self.read8()
 
 	def readBool(self):
 		return self.read8()==1
