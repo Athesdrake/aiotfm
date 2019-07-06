@@ -4,9 +4,9 @@ import time
 from .packet import Packet
 from .get_keys import get_keys
 from .connection import Connection
-from .player import Profile
+from .player import Profile, Player
 from .tribe import Tribe
-
+from .message import Message, Whisper, ChannelMessage
 
 class Client:
 	"""Represents a client that connects to Transformice.
@@ -76,8 +76,11 @@ class Client:
 			self.dispatch('joined_room', room_name, private)
 
 		elif CCC==(6, 6): # Room message
-			player_id, username, commu, message = packet.unpack('LsBs')
-			self.dispatch('room_message', username, message)
+			player_id = packet.read32()
+			username = packet.readUTF()
+			commu = packet.read8()
+			message = packet.readUTF()
+			self.dispatch('room_message', Message(Player(username, pid=player_id), message, commu))
 
 		elif CCC==(8, 16): # profile
 			self.dispatch('profile', Profile(packet))
@@ -151,8 +154,8 @@ class Client:
 				author, message = packet.readUTF(), packet.readString()
 				self.dispatch('tribe_message', author, message)
 			elif TC==66: # Whisper
-				author, commu, receiver, message = packet.readUTF(), packet.read32(), packet.readUTF(), packet.readUTF()
-				self.dispatch('whisper', author, commu, receiver, message)
+				author, commu, receiver, message = Player(packet.readUTF()), packet.read32(), packet.readUTF(), packet.readUTF()
+				self.dispatch('whisper', Whisper(author, commu, receiver, message, self))
 			elif TC==88: # tribe member connected
 				self.dispatch('member_connected', packet.readUTF())
 			elif TC==90: # tribe member disconnected
@@ -165,7 +168,6 @@ class Client:
 			if self.LOG_UNHANDLED_PACKETS:
 				print(CCC, bytes(packet.buffer)[2:])
 			return False
-		return True
 
 	async def handle_old_packet(self, connection:Connection, oldCCC:tuple, data:list):
 		return False
@@ -407,6 +409,9 @@ class Client:
 		:param message: :class:`str` the content of the whisper.
 		:param overflow: :class:`bool` will send the complete message if True, splitted in several messages.
 		"""
+		if isinstance(username, Player):
+			username = username.username
+
 		async def send(msg):
 			await self.sendCP(52, Packet().writeString(username).writeString(msg))
 
