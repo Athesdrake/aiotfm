@@ -391,14 +391,25 @@ class Client:
 		"""
 		await self.sendCP(50, Packet().writeString(message))
 
-	async def whisper(self, username, message):
+	async def whisper(self, username, message, overflow=False):
 		"""|coro|
 		Whisper to a player.
 
 		:param username: :class:`str` the player to whisper.
 		:param message: :class:`str` the content of the whisper.
+		:param overflow: :class:`bool` will send the complete message if True, splitted in several messages.
 		"""
-		await self.sendCP(52, Packet().writeString(username).writeString(message))
+		async def send(msg):
+			await self.sendCP(52, Packet().writeString(username).writeString(msg))
+
+		if isinstance(message, str):
+			message = message.encode()
+		message = message.replace(b'<', b'&lt;').replace(b'>', b'&gt;')
+
+		await send(message[:255])
+		for i in range(255, len(message), 255):
+			await asyncio.sleep(1)
+			await self.whisper(username, message[i:i+255])
 
 	async def getTribe(self, disconnected=True):
 		"""|coro|
