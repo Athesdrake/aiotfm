@@ -51,7 +51,7 @@ class Client:
 		Subclasses should handle only the unhandled packets from this method.
 
 		Example: ::
-			class SubClient(aiotfm.Client):
+			class Bot(aiotfm.Client):
 				async def handle_packet(self, conn, packet):
 					handled = await super().handle_packet(conn, packet.copy())
 
@@ -82,8 +82,18 @@ class Client:
 			message = packet.readUTF()
 			self.dispatch('room_message', Message(Player(username, pid=player_id), message, commu))
 
-		elif CCC==(8, 16): # profile
+		elif CCC==(8, 16): # Profile
 			self.dispatch('profile', Profile(packet))
+
+		elif CCC==(8, 20): # Shop
+			self.dispatch('shop', Shop(packet))
+
+		elif CCC==(8, 22): # Skills
+			skills = {}
+			for i in range(packet.read8()):
+				key, value = packet.read8(), packet.read8()
+				skills[key] = value
+			self.dispatch('skills', skills)
 
 		elif CCC==(16, 2): # Tribe invitation received
 			author = packet.readUTF()
@@ -115,13 +125,13 @@ class Client:
 			await connection.send(os_info)
 			self.dispatch('login_ready', online_players, community, country)
 
-		elif CCC==(26, 12):
-			self.dispatch('login_result', packet.read8(), packet.readUTF())
+		elif CCC==(26, 12): # Login result
+			self.dispatch('login_result', packet.read8(), packet.readUTF(), packet.readUTF())
 
-		elif CCC==(26, 25): # ping
+		elif CCC==(26, 25): # Ping
 			self.dispatch('ping')
 
-		elif CCC==(28, 6): # server ping
+		elif CCC==(28, 6): # Server ping
 			await connection.send(Packet.new(28, 6).write8(packet.read8()))
 
 		elif CCC==(28, 62): # Already connected ?
@@ -130,6 +140,9 @@ class Client:
 				return True
 				self.loop.stop()
 				raise Exception('Already connected')
+
+		elif CCC==(29, 6): # Lua logs
+			self.dispatch('lua_log', packet.readUTF())
 
 		elif CCC==(44, 1): # Bulle switching
 			bulle_id = packet.read32()
@@ -168,6 +181,7 @@ class Client:
 			if self.LOG_UNHANDLED_PACKETS:
 				print(CCC, bytes(packet.buffer)[2:])
 			return False
+		return True
 
 	async def handle_old_packet(self, connection:Connection, oldCCC:tuple, data:list):
 		return False
