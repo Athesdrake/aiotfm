@@ -115,8 +115,18 @@ class Client:
 		elif CCC==(26, 12):
 			self.dispatch('login_result', packet.read8(), packet.readUTF())
 
-		elif CCC==(28, 6): # pong
-			self.dispatch('ping', packet.read8())
+		elif CCC==(26, 25): # ping
+			self.dispatch('ping')
+
+		elif CCC==(28, 6): # server ping
+			await connection.send(Packet.new(28, 6).write8(packet.read8()))
+
+		elif CCC==(28, 62): # Already connected ?
+			already_connected = packet.readBool()
+			if already_connected:
+				return True
+				self.loop.stop()
+				raise Exception('Already connected')
 
 		elif CCC==(44, 1): # Bulle switching
 			bulle_id = packet.read32()
