@@ -189,7 +189,7 @@ class Client:
 		setattr(self, name, coro)
 		return coro
 
-	def wait_for(self, event, condition=None, timeout=None):
+	def wait_for(self, event, condition=None, timeout=None, stopPropagation=False):
 		"""Wait for an event.
 
 		Example: ::
@@ -215,7 +215,7 @@ class Client:
 		if event not in self._waiters:
 			self._waiters[event] = []
 
-		self._waiters[event].append((condition, future))
+		self._waiters[event].append((condition, future, stopPropagation))
 
 		return asyncio.wait_for(future, timeout, loop=self.loop)
 
@@ -255,7 +255,7 @@ class Client:
 		if method in self._waiters:
 			to_remove = []
 			waiters = self._waiters[method]
-			for i, (cond, fut) in enumerate(waiters):
+			for i, (cond, fut, stop) in enumerate(waiters):
 				if fut.cancelled():
 					to_remove.append(i)
 					continue
@@ -266,8 +266,12 @@ class Client:
 					fut.set_exception(e)
 				else:
 					if result:
-						to_remove.append(i)
-						fut.set_result(args if len(args) else None)
+						fut.set_result(args[0] if len(args)==1 else args if len(args) else None)
+						if stop:
+							del waiters[i]
+							return
+						else:
+							to_remove.append(i)
 
 			if len(to_remove)==len(waiters):
 				del self._waiters[method]
