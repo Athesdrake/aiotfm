@@ -288,7 +288,7 @@ class Client:
 		"""
 		self.keys = keys = await get_keys(api_tfmid, api_token)
 
-		await self.main.connect('164.132.202.12', 5555)
+		await self.main.connect('94.23.193.229', 13801)
 
 		while not self.main.socket.connected:
 			await asyncio.sleep(.1)
