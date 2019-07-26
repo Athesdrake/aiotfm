@@ -80,7 +80,7 @@ class Client:
 			username = packet.readUTF()
 			commu = packet.read8()
 			message = packet.readUTF()
-			self.dispatch('room_message', Message(Player(username, pid=player_id), message, commu))
+			self.dispatch('room_message', Message(Player(username, pid=player_id), message, commu, self))
 
 		elif CCC==(8, 16): # Profile
 			self.dispatch('profile', Profile(packet))
