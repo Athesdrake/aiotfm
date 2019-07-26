@@ -391,11 +391,13 @@ class Client:
 		:param code: :class:`int` the community platform code.
 		:param data: :class:`Packet` or :class:`bytes` the data.
 		"""
-		self.cp_fingerprint = (self.cp_fingerprint + 1) % 0XFFFFFFFF
+		self.cp_fingerprint = fp = (self.cp_fingerprint + 1) % 0XFFFFFFFF
 
 		packet = Packet.new(60, 3).write16(code)
 		packet.write32(self.cp_fingerprint).writeBytes(data)
 		await self.main.send(packet, cipher=True)
+
+		return fp
 
 	async def sendRoomMessage(self, message):
 		"""|coro|
