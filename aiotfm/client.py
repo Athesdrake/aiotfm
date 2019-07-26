@@ -6,7 +6,8 @@ from .get_keys import get_keys
 from .connection import Connection
 from .player import Profile, Player
 from .tribe import Tribe
-from .message import Message, Whisper, ChannelMessage
+from .message import Message, Whisper, Channel, ChannelMessage
+from .shop import Shop
 
 class Client:
 	"""Represents a client that connects to Transformice.
@@ -34,6 +35,8 @@ class Client:
 
 		self.community = community # EN
 		self.cp_fingerprint = 0
+
+		self._channels = set()
 
 	async def received_data(self, data, connection):
 		"""|coro|
@@ -163,8 +166,32 @@ class Client:
 			self.dispatch('raw_cp', TC, packet.copy(True))
 			if TC==3: # Connected to the community platform
 				self.dispatch('ready')
-			elif TC==65:
-				author, message = packet.readUTF(), packet.readString()
+			elif TC==55: # Channel join result
+				result = packet.read8()
+				self.dispatch('channel_joined_result', result)
+			elif TC==57: # Channel leave result
+				result = packet.read8()
+				self.dispatch('channel_leaved_result', result)
+			elif TC==59: # Channel /who result
+				result = packet.read8()
+				self.dispatch('channel_who', [packet.readUTF() for _ in range(packet.read16())])
+			elif TC==62: # Joined a channel
+				name = packet.readUTF()
+				try:
+					self._channels.add(name)
+				except:
+					pass
+				self.dispatch('channel_joined', name)
+			elif TC==63: # Quit a channel
+				name = packet.readUTF()
+				self._channels.remove(name)
+				self.dispatch('channel_closed', name)
+			elif TC==64: # Channel message
+				author, community = packet.readUTF(), packet.read32()
+				channel_name, message = packet.readUTF(), packet.readUTF()
+				self.dispatch('channel_message', ChannelMessage(author, community, message, Channel(self, channel_name)))
+			elif TC==65: # Tribe message
+				author, message = packet.readUTF(), packet.readUTF()
 				self.dispatch('tribe_message', author, message)
 			elif TC==66: # Whisper
 				author, commu, receiver, message = Player(packet.readUTF()), packet.read32(), packet.readUTF(), packet.readUTF()
@@ -416,6 +443,18 @@ class Client:
 		:param message: :class:`str` the content of the message.
 		"""
 		await self.sendCP(50, Packet().writeString(message))
+
+	async def sendChannelMessage(self, channel, message):
+		"""|coro|
+		Send a message to a public channel.
+
+		:param channel: :class:`str` the channel's name.
+		:param message: :class:`str` the content of the message.
+		"""
+		if isinstance(channel, Channel):
+			channel = channel.name
+
+		return await self.sendCP(48, Packet().writeString(channel).writeString(message))
 
 	async def whisper(self, username, message, overflow=False):
 		"""|coro|
