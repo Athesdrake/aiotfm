@@ -320,9 +320,9 @@ class Client:
 		"""
 		self.keys = keys = await get_keys(api_tfmid, api_token)
 
-		for port in [3724, 6112, 44444, 44440, 5555]:
+		for port in [13801, 11801, 12801, 14801]:
 			try:
-				await self.main.connect('164.132.202.12', port)
+				await self.main.connect('94.23.193.229', port)
 			except:
 				pass
 			else:
