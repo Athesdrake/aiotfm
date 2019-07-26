@@ -26,7 +26,8 @@ class Whisper(Message):
 
 	def __str__(self):
 		direction = '<' if self.sent else '>'
-		return '{1} [{0.community}] [{0.author}] {0.content}'.format(self, direction)
+		author = self.receiver if self.sent else self.author
+		return f'{direction} [{self.community}] [{author}] {self.content}'
 
 class Channel:
 	def __init__(self, name, client):
