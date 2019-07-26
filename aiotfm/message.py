@@ -28,6 +28,17 @@ class Whisper(Message):
 		direction = '<' if self.sent else '>'
 		return '{1} [{0.community}] [{0.author}] {0.content}'.format(self, direction)
 
+class Channel:
+	def __init__(self, name, client):
+		self.name = name
+		self._client = client
+
+	async def send(self, message):
+		await self._client.sendChannelMessage(self, message)
+
+	async def who(self):
+		pass
+
 class ChannelMessage(Message):
 	def __init__(self, author, community, content, channel):
 		super().__init__(self, author, content, community)
