@@ -356,7 +356,7 @@ class Client:
 
 		packet = Packet.new(26, 8).writeString(username).writeString(password)
 		packet.writeString("app:/TransformiceAIR.swf/[[DYNAMIC]]/2/[[DYNAMIC]]/4")
-		packet.writeString(room).write32(self.authkey^self.keys.auth)
+		packet.writeString(room).write32(self.authkey^self.keys.auth).write8(0).writeString('')
 		packet.cipher(self.keys.identification).write8(0)
 
 		await self.main.send(packet)
