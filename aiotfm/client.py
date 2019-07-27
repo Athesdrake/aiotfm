@@ -339,7 +339,7 @@ class Client:
 	async def on_error(self, event, err, *a, **kw):
 		message = 'An error occurred while dispatching the event "{0}":\n\t{1.__class__.__name__}: {1}'
 		print(message.format(event, err), file=sys.stderr)
-		traceback.print_exc()
+		traceback.print_exc(limit=-1)
 
 	async def on_connection_error(self, conn, error):
 		print('{0.__class__.__name__}: {0}'.format(error), file=sys.stderr)
