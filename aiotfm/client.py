@@ -338,14 +338,17 @@ class Client:
 		if coro is not None:
 			asyncio.ensure_future(self._run_event(coro, method, *args, **kwargs), loop=self.loop)
 
-	async def start(self, api_tfmid, api_token):
+	async def start(self, api_tfmid, api_token, keys=None):
 		"""|coro|
 		Connects the client to the game.
 
 		:param api_tfmid: :class:`int` or :class:`str` your Transformice id.
 		:param api_token: :class:`str` your token to access the API.
 		"""
-		self.keys = keys = await get_keys(api_tfmid, api_token)
+		if keys is not None:
+			self.keys = keys
+		else:
+			self.keys = keys = await get_keys(api_tfmid, api_token)
 
 		for port in [13801, 11801, 12801, 14801]:
 			try:
@@ -400,7 +403,7 @@ class Client:
 			loop.create_task(bot.start(api_id, api_token))
 			loop.run_forever()
 		"""
-		asyncio.ensure_future(self.start(api_tfmid, api_token), loop=self.loop)
+		asyncio.ensure_future(self.start(api_tfmid, api_token, keys=kwargs.pop('keys', None)), loop=self.loop)
 		self.loop.run_until_complete(self.wait_for('on_login_ready'))
 		asyncio.ensure_future(self.login(username, password, **kwargs), loop=self.loop)
 
