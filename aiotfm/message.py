@@ -1,4 +1,4 @@
-from .utils import chatCommu
+from aiohttp.utils import chatCommu
 
 class Message:
 	def __init__(self, author, content, community, client):

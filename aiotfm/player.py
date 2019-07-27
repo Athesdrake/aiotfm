@@ -1,4 +1,4 @@
-from .packet import Packet
+from aiotfm.packet import Packet
 
 class Player:
 	def __init__(self, username, id=-1, pid=-1, **kwargs):

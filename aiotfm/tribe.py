@@ -1,4 +1,4 @@
-from .utils import Date
+from aiotfm.utils import Date
 
 IS_LEADER = 2
 CAN_CHANGE_GREETING_MESSAGE = 4

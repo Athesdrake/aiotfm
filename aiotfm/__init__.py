@@ -1,9 +1,9 @@
-from . import utils
-from .client import Client
-from .connection import Connection
-from .packet import Packet
-from .player import Profile, Stats
-from .tribe import *
+from aiotfm import utils
+from aiotfm.client import Client
+from aiotfm.connection import Connection
+from aiotfm.packet import Packet
+from aiotfm.player import Profile, Stats
+from aiotfm.tribe import *
 
-from .__version__ import __author__, __title__, __description__
-from .__version__ import __url__, __version__, __credits__, __license__
+from aiotfm.__version__ import __author__, __title__, __description__
+from aiotfm.__version__ import __url__, __version__, __credits__, __license__

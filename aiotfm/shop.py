@@ -1,4 +1,4 @@
-from . import Packet
+from aiotfm.packet import Packet
 
 class Shop:
 	def __init__(self, packet:Packet):

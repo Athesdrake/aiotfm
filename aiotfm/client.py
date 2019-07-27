@@ -1,13 +1,13 @@
 import asyncio
 import time
 
-from .packet import Packet
-from .get_keys import get_keys
-from .connection import Connection
-from .player import Profile, Player
-from .tribe import Tribe
-from .message import Message, Whisper, Channel, ChannelMessage
-from .shop import Shop
+from aiotfm.packet import Packet
+from aiotfm.get_keys import get_keys
+from aiotfm.connection import Connection
+from aiotfm.player import Profile, Player
+from aiotfm.tribe import Tribe
+from aiotfm.message import Message, Whisper, Channel, ChannelMessage
+from aiotfm.shop import Shop
 
 class Client:
 	"""Represents a client that connects to Transformice.

@@ -1,6 +1,6 @@
 import asyncio
 
-from .packet import Packet
+from aiotfm.packet import Packet
 
 class Socket:
 	"""A socket class with asyncio."""
