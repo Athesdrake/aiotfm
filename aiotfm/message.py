@@ -42,6 +42,9 @@ class Channel:
 	async def send(self, message):
 		await self._client.sendChannelMessage(self, message)
 
+	async def leave(self):
+		await self._client.leaveChannel(self)
+
 	async def who(self):
 		pass
 
