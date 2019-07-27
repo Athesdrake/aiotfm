@@ -198,7 +198,7 @@ class Client:
 			elif TC==64: # Channel message
 				author, community = packet.readUTF(), packet.read32()
 				channel_name, message = packet.readUTF(), packet.readUTF()
-				self.dispatch('channel_message', ChannelMessage(author, community, message, Channel(self, channel_name)))
+				self.dispatch('channel_message', ChannelMessage(author, community, message, Channel(channel_name, self)))
 
 			elif TC==65: # Tribe message
 				author, message = packet.readUTF(), packet.readUTF()

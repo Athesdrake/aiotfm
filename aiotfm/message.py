@@ -11,7 +11,7 @@ class Message:
 		return '[{0.author}] {0.content}'.format(self)
 
 	def __repr__(self):
-		text = ' '.join('{}={!r}'.format(k,v[:32]) for k,v in vars(self).items() if not k.startswith('_'))
+		text = ' '.join('{}={}'.format(k,repr(v)[:32]) for k,v in vars(self).items() if not k.startswith('_'))
 		return '<{.__class__.__name__} {}>'.format(self, text)
 
 class Whisper(Message):
@@ -42,10 +42,11 @@ class Channel:
 
 class ChannelMessage(Message):
 	def __init__(self, author, community, content, channel):
-		super().__init__(self, author, content, community)
+		super().__init__(author, content, community, channel._client)
 		self.channel = channel
 
-		self.reply = channel.send
+	async def reply(self, message):
+		await self.channel.send(message)
 
 	def __str__(self):
-		return '{0.channel} [{0.community}] [{0.author}] {0.content}'.format(self)
+		return '{0.channel.name} [{0.community}] [{0.author}] {0.content}'.format(self)
