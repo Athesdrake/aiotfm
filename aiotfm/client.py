@@ -1,5 +1,7 @@
 import asyncio
+import sys
 import time
+import traceback
 
 from aiotfm.packet import Packet
 from aiotfm.get_keys import get_keys
@@ -338,8 +340,12 @@ class Client:
 		if coro is not None:
 			asyncio.ensure_future(self._run_event(coro, method, *args, **kwargs), loop=self.loop)
 
+	async def on_error(self, event, err, *a, **kw):
+		message = 'An error occurred while dispatching the event "{0}":\n\t{1.__class__.__name__}: {1}'
+		print(message.format(event, err), file=sys.stderr)
+		traceback.print_exc()
+
 	async def on_connection_error(self, conn, error):
-		import sys
 		print('{0.__class__.__name__}: {0}'.format(error), file=sys.stderr)
 
 		if error.__class__ is EOFError:
