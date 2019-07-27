@@ -38,7 +38,7 @@ class Client:
 		self.community = community # EN
 		self.cp_fingerprint = 0
 
-		self._channels = set()
+		self._channels = []
 
 	async def received_data(self, data, connection):
 		"""|coro|
@@ -184,15 +184,20 @@ class Client:
 
 			elif TC==62: # Joined a channel
 				name = packet.readUTF()
-				try:
-					self._channels.add(name)
-				except:
-					pass
-				self.dispatch('channel_joined', name)
+
+				if name in self._channels:
+					channel = [c for c in self._channels if c==name][0]
+				else:
+					channel = Channel(name, self)
+					self._channels.append(channel)
+
+				self.dispatch('channel_joined', channel)
 
 			elif TC==63: # Quit a channel
 				name = packet.readUTF()
-				self._channels.remove(name)
+				if name in self._channels:
+					self._channels.remove(name)
+
 				self.dispatch('channel_closed', name)
 
 			elif TC==64: # Channel message

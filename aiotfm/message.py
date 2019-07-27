@@ -34,6 +34,11 @@ class Channel:
 		self.name = name
 		self._client = client
 
+	def __eq__(self, other):
+		if isinstance(other, str):
+			return self.name==other
+		return self.name==other.name
+
 	async def send(self, message):
 		await self._client.sendChannelMessage(self, message)
 
