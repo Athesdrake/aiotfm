@@ -338,6 +338,13 @@ class Client:
 		if coro is not None:
 			asyncio.ensure_future(self._run_event(coro, method, *args, **kwargs), loop=self.loop)
 
+	async def on_connection_error(self, conn, error):
+		import sys
+		print('{0.__class__.__name__}: {0}'.format(error), file=sys.stderr)
+
+		if error.__class__ is EOFError:
+			self.close()
+
 	async def start(self, api_tfmid, api_token, keys=None):
 		"""|coro|
 		Connects the client to the game.

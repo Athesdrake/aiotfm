@@ -78,19 +78,24 @@ class Connection:
 	async def _recv_loop(self):
 		"""|coro|
 		The loop that receives data and send it to the Client.received_data method."""
-		while self.open:
-			lensize = await self.socket.recv(1)
-			if len(lensize)==0:
-				if self.open:
-					raise EOFError('The connection "{.name}" has been closed.'.format(self))
-				self.close()
-				break
-			elif lensize[0]>3:
-				raise TypeError('The connection {.name} receive a non-valid type of {} bytes.'.format(self, lensize[0]))
+		try:
+			while self.open:
+				try:
+					lensize = await self.socket.recv(1)
+				except EOFError:
+					if self.open:
+						raise EOFError('The connection "{.name}" has been closed.'.format(self))
+					self.close()
+					break
+				else:
+					if lensize[0]>3:
+						raise TypeError('The connection {.name} receive a non-valid type of {} bytes.'.format(self, lensize[0]))
 
-			length = int.from_bytes(await self.socket.recv(lensize[0]), 'big')
-			data = await self.socket.recv(length)
-			await self.client.received_data(data, self)
+				length = int.from_bytes(await self.socket.recv(lensize[0]), 'big')
+				data = await self.socket.recv(length)
+				await self.client.received_data(data, self)
+		except Exception as e:
+			self.client.dispatch('connection_error', self, e)
 
 	async def send(self, packet, cipher=False):
 		"""|coro|
