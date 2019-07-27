@@ -295,10 +295,6 @@ class Client:
 					await self.on_error(event_name, e, *args, **kwargs)
 				except asyncio.CancelledError:
 					pass
-				else:
-					raise e
-			else:
-				raise e
 
 	def dispatch(self, event, *args, **kwargs):
 		"""Dispatches events
