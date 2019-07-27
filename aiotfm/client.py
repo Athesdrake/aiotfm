@@ -337,9 +337,9 @@ class Client:
 			asyncio.ensure_future(self._run_event(coro, method, *args, **kwargs), loop=self.loop)
 
 	async def on_error(self, event, err, *a, **kw):
-		message = 'An error occurred while dispatching the event "{0}":\n\t{1.__class__.__name__}: {1}'
-		print(message.format(event, err), file=sys.stderr)
-		traceback.print_exc(limit=-1)
+		message = '\nAn error occurred while dispatching the event "{0}":\n\n{2}'
+		tb = traceback.format_exc(limit=-1)
+		print(message.format(event, err, tb), file=sys.stderr)
 
 	async def on_connection_error(self, conn, error):
 		print('{0.__class__.__name__}: {0}'.format(error), file=sys.stderr)
