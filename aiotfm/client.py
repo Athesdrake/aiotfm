@@ -620,6 +620,19 @@ class Client:
 		"""
 		await self.sendCP(54, Packet().writeString(name).writeBool(permanent))
 
+	async def leaveChannel(self, channel):
+		"""|coro|
+		Leaves a #channel.
+
+		:param channel: :class:`aiotfm.Channel` channel to leave.
+		"""
+		if isinstance(channel, Channel):
+			name = channel.name
+		else:
+			name = channel
+
+		await self.sendCP(56, Packet().writeString(name))
+
 	async def enterInvTribeHouse(self, author):
 		"""|coro|
 		Join the tribe house of another player after receiving an /inv.
