@@ -28,6 +28,15 @@ class Bot(aiotfm.Client):
 		except asyncio.TimeoutError:
 			return None # The player does not exists or is not connected.
 
+	def run(self, block=True):
+		with open('bot.config') as f:
+			config = json.load(f)
+			api_id, api_token = config.get('api_id'), config.get('api_token')
+
+		self.loop.run_until_complete(self.start(api_id, api_token))
+		if block:
+			self.loop.run_forever()
+
 	async def on_login_ready(self, online_players, community, country):
 		print('Connected to Transformice.')
 		print(f'There are {online_players} online players.')
