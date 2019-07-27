@@ -166,17 +166,22 @@ class Client:
 		elif CCC==(60, 3): # Community platform
 			TC = packet.read16()
 			self.dispatch('raw_cp', TC, packet.copy(True))
+
 			if TC==3: # Connected to the community platform
 				self.dispatch('ready')
+
 			elif TC==55: # Channel join result
 				result = packet.read8()
 				self.dispatch('channel_joined_result', result)
+
 			elif TC==57: # Channel leave result
 				result = packet.read8()
 				self.dispatch('channel_leaved_result', result)
+
 			elif TC==59: # Channel /who result
 				result = packet.read8()
 				self.dispatch('channel_who', [packet.readUTF() for _ in range(packet.read16())])
+
 			elif TC==62: # Joined a channel
 				name = packet.readUTF()
 				try:
@@ -184,32 +189,41 @@ class Client:
 				except:
 					pass
 				self.dispatch('channel_joined', name)
+
 			elif TC==63: # Quit a channel
 				name = packet.readUTF()
 				self._channels.remove(name)
 				self.dispatch('channel_closed', name)
+
 			elif TC==64: # Channel message
 				author, community = packet.readUTF(), packet.read32()
 				channel_name, message = packet.readUTF(), packet.readUTF()
 				self.dispatch('channel_message', ChannelMessage(author, community, message, Channel(self, channel_name)))
+
 			elif TC==65: # Tribe message
 				author, message = packet.readUTF(), packet.readUTF()
 				self.dispatch('tribe_message', author, message)
+
 			elif TC==66: # Whisper
 				author, commu, receiver, message = Player(packet.readUTF()), packet.read32(), packet.readUTF(), packet.readUTF()
 				self.dispatch('whisper', Whisper(author, commu, receiver, message, self))
+
 			elif TC==88: # tribe member connected
 				self.dispatch('member_connected', packet.readUTF())
+
 			elif TC==90: # tribe member disconnected
 				self.dispatch('member_disconnected', packet.readUTF())
+
 			else:
 				if self.LOG_UNHANDLED_PACKETS:
 					print(CCC, TC, bytes(packet.buffer)[4:])
 				return False
+
 		else:
 			if self.LOG_UNHANDLED_PACKETS:
 				print(CCC, bytes(packet.buffer)[2:])
 			return False
+
 		return True
 
 	async def handle_old_packet(self, connection:Connection, oldCCC:tuple, data:list):
