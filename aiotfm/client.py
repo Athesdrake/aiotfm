@@ -610,6 +610,16 @@ class Client:
 		packet.writeString(room_name).writeBool(auto)
 		await self.main.send(packet)
 
+	async def joinChannel(self, name, permanent=True):
+		"""|coro|
+		Join a #channel.
+		The event 'on_channel_joined' is dispatched when the client has successfully joined a channel.
+
+		:param name: :class:`str` the channel's name
+		:param permanent: Optional[:class:`bool`] if True (default) the server will automatically reconnect the user to this channel when logged in.
+		"""
+		await self.sendCP(54, Packet().writeString(name).writeBool(permanent))
+
 	async def enterInvTribeHouse(self, author):
 		"""|coro|
 		Join the tribe house of another player after receiving an /inv.
