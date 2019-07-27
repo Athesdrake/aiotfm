@@ -414,6 +414,12 @@ class Client:
 			# asyncio.ensure_future(self.close())
 			raise e
 
+	def close(self):
+		self.main.close()
+		if self.bulle is not None:
+			self.bulle.close()
+		self.loop.stop()
+
 	async def sendCP(self, code, data=b''):
 		"""|coro|
 		Send a packet to the community platform.
