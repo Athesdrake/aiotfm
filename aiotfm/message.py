@@ -1,4 +1,5 @@
 from aiotfm.utils import chatCommu
+from aiotfm.packet import Packet
 
 class Message:
 	def __init__(self, author, content, community, client):
@@ -27,12 +28,16 @@ class Whisper(Message):
 	def __str__(self):
 		direction = '<' if self.sent else '>'
 		author = self.receiver if self.sent else self.author
-		return f'{direction} [{self.community}] [{author}] {self.content}'
+		commu = '' if self.sent else '[{}] '.format(self.community)
+		return f'{direction} {commu}[{author}] {self.content}'
 
 class Channel:
 	def __init__(self, name, client):
 		self.name = name
 		self._client = client
+
+	def __repr__(self):
+		return '<Channel name={.name}>'.format(self)
 
 	def __eq__(self, other):
 		if isinstance(other, str):
@@ -46,7 +51,12 @@ class Channel:
 		await self._client.leaveChannel(self)
 
 	async def who(self):
-		pass
+		def check(idseq, players):
+			return idseq==idSequence
+
+		idSequence = await self._client.sendCP(58, Packet().writeString(self.name))
+		_, players = await self._client.wait_for('on_channel_who', check, timeout=3)
+		return players
 
 class ChannelMessage(Message):
 	def __init__(self, author, community, content, channel):

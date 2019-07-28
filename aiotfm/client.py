@@ -179,8 +179,10 @@ class Client:
 				self.dispatch('channel_leaved_result', result)
 
 			elif TC==59: # Channel /who result
+				idSequence = packet.read32()
 				result = packet.read8()
-				self.dispatch('channel_who', [packet.readUTF() for _ in range(packet.read16())])
+				players = [Player(packet.readUTF()) for _ in range(packet.read16())]
+				self.dispatch('channel_who', idSequence, players)
 
 			elif TC==62: # Joined a channel
 				name = packet.readUTF()
