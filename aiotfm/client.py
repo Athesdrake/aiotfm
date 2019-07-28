@@ -48,7 +48,10 @@ class Client:
 		:param connection: :class:`aiotfm.connection.Connection` the connection that received the data.
 		"""
 		self.dispatch('raw_socket', connection, Packet(data))
-		await self.handle_packet(connection, Packet(data))
+		try:
+			await self.handle_packet(connection, Packet(data))
+		except Exception:
+			traceback.print_exc()
 
 	async def handle_packet(self, connection:Connection, packet:Packet):
 		"""|coro|
