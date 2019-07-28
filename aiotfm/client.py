@@ -208,7 +208,13 @@ class Client:
 			elif TC==64: # Channel message
 				author, community = packet.readUTF(), packet.read32()
 				channel_name, message = packet.readUTF(), packet.readUTF()
-				self.dispatch('channel_message', ChannelMessage(author, community, message, Channel(channel_name, self)))
+				channel = self.get_channel(channel_name)
+
+				if channel is None:
+					channel = Channel(channel_name, self)
+					self._channels.append(channel)
+
+				self.dispatch('channel_message', ChannelMessage(author, community, message, channel))
 
 			elif TC==65: # Tribe message
 				author, message = packet.readUTF(), packet.readUTF()
@@ -255,6 +261,14 @@ class Client:
 				self.dispatch('heartbeat', (time.clock()-t)*1000)
 				last_heartbeat = self.loop.time()
 			await asyncio.sleep(.5)
+
+	def get_channel(self, name):
+		if name is None:
+			return None
+
+		for channel in self._channels:
+			if channel.name==name:
+				return channel
 
 	def event(self, coro):
 		"""A decorator that registers an event.
