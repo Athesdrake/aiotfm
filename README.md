@@ -11,6 +11,7 @@ If you prefer Lua over Python then checkout the [Lua version](https://github.com
 - 3 times faster than TransFromage
 - Compatible with discord.py
 - Faster
+- Asynchronous
 
 ### Speed
 
@@ -22,7 +23,7 @@ Those results can vary depending on your computer and your internet connection.
 You can install aiotfm using pip:
 `pip install aiotfm`
 
-You can also clone this repository and install it manually:
+To have a more up to date package, you have to clone this repository and install it manually:
 ```sh
 git clone https://github.com/Athesdrake/aiotfm
 cd aiotfm
@@ -31,7 +32,13 @@ python3 -m pip install .
 
 ### Requirements
 
-aiotfm require python 3.5.3 or higher and [aiohttp](https://github.com/aio-libs/aiohttp).
+aiotfm require python 3.6 or higher and [aiohttp](https://github.com/aio-libs/aiohttp).
+
+#### Python 3.5
+
+You can still use aiotfm with Python 3.5.3 or higher by cloning the repository and remove the sugar syntax of Python 3.6.
+These changes are the typed variables and fstrings.
+Due to a major update in the asynchronous stuff of Python 3.5.3, aiotfm is not compatible with the previous versions of Python.
 
 ### Update
 
@@ -46,7 +53,7 @@ import aiotfm
 bot = aiotfm.Client()
 
 @bot.event
-def on_ready():
+async def on_ready():
 	print('Connected to the community platform.')
 
 bot.run("api_tfmid", "api_token", "username", "password", encrypted=False, room="start_room")
