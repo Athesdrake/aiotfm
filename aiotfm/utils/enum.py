@@ -51,5 +51,5 @@ class chatCommu(Enum):
 
 	def __missing__(self, key):
 		if isinstance(key, int):
-			return 'xx'
+			return 'int'
 		return 1
