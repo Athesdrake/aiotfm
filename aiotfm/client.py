@@ -215,7 +215,7 @@ class Client:
 				self.dispatch('tribe_message', author, message)
 
 			elif TC==66: # Whisper
-				author, commu, receiver, message = Player(packet.readUTF()), packet.read32(), packet.readUTF(), packet.readUTF()
+				author, commu, receiver, message = Player(packet.readUTF()), packet.read32(), Player(packet.readUTF()), packet.readUTF()
 				self.dispatch('whisper', Whisper(author, commu, receiver, message, self))
 
 			elif TC==88: # tribe member connected
