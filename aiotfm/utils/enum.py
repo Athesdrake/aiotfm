@@ -40,17 +40,13 @@ class chatCommu(Enum):
 	ph = 17
 	lt = 18
 	jp = 19
-	ch = 20
 	fi = 21
 	cz = 22
 	hr = 23
-	sk = 24
 	bg = 25
 	lv = 26
 	he = 27
 	it = 28
-	et = 29
-	az = 30
 	pt = 31
 
 	def __missing__(self, key):
