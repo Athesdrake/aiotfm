@@ -33,14 +33,6 @@ class Packet:
 			p.pos = self.pos
 		return p
 
-	def unpack(self, fmt):
-		fmt = '>'+fmt
-		buf = self.readBytes(struct.calcsize(fmt))
-		result = struct.unpack(fmt, buf)
-		if len(result)==1:
-			return result[0]
-		return result
-
 	def readBytes(self, nbr=1):
 		self.pos += nbr
 		return self.buffer[self.pos-nbr:self.pos]
