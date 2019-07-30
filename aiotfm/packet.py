@@ -98,6 +98,9 @@ class Packet:
 			string = string.encode()
 		return self.write16(len(string)).writeBytes(string)
 
+	def writeUTF(self, string):
+		return self.writeString(string)
+
 	def export(self, fp=0):
 		if self.exported:
 			return self.bytes
