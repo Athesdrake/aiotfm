@@ -126,7 +126,7 @@ class Packet:
 		self.buffer = ccc+tmp
 		return self
 
-	def cipher(self, keys):
+	def cipher(self, key):
 		if len(self.buffer)<2:
 			raise Exception()
 		while len(self.buffer)<10:
@@ -138,7 +138,7 @@ class Packet:
 		for i in range(length//4+(length%4>0)):
 			chunks.append(self.read32())
 
-		chunks = encode_chunks(chunks, len(chunks), keys)
+		chunks = xxtea_encode(chunks, len(chunks), key)
 
 		packet = Packet.new(ccc).write16(len(chunks))
 		for chunk in chunks:
@@ -147,25 +147,16 @@ class Packet:
 		self.buffer = packet.buffer
 		return self
 
-def encode_chunks(v, n, keys):
-	DELTA = 0x9e3779b9
-	def MX():
-		return int(((z>>5)^(y<<2)) + ((y>>3)^(z<<4))^(sum^y) + (keys[(p & 3)^e]^z))
+DELTA = 0X9E3779B9
 
-	y = v[0]
+def xxtea_encode(v, n, key):
+	cycles = 6 + 52//n
 	sum = 0
-	if n > 1:
-		z = v[n - 1]
-		q = int(6 + 52 / n)
-	while q > 0:
-		q -= 1
+	z = v[-1]
+	for _ in range(cycles):
 		sum = (sum + DELTA) & 0xffffffff
-		e = ((sum >> 2) & 0xffffffff) & 3
-		p = 0
-		while p < n - 1:
-			y = v[p + 1]
-			z = v[p] = (v[p] + MX()) & 0xffffffff
-			p += 1
-		y = v[0]
-		z = v[n - 1] = (v[n - 1] + MX()) & 0xffffffff
+		e = sum >> 2 & 3
+		for p in range(n):
+			y = v[(p+1)%n]
+			z = v[p] = (v[p] + (((z>>5^y<<2) + (y>>3^z<<4)) ^ ((sum^y) + (key[(p&3)^e] ^ z))))&0xffffffff
 	return v
