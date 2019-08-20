@@ -1,5 +1,3 @@
-import struct
-
 class Packet:
 	def __init__(self, buffer=None):
 		if buffer is None:
@@ -171,7 +169,7 @@ class Packet:
 		self.buffer = packet.buffer
 		return self
 
-DELTA = 0X9E3779B9
+DELTA = 0x9e3779b9
 
 def xxtea_encode(v, n, key):
 	"""https://en.wikipedia.org/wiki/XXTEA"""
