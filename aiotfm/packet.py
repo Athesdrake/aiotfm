@@ -150,7 +150,9 @@ class Packet:
 	def cipher(self, key):
 		"""Cipher the packet with the XXTEA algorithm."""
 		if len(self.buffer)<2:
-			raise Exception()
+			raise Exception("The Packet is empty.")
+		if len(key)<4:
+			raise Exception("Invalid key: {}".format(key))
 		while len(self.buffer)<10:
 			self.write8(0)
 
