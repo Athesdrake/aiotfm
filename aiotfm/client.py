@@ -666,7 +666,7 @@ class Client:
 
 		:param player: :class:`str` the player's username you want to recruit.
 		"""
-		await self.sendCP(78, Packet().writeString(player), cipher=True)
+		await self.sendCP(78, Packet().writeString(player))
 
 	async def requestShopList(self):
 		"""|coro|
