@@ -378,6 +378,7 @@ class Client:
 		message = '\nAn error occurred while dispatching the event "{0}":\n\n{2}'
 		tb = traceback.format_exc(limit=-1)
 		print(message.format(event, err, tb), file=sys.stderr)
+		return message.format(event, err, tb)
 
 	async def on_connection_error(self, conn, error):
 		print('{0.__class__.__name__}: {0}'.format(error), file=sys.stderr)
