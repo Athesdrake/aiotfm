@@ -682,3 +682,11 @@ class Client:
 		"""|coro|
 		Send a request to the server to get the shop list."""
 		await self.main.send(Packet.new(8, 20))
+
+	async def on_login_result(self, code, *args):
+		self.loop.call_later(5, self.close)
+		if code==1:
+			raise AlreadyConnected()
+		elif code==2:
+			raise IncorrectPassword()
+		raise LoginError(code)
