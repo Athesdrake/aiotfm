@@ -10,6 +10,7 @@ from aiotfm.player import Profile, Player
 from aiotfm.tribe import Tribe
 from aiotfm.message import Message, Whisper, Channel, ChannelMessage
 from aiotfm.shop import Shop
+from aiotfm.locale import Locale
 
 class Client:
 	"""Represents a client that connects to Transformice.
@@ -35,6 +36,7 @@ class Client:
 
 		self._waiters = {}
 
+		self.locale = Locale()
 		self.community = community # EN
 		self.cp_fingerprint = 0
 
@@ -89,6 +91,12 @@ class Client:
 			commu = packet.read8()
 			message = packet.readUTF()
 			self.dispatch('room_message', Message(Player(username, pid=player_id), message, commu, self))
+
+		elif CCC==(6, 20): # Server message
+			packet.readBool() # if False then the message will appear in the #Server channel
+			t_key = packet.readUTF()
+			t_args = [packet.readUTF() for i in range(packet.read8())]
+			self.dispatch('server_message', self.locale[t_key], *t_args)
 
 		elif CCC==(8, 16): # Profile
 			self.dispatch('profile', Profile(packet))
@@ -418,6 +426,7 @@ class Client:
 		packet.write32(0).write32(0x6257).writeString('')
 
 		await self.main.send(packet)
+		await self.locale.load()
 
 	async def login(self, username, password, encrypted=True, room='1'):
 		"""|coro|
