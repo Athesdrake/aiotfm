@@ -1,4 +1,5 @@
 from aiotfm import __version__
+from aiotfm.errors import EndpointError, InternalError, MaintenanceError
 
 try:
 	import aiohttp
@@ -37,11 +38,11 @@ async def get_keys(tfm_id, api_token):
 			if len(keys.packet) and len(keys.identification) and len(keys.msg):
 				return keys
 
-			raise Exception('Something goes wrong: A key is empty ! {}'.format(data))
+			raise EndpointError('Something goes wrong: A key is empty ! {}'.format(data))
 		else:
 			if data.get('internal_error_step')==2:
-				raise Exception('The game might be in maintenance mode.')
+				raise MaintenanceError('The game might be in maintenance mode.')
 			else:
-				raise Exception('An internal error occur: {}'.format(data.get('internal_error_step')))
+				raise InternalError('An internal error occur: {}'.format(data.get('internal_error_step')))
 	else:
-		raise Exception("Can't get the keys. Error info: {}".format(data.get('error')))
+		raise EndpointError("Can't get the keys. Error info: {}".format(data.get('error')))

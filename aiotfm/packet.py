@@ -1,3 +1,5 @@
+from aiotfm.errors import PacketError, PacketTooLarge, XXTEAInvalidPacket, XXTEAInvalidKeys
+
 class Packet:
 	def __init__(self, buffer=None):
 		if buffer is None:
@@ -131,7 +133,7 @@ class Packet:
 		elif size<=0xffffff:
 			m.write8(3).write24(size)
 		else:
-			raise Exception('Packet too big.')
+			raise PacketTooLarge("The Packet maximum size of 16777215 has been exceeded.")
 		m.write8(fp)
 
 		self.bytes = bytes(m.buffer + self.buffer)
@@ -150,9 +152,9 @@ class Packet:
 	def cipher(self, key):
 		"""Cipher the packet with the XXTEA algorithm."""
 		if len(self.buffer)<2:
-			raise Exception("The Packet is empty.")
+			raise XXTEAInvalidPacket("The Packet is empty.")
 		if len(key)<4:
-			raise Exception("Invalid key: {}".format(key))
+			raise XXTEAInvalidKeys(str(key))
 		while len(self.buffer)<10:
 			self.write8(0)
 

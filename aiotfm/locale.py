@@ -2,6 +2,8 @@ import aiohttp
 import re
 import zlib
 
+from aiotfm.errors import InvalidLocale
+
 class Translation:
 	def __init__(self, key, value):
 		self.key = key
@@ -62,7 +64,7 @@ class Locale:
 		async with aiohttp.ClientSession() as session:
 			async with session.get(self.BASE_URL.format(self)) as r:
 				if r.status_code==404:
-					raise Exception('Invalid locale.')
+					raise InvalidLocale()
 
 				# Decompress the file and parse it
 				content = zlib.decompress(await r.read()).decode('utf-8')
