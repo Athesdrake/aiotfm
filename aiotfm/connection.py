@@ -1,6 +1,6 @@
 import asyncio
 
-from aiotfm.errors import EndOfFile, InvalidSocketData
+from aiotfm.errors import InvalidSocketData
 
 class Socket:
 	"""A socket class with asyncio."""
@@ -27,7 +27,7 @@ class Socket:
 			return await self._reader.readexactly(size)
 		except asyncio.streams.IncompleteReadError as e:
 			if e.partial==b'':
-				raise EndOfFile() # EOF found
+				raise EOFError() # EOF found
 			else:
 				return b'\x00' # Return dummy packet to prevent crash while parsing.
 
@@ -82,9 +82,9 @@ class Connection:
 			while self.open:
 				try:
 					lensize = await self.socket.recv(1)
-				except EndOfFile:
+				except EOFError:
 					if self.open:
-						raise EndOfFile('The connection "{.name}" has been closed.'.format(self))
+						raise EOFError('The connection "{.name}" has been closed.'.format(self))
 					self.close()
 					break
 				else:

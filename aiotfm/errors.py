@@ -34,10 +34,6 @@ class ConnectionClosed(AiotfmException):
 	"""Exception thrown when one of the connection closes."""
 	pass
 
-class EndOfFile(ConnectionClosed):
-	"""Exception thrown when a socket receive the End Of File signal."""
-	pass
-
 
 class InvalidSocketData(AiotfmException):
 	"""Exception thrown when a socket receive an invalid data."""
