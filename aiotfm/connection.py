@@ -1,6 +1,6 @@
 import asyncio
 
-from aiotfm.packet import Packet
+from aiotfm.errors import InvalidSocketData
 
 class Socket:
 	"""A socket class with asyncio."""
@@ -89,7 +89,7 @@ class Connection:
 					break
 				else:
 					if lensize[0]>3:
-						raise TypeError('The connection {.name} receive a non-valid type of {} bytes.'.format(self, lensize[0]))
+						raise InvalidSocketData('The connection {.name} receive a non-valid type of {} bytes.'.format(self, lensize[0]))
 
 				length = int.from_bytes(await self.socket.recv(lensize[0]), 'big')
 				data = await self.socket.recv(length)

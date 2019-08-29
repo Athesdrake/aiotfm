@@ -1,4 +1,4 @@
-from aiotfm import utils
+from aiotfm import utils, errors
 from aiotfm.client import Client
 from aiotfm.connection import Connection
 from aiotfm.packet import Packet

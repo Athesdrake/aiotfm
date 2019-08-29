@@ -10,6 +10,8 @@ from aiotfm.player import Profile, Player
 from aiotfm.tribe import Tribe
 from aiotfm.message import Message, Whisper, Channel, ChannelMessage
 from aiotfm.shop import Shop
+from aiotfm.locale import Locale
+from aiotfm.errors import *
 
 class Client:
 	"""Represents a client that connects to Transformice.
@@ -35,6 +37,7 @@ class Client:
 
 		self._waiters = {}
 
+		self.locale = Locale()
 		self.community = community # EN
 		self.cp_fingerprint = 0
 
@@ -89,6 +92,12 @@ class Client:
 			commu = packet.read8()
 			message = packet.readUTF()
 			self.dispatch('room_message', Message(Player(username, pid=player_id), message, commu, self))
+
+		elif CCC==(6, 20): # Server message
+			packet.readBool() # if False then the message will appear in the #Server channel
+			t_key = packet.readUTF()
+			t_args = [packet.readUTF() for i in range(packet.read8())]
+			self.dispatch('server_message', self.locale[t_key], *t_args)
 
 		elif CCC==(8, 16): # Profile
 			self.dispatch('profile', Profile(packet))
@@ -145,9 +154,8 @@ class Client:
 		elif CCC==(28, 62): # Already connected ?
 			already_connected = packet.readBool()
 			if already_connected:
-				return True
-				self.loop.stop()
-				raise Exception('Already connected')
+				self.loop.call_later(5, self.close)
+				raise AlreadyConnected()
 
 		elif CCC==(29, 6): # Lua logs
 			self.dispatch('lua_log', packet.readUTF())
@@ -277,9 +285,9 @@ class Client:
 		"""
 		name = coro.__name__
 		if not name.startswith('on_'):
-			raise Exception("'{}' isn't a correct event naming.".format(name))
+			raise InvalidEvent("'{}' isn't a correct event naming.".format(name))
 		if not asyncio.iscoroutinefunction(coro):
-			raise Exception("Couldn't register a non-coroutine function for the event {}.".format(name))
+			raise InvalidEvent("Couldn't register a non-coroutine function for the event {}.".format(name))
 
 		setattr(self, name, coro)
 		return coro
@@ -406,7 +414,7 @@ class Client:
 			else:
 				break
 		else:
-			raise Exception('Unable to connect to the server.')
+			raise ConnectionError('Unable to connect to the server.')
 
 		while not self.main.socket.connected:
 			await asyncio.sleep(.1)
@@ -418,6 +426,7 @@ class Client:
 		packet.write32(0).write32(0x6257).writeString('')
 
 		await self.main.send(packet)
+		await self.locale.load()
 
 	async def login(self, username, password, encrypted=True, room='1'):
 		"""|coro|
@@ -553,7 +562,7 @@ class Client:
 			elif result==17:
 				return None
 			else:
-				raise Exception('Internal error: 118-{}'.format(result))
+				raise CommunityPlatformError(118, result)
 		return Tribe(packet)
 
 	async def playEmote(self, id, flag='be'):
@@ -576,7 +585,7 @@ class Client:
 		:param id: :class:`int` the smiley's id. (from 0 to 10)
 		"""
 		if 10>id>0:
-			raise Exception('Invalid smiley id')
+			raise AiotfmException('Invalid smiley id')
 
 		packet = Packet.new(8, 5).write8(id).write32(0)
 
@@ -673,3 +682,11 @@ class Client:
 		"""|coro|
 		Send a request to the server to get the shop list."""
 		await self.main.send(Packet.new(8, 20))
+
+	async def on_login_result(self, code, *args):
+		self.loop.call_later(5, self.close)
+		if code==1:
+			raise AlreadyConnected()
+		elif code==2:
+			raise IncorrectPassword()
+		raise LoginError(code)
