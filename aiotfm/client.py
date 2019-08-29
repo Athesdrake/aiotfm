@@ -391,7 +391,7 @@ class Client:
 	async def on_connection_error(self, conn, error):
 		print('{0.__class__.__name__}: {0}'.format(error), file=sys.stderr)
 
-		if error.__class__ is EOFError:
+		if isinstance(error, EOFError):
 			self.close()
 
 	async def start(self, api_tfmid, api_token, keys=None):
