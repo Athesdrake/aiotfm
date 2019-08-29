@@ -582,9 +582,9 @@ class Client:
 		"""|coro|
 		Makes the client showing a smiley above it's head.
 
-		:param id: :class:`int` the smiley's id. (from 0 to 10)
+		:param id: :class:`int` the smiley's id. (from 0 to 9)
 		"""
-		if 10>id>0:
+		if id<0 or id>9:
 			raise AiotfmException('Invalid smiley id')
 
 		packet = Packet.new(8, 5).write8(id).write32(0)
