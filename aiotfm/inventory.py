@@ -58,11 +58,14 @@ class Inventory:
 		self.items = items or {}
 		self.client = client
 
-		for item in self.items.values():
+		for item in self:
 			item.inventory = self
 
 	def __repr__(self):
 		return "<Inventory client={!r}>".format(self.client)
+
+	def __iter__(self):
+		return iter(self.items.values())
 
 	@classmethod
 	def from_packet(cls, packet):
