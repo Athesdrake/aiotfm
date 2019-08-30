@@ -1,3 +1,5 @@
+from aiotfm.errors import AiotfmException
+
 class Room:
 	"""Represents the room that the bot currently is in.
 
@@ -18,41 +20,38 @@ class Room:
 	def __repr__(self):
 		return "<Room name={} private={}>".format(self.name, self.private)
 
-	def get_player(self, max=None, gate="and", **kwargs):
-		"""Gets a player from the room.
+	def get_players(self, predicate, max=None):
+		"""Filters players from the room.
 
-		:param max: Optional[:class:`int`] The maximum amout of players to return. If this is one it will return the player instead of a list.
-		:param gate: Optional[:class:`str`] The gate to compare values given to kwargs. Can be either 'and' or 'or'.
-		:param kwargs: Applied filters. You set a :class:`Player` attribute and its value and the function will use them as filters.
-		:return: Union[:class:`list`[:class:`tuple`], :class:`tuple`] The filtered players. Each tuple is an index-player pair."""
-		players = []
-		quantity = 0
+		:param predicate: A function that returns a boolean-like result to filter through the players.
+		:param max: Optional[:class:`int`] The maximum amount of players to return.
+		:return: `Iterable` The filtered players."""
+		return [p for p in self.players if predicate(p)][:max]
 
-		for index, player in enumerate(self.players):
-			if max is not None:
-				if quantity >= max:
-					break
+	def get_player(self, **kwargs):
+		"""Gets one player in the room with an identifier.
 
-			if gate == "and":
-				append = True
-				for key, value in kwargs.items():
-					if getattr(player, key) != value:
-						append = False
-						break
+		:param kwargs: Which identifier to use. Can be either name, username, id or pid.
+		:return: :class:`aiotfm.player.Player` The player or None"""
+		if len(kwargs)==0:
+			raise AiotfmException('You did not provide any identifier.')
+		if len(kwargs)>1:
+			raise AiotfmException('You cannot filter one player with more than one identifier.')
 
-			elif gate == "or":
-				append = False
-				for key, value in kwargs.items():
-					if getattr(player, key) == value:
-						append = True
-						break
+		identifier, value = kwargs.items()[0]
 
-			if append:
-				players.append((index, player))
-				quantity += 1
+		if identifier=='name' or identifier=='username':
+			def filter(p):
+				return p==value
+		elif identifier=='id':
+			def filter(p):
+				return p.id==int(value)
+		elif identifier=='pid':
+			def filter(p):
+				return p.pid==int(value)
+		else:
+			raise AiotfmException('Invalid filter.')
 
-		if max == 1:
-			if quantity == 1:
-				return players[0]
-			return None
-		return players
+		result = self.get_players(filter)
+		if len(result):
+			return result[0]
