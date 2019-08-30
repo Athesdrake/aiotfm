@@ -10,17 +10,19 @@ class LoginError(AiotfmException):
 
 class AlreadyConnected(LoginError):
 	"""Exception thrown when the account provided is already connected."""
-	pass
+	def __init__(self):
+		super().__init__(1)
 
 class IncorrectPassword(LoginError):
 	"""Exception thrown when trying to connect with a wrong password."""
-	pass
+	def __init__(self):
+		super().__init__(2)
 
 
 class InvalidEvent(AiotfmException):
 	"""Exception thrown when you added an invalid event to the client.
 
-	En event is valid only if its name begin by 'on_' and it is coroutine.
+	An event is valid only if its name begin by 'on_' and it is coroutine.
 	"""
 	pass
 

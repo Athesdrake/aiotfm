@@ -63,7 +63,7 @@ class Locale:
 		# Download the locale
 		async with aiohttp.ClientSession() as session:
 			async with session.get(self.BASE_URL.format(self)) as r:
-				if r.status_code==404:
+				if r.status==404:
 					raise InvalidLocale()
 
 				# Decompress the file and parse it
