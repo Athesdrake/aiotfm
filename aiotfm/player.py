@@ -31,6 +31,8 @@ class Player:
 		self.ducking = False
 		self.jumping = False
 
+		self.trade = None
+
 	@classmethod
 	def from_packet(cls, packet:Packet):
 		name = packet.readUTF()
