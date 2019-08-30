@@ -41,7 +41,7 @@ class InventoryItem:
 		"""|coro|
 		Uses this item."""
 		if self.inventory is None or self.inventory.client is None:
-			raise TypeError("ItemInventory doesn't have the inventory variable or Inventory doesn't have the client variable.")
+			raise TypeError("InventoryItem doesn't have the inventory variable or Inventory doesn't have the client variable.")
 		await self.inventory.client.main.send(Packet.new(31, 3).write16(self.id))
 
 class Inventory:
