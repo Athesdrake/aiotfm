@@ -10,6 +10,8 @@ from aiotfm.player import Profile, Player
 from aiotfm.tribe import Tribe
 from aiotfm.message import Message, Whisper, Channel, ChannelMessage
 from aiotfm.shop import Shop
+from aiotfm.inventory import Inventory, InventoryItem, Trade
+from aiotfm.room import Room
 from aiotfm.locale import Locale
 from aiotfm.errors import *
 
@@ -26,6 +28,21 @@ class Client:
 	loop: Optional[event loop]
 		The `event loop`_ to use for asynchronous operations. If ``None`` is passed (defaults),
 		the event loop used will be ``asyncio.get_event_loop()``.
+
+	Attributes
+	----------
+	username: Optional[:class:`str`]
+		The bot's username received from the server. Might be None if the bot didn't log in yet.
+	room: Optional[:class:`aiotfm.room.Room`]
+		The bot's room. Might be None if the bot didn't log in yet or couldn't join any room yet.
+	trade: Optional[:class:`aiotfm.inventory.Trade`]
+		The current trade that's going on (i.e: both traders accepted it).
+	trades: :class:`list`[:class:`aiotfm.inventory.Trade`]
+		All the trades that the bot participates. Most of them might be invitations only.
+	inventory: Optional[:class:`aiotfm.inventory.Inventory`]
+		The bot's inventory. Might be None if the bot didn't log in yet or it didn't receive anything.
+	locale: :class:`aiotfm.locale.Locale`
+		The bot's locale (translations).
 	"""
 	LOG_UNHANDLED_PACKETS = False
 
@@ -37,6 +54,12 @@ class Client:
 
 		self._waiters = {}
 
+		self.room = None
+		self.trade = None
+		self.trades = []
+		self.inventory = None
+
+		self.username = None
 		self.locale = Locale()
 		self.community = community # EN
 		self.cp_fingerprint = 0
@@ -75,16 +98,15 @@ class Client:
 		:return: True if the packet got handled, False otherwise.
 		"""
 		CCC = packet.readCode()
-		if CCC == (1, 1): # Old packets
+		if CCC==(1, 1): # Old packets
 			data = packet.readBytes().split(b'\x01')
 			oldCCC = tuple(data.pop(0)[:2])
 			self.dispatch('old_packet', connection, oldCCC, data)
 			return await self.handle_old_packet(connection, oldCCC, data)
 
 		elif CCC==(5, 21): # Joined room
-			private = packet.readBool()
-			room_name = packet.readString() # Decode it at your own risk
-			self.dispatch('joined_room', room_name, private)
+			room = self.room = Room(private=not packet.readBool(), name=packet.readUTF())
+			self.dispatch('joined_room', room)
 
 		elif CCC==(6, 6): # Room message
 			player_id = packet.read32()
@@ -119,7 +141,7 @@ class Client:
 
 		elif CCC==(26, 2): # Logged in successfully
 			player_id = packet.read32()
-			username = packet.readUTF()
+			self.username = username = packet.readUTF()
 			played_time = packet.read32()
 			community = packet.read8()
 			pid = packet.read32()
@@ -151,14 +173,97 @@ class Client:
 		elif CCC==(28, 6): # Server ping
 			await connection.send(Packet.new(28, 6).write8(packet.read8()))
 
-		elif CCC==(28, 62): # Already connected ?
-			already_connected = packet.readBool()
-			if already_connected:
-				self.loop.call_later(5, self.close)
-				raise AlreadyConnected()
-
 		elif CCC==(29, 6): # Lua logs
 			self.dispatch('lua_log', packet.readUTF())
+
+		elif CCC==(31, 1): # Inventory data
+			self.inventory = Inventory.from_packet(packet)
+			self.inventory.client = self
+			self.dispatch('inventory_data', self.inventory)
+
+		elif CCC==(31, 2): # Update inventory item
+			id = packet.read16()
+			quantity = packet.read8()
+
+			if id in self.inventory.items:
+				item = self.inventory.items[id]
+				previous = item.quantity
+				item.quantity = quantity
+				self.dispatch('inventory_item_update', item, previous)
+
+			else:
+				item = InventoryItem(id=id, quantity=quantity)
+				self.inventory.items[item.id] = item
+				self.dispatch('new_inventory_item', item)
+
+		elif CCC==(31, 5): # Trade invite
+			player = self.room.get_player(max=1, pid=packet.read32())
+			trade = Trade(player[1], self)
+			self.trades.append(trade)
+			trade.alive = True
+			trade.on_invite = True
+			self.dispatch('trade_invite', trade)
+
+		elif CCC==(31, 6): # Trade error
+			name = packet.readUTF()
+			error = packet.read8()
+
+			if name == "":
+				print("internal error?", error)
+				if self.trade._other.username == name:
+					self.trade._close()
+					self.dispatch('trade_error', self.trade, error)
+					self.dispatch('trade_close', self.trade)
+
+			else:
+				for trade in self.trades:
+					if trade._other.username == name:
+						print("trade error", error)
+						trade._close()
+						self.dispatch('trade_error', trade, error)
+						self.dispatch('trade_close', trade)
+						break
+
+		elif CCC==(31, 7): # Trade start
+			player = self.room.get_player(max=1, pid=packet.read32())[1]
+			player.trade.on_invite = False
+			player.trade.alive = True
+
+			if self.trade is not None:
+				trade = self.trade
+				self.trade._close()
+				self.dispatch('trade_close', trade)
+			self.trade = player.trade
+			self.dispatch('trade_start', self.trade)
+
+		elif CCC==(31, 8): # Trade items
+			me = packet.readBool()
+			id = packet.read16()
+			adding = packet.readBool()
+			quantity = packet.read8()
+			print("add item to trade", me, id, adding, quantity, packet.read8())
+			quantity = (1 if adding else -1) * quantity
+
+			items = self.trade.items_me if me else self.trade.items_other
+			if id in items:
+				items[id] += quantity
+			else:
+				items[id] = quantity
+
+			self.dispatch('trade_item_change', self.trade, self if me else self.trade._other, id, quantity, items[id])
+
+		elif CCC==(31, 9): # Trade lock
+			if packet.readBool():
+				self.trade.locked_me = packet.readBool()
+				self.dispatch('trade_lock', self.trade, self, self.trade.locked_me)
+			else:
+				self.trade.locked_other = packet.readBool()
+				self.dispatch('trade_lock', self.trade, self.trade._other, self.trade.locked_other)
+
+		elif CCC==(31, 10): # Trade complete
+			trade = self.trade
+			self.trade._close()
+			self.dispatch('trade_complete', trade)
 
 		elif CCC==(44, 1): # Bulle switching
 			bulle_id = packet.read32()
@@ -243,6 +348,50 @@ class Client:
 					print(CCC, TC, bytes(packet.buffer)[4:])
 				return False
 
+		elif CCC==(100, 67): # New inventory item
+			slot = packet.read8()
+			id = packet.read16()
+			quantity = packet.read8()
+
+			item = InventoryItem(id=id, quantity=quantity, slot=None if slot == 0 else slot)
+			self.inventory.items.append(item)
+			self.dispatch('new_inventory_item', item)
+
+		elif CCC==(144, 1): # Set player list
+			prev = self.room.players
+			self.room.players = []
+
+			for player in range(packet.read16()):
+				self.room.players.append(Player.from_packet(packet))
+
+			for player in prev:
+				if player.trade is not None:
+					new = self.room.get_player(max=1, pid=player.pid)
+
+					if new:
+						player.trade._update_player(new[1])
+					else:
+						trade = player.trade
+						player.trade._close()
+						self.dispatch('trade_close', trade)
+
+			self.dispatch('bulk_update_room_player', prev, self.room.players)
+
+		elif CCC==(144, 2): # Add a player
+			player = Player.from_packet(packet)
+
+			room_player = self.room.get_player(max=1, pid=player.pid)
+			if room_player:
+				del self.room.players[room_player[0]]
+
+			self.room.players.append(player)
+			if room_player is None:
+				self.dispatch('add_room_player', player)
+			else:
+				if room_player[1].trade is not None:
+					room_player[1].trade._update_player(player)
+				self.dispatch('update_room_player', room_player[1], player)
+
 		else:
 			if self.LOG_UNHANDLED_PACKETS:
 				print(CCC, bytes(packet.buffer)[2:])
@@ -251,7 +400,41 @@ class Client:
 		return True
 
 	async def handle_old_packet(self, connection:Connection, oldCCC:tuple, data:list):
-		return False
+		"""|coro|
+		Handles the known packets from the old protocol and dispatches events.
+		Subclasses should handle only the unhandled packets from this method.
+
+		Example: ::
+			class Bot(aiotfm.Client):
+				async def handle_old_packet(self, conn, oldCCC, data):
+					handled = await super().handle_old_packet(conn, data.copy())
+
+					if not handled:
+						# Handle here the unhandled packets.
+						pass
+
+		:param connection: :class:`aiotfm.connection.Connection` the connection that received the packet.
+		:param oldCCC: :class:`tuple` the packet identifiers on the old protocol.
+		:param data: :class:`list` the packet data.
+		:return: True if the packet got handled, False otherwise.
+		"""
+		if oldCCC==(8, 7): # Remove a player
+			player = self.room.get_player(max=1, pid=int(data[0]))
+
+			if player:
+				del self.room.players[player[0]]
+				if player[1].trade is not None:
+					trade = player[1].trade
+					player[1].trade._close()
+					self.dispatch('trade_close', trade)
+				self.dispatch('remove_room_player', player[1])
+
+		else:
+			if self.LOG_UNHANDLED_PACKETS:
+				print("[OLD]", oldCCC, data)
+			return False
+
+		return True
 
 	async def _heartbeat_loop(self):
 		"""|coro|
@@ -682,6 +865,24 @@ class Client:
 		"""|coro|
 		Send a request to the server to get the shop list."""
 		await self.main.send(Packet.new(8, 20))
+
+	async def startTrade(self, player):
+		"""|coro|
+		Starts a trade with the given player.
+
+		:param player: :class:`aiotfm.player.Player` the player to trade with.
+		:return: :class:`aiotfm.inventory.Trade` the resulting trade"""
+		trade = Trade(self, player)
+		self.trades.append(trade)
+		trade.alive = True
+		trade.on_invite = True
+		await trade.accept()
+		return trade
+
+	async def requestInventory(self):
+		"""|coro|
+		Send a request to the server to get the bot's inventory."""
+		await self.main.send(Packet.new(31, 1))
 
 	async def on_login_result(self, code, *args):
 		self.loop.call_later(5, self.close)
