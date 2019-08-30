@@ -391,7 +391,7 @@ class Client:
 	async def on_connection_error(self, conn, error):
 		print('{0.__class__.__name__}: {0}'.format(error), file=sys.stderr)
 
-		if error.__class__ is EOFError:
+		if isinstance(error, EOFError):
 			self.close()
 
 	async def start(self, api_tfmid, api_token, keys=None):
@@ -582,9 +582,9 @@ class Client:
 		"""|coro|
 		Makes the client showing a smiley above it's head.
 
-		:param id: :class:`int` the smiley's id. (from 0 to 10)
+		:param id: :class:`int` the smiley's id. (from 0 to 9)
 		"""
-		if 10>id>0:
+		if id<0 or id>9:
 			raise AiotfmException('Invalid smiley id')
 
 		packet = Packet.new(8, 5).write8(id).write32(0)
