@@ -197,8 +197,8 @@ class Client:
 				self.dispatch('new_item', item)
 
 		elif CCC==(31, 5): # Trade invite
-			player = self.room.get_player(max=1, pid=packet.read32())
-			trade = Trade(player[1], self)
+			player = self.room.get_player(pid=packet.read32())
+			trade = Trade(player, self)
 			self.trades.append(trade)
 			trade.alive = True
 			trade.on_invite = True
@@ -225,7 +225,7 @@ class Client:
 						break
 
 		elif CCC==(31, 7): # Trade start
-			player = self.room.get_player(max=1, pid=packet.read32())[1]
+			player = self.room.get_player(pid=packet.read32())
 			player.trade.on_invite = False
 			player.trade.alive = True
 
@@ -358,39 +358,37 @@ class Client:
 			self.dispatch('new_item', item)
 
 		elif CCC==(144, 1): # Set player list
-			prev = self.room.players
+			before = self.room.players
 			self.room.players = []
 
 			for player in range(packet.read16()):
 				self.room.players.append(Player.from_packet(packet))
 
-			for player in prev:
+			for player in before:
 				if player.trade is not None:
-					new = self.room.get_player(max=1, pid=player.pid)
+					after = self.room.get_player(pid=player.pid)
 
-					if new:
-						player.trade._update_player(new[1])
+					if after is not None:
+						player.trade._update_player(after)
 					else:
 						trade = player.trade
 						player.trade._close()
 						self.dispatch('trade_close', trade)
 
-			self.dispatch('bulk_player_update', prev, self.room.players)
+			self.dispatch('bulk_player_update', before, self.room.players)
 
 		elif CCC==(144, 2): # Add a player
-			player = Player.from_packet(packet)
+			after = Player.from_packet(packet)
+			before = self.room.get_player(pid=after.pid)
 
-			room_player = self.room.get_player(max=1, pid=player.pid)
-			if room_player:
-				del self.room.players[room_player[0]]
-
-			self.room.players.append(player)
-			if room_player is None:
-				self.dispatch('player_join', player)
+			self.room.players.append(after)
+			if before is None:
+				self.dispatch('player_join', after)
 			else:
-				if room_player[1].trade is not None:
-					room_player[1].trade._update_player(player)
-				self.dispatch('player_update', room_player[1], player)
+				self.room.players.remove(before)
+				if before.trade is not None:
+					before.trade._update_player(after)
+				self.dispatch('player_update', before, after)
 
 		else:
 			if self.LOG_UNHANDLED_PACKETS:
@@ -419,15 +417,15 @@ class Client:
 		:return: True if the packet got handled, False otherwise.
 		"""
 		if oldCCC==(8, 7): # Remove a player
-			player = self.room.get_player(max=1, pid=int(data[0]))
+			player = self.room.get_player(pid=int(data[0]))
 
-			if player:
-				del self.room.players[player[0]]
-				if player[1].trade is not None:
+			if player is not None:
+				self.room.players.remove(player)
+				if player.trade is not None:
 					trade = player[1].trade
-					player[1].trade._close()
+					player.trade._close()
 					self.dispatch('trade_close', trade)
-				self.dispatch('remove_room_player', player[1])
+				self.dispatch('player_remove', player)
 
 		else:
 			if self.LOG_UNHANDLED_PACKETS:
