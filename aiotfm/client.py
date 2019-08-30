@@ -179,7 +179,7 @@ class Client:
 		elif CCC==(31, 1): # Inventory data
 			self.inventory = Inventory.from_packet(packet)
 			self.inventory.client = self
-			self.dispatch('inventory_data', self.inventory)
+			self.dispatch('inventory_update', self.inventory)
 
 		elif CCC==(31, 2): # Update inventory item
 			id = packet.read16()
@@ -189,12 +189,12 @@ class Client:
 				item = self.inventory.items[id]
 				previous = item.quantity
 				item.quantity = quantity
-				self.dispatch('inventory_item_update', item, previous)
+				self.dispatch('item_update', item, previous)
 
 			else:
 				item = InventoryItem(id=id, quantity=quantity)
 				self.inventory.items[item.id] = item
-				self.dispatch('new_inventory_item', item)
+				self.dispatch('new_item', item)
 
 		elif CCC==(31, 5): # Trade invite
 			player = self.room.get_player(max=1, pid=packet.read32())
@@ -355,7 +355,7 @@ class Client:
 
 			item = InventoryItem(id=id, quantity=quantity, slot=None if slot == 0 else slot)
 			self.inventory.items.append(item)
-			self.dispatch('new_inventory_item', item)
+			self.dispatch('new_item', item)
 
 		elif CCC==(144, 1): # Set player list
 			prev = self.room.players
@@ -375,7 +375,7 @@ class Client:
 						player.trade._close()
 						self.dispatch('trade_close', trade)
 
-			self.dispatch('bulk_update_room_player', prev, self.room.players)
+			self.dispatch('bulk_player_update', prev, self.room.players)
 
 		elif CCC==(144, 2): # Add a player
 			player = Player.from_packet(packet)
@@ -386,11 +386,11 @@ class Client:
 
 			self.room.players.append(player)
 			if room_player is None:
-				self.dispatch('add_room_player', player)
+				self.dispatch('player_join', player)
 			else:
 				if room_player[1].trade is not None:
 					room_player[1].trade._update_player(player)
-				self.dispatch('update_room_player', room_player[1], player)
+				self.dispatch('player_update', room_player[1], player)
 
 		else:
 			if self.LOG_UNHANDLED_PACKETS:
