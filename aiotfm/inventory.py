@@ -1,3 +1,5 @@
+from functools import cmp_to_key
+
 from aiotfm.packet import Packet
 from aiotfm.player import Player
 
@@ -111,6 +113,21 @@ class Inventory:
 		"""Gets an item from this :class:`aiotfm.inventory.Inventory`.
 		Shorthand for :class:`aiotfm.inventory.Inventory`.items.get"""
 		return self.items.get(id)
+
+	def sort(self):
+		"""Sort the inventory the same way the client does.
+		:return: :class:`list`
+		"""
+		def cmp(a, b):
+			if (a.is_currency or b.is_currency) and not (a.is_currency and b.is_currency):
+				return -1 if a.is_currency else 1 # Currency are always on the top
+			if (a.is_event or b.is_event) and not (a.is_event and b.is_event):
+				return -1 if a.is_event else 1 # Event items comes always after the currency
+			if a.category!=b.category:
+				return b.category - a.category # Higher means first
+			return a.id - b.id # Lastly the items are sorted by their ids
+
+		return sorted(iter(self), key=cmp_to_key(cmp))
 
 class Trade:
 	"""Represents a trade that the bot is participating (not started, in progress or ended).
