@@ -20,6 +20,28 @@ class Room:
 	def __repr__(self):
 		return "<Room name={} private={}>".format(self.name, self.private)
 
+	@property
+	def community(self):
+		"""Returns the room's community."""
+		if self.name.startswith('*'):
+			return 'xx'
+		return self.name.split('-', 1)[0]
+
+	@property
+	def is_tribe(self):
+		"""Returns true if it's a tribe house."""
+		return self.name.startswith('*\x03')
+
+	@property
+	def display_name(self):
+		"""Return the display name of the room.
+		It removes the \x03 char from the tribe house and the community from the public rooms."""
+		if self.is_tribe:
+			return self.name.replace('\x03', '')
+		if self.name.startswith('*'):
+			return self.name
+		return self.name.split('-', 1)[1]
+
 	def get_players(self, predicate, max=None):
 		"""Filters players from the room.
 
