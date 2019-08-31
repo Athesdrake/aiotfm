@@ -83,12 +83,12 @@ class Inventory:
 		return self.items.get(id)
 
 class Trade:
-	"""Represents a trade that the bot is participing (not started, in progress or ended).
+	"""Represents a trade that the bot is participating (not started, in progress or ended).
 
 	Attributes
 	----------
 	traders: `list`
-		The users that are participing on the trade. One of them is an instance of :class:`aiotfm.client.Client` and the other one of :class:`aiotfm.player.Player`.
+		The users that are participating on the trade. One of them is an instance of :class:`aiotfm.client.Client` and the other one of :class:`aiotfm.player.Player`.
 		The first item is always who invited to trade.
 	locked_me: `bool`
 		Whether the bot has locked (confirmed) the trade.
@@ -104,8 +104,8 @@ class Trade:
 		Whether the trade has been accepted (started).
 	alive: `bool`
 		Whether the trade didn't end yet (even if it is on the invite screen).
-	cancelled: `bool`
-		Whether the trade was cancelled by the bot."""
+	canceled: `bool`
+		Whether the trade was canceled by the bot."""
 	def __init__(self, host, destiny):
 		self.traders = [host, destiny]
 		self.locked_me = False
@@ -117,7 +117,7 @@ class Trade:
 		self.on_invite = False
 		self.accepted = False
 		self.alive = False
-		self.cancelled = False
+		self.canceled = False
 
 		self._starter = None
 		self._client, self._other = None, None
@@ -139,8 +139,8 @@ class Trade:
 		self._update_player(self._other)
 
 	def __repr__(self):
-		return "<Trade on_invite={} accepted={} alive={} cancelled={} locked_me={} locked_other={} traders={}>".format(
-			self.on_invite, self.accepted, self.alive, self.cancelled, self.locked_me, self.locked_other, self.traders
+		return "<Trade on_invite={} accepted={} alive={} canceled={} locked_me={} locked_other={} traders={}>".format(
+			self.on_invite, self.accepted, self.alive, self.canceled, self.locked_me, self.locked_other, self.traders
 		)
 
 	def _update_player(self, player):
@@ -163,7 +163,7 @@ class Trade:
 		if not self.alive:
 			raise TypeError("Can not cancel a dead trade.")
 		self._close()
-		self.cancelled = True
+		self.canceled = True
 		await self._client.main.send(Packet.new(31, 6).writeString(self._other.username).write8(2))
 		self._client.dispatch('trade_close', self)
 
