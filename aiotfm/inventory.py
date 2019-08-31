@@ -12,30 +12,60 @@ class InventoryItem:
 		The quantity of the item.
 	inventory: Optional[`aiotfm.inventory.Inventory`]
 		The inventory class. Might be None.
+	can_use: `bool`
+		True if you can use this item.
+	category: `int`
+		Define the category's item. Used by the sorting algorithm.
+	img_id: `str`
+		Id used to get the item's image.
+	is_event: `bool`
+		True if it's an item from an event.
+	slot: `int`
+		Define the equipped slot with this item. If slot is 0 then the item is not equipped.
 	"""
 	def __init__(self, id, **kwargs):
 		self.id = id
 		self.quantity = kwargs.get("quantity", 0)
 		self.inventory = kwargs.get("inventory", None)
 
+		self.can_use = kwargs.get("can_use", True)
+		self.category = kwargs.get("category", 0)
+		self.img_id = kwargs.get("img_id", str(self.id))
+		self.is_event = kwargs.get("is_event", False)
+		self.slot = kwargs.get("slot", 0)
+
 	def __repr__(self):
 		return "<InventoryItem id={} quantity={}>".format(self.id, self.quantity)
+
+	@property
+	def image_url(self):
+		return 'https://transformice.com/images/x_transformice/x_inventaire/{.img_id}.jpg'.format(self)
+
+	@property
+	def is_currency(self):
+		return self.id in (800, 801, 2253, 2254, 2257, 2260, 2261)
+
+	@property
+	def is_equipped(self):
+		return self.slot>0
 
 	@classmethod
 	def from_packet(cls, packet):
 		id = packet.read16()
-		quantity = packet.read8()
-		packet.read8()
-		packet.readBool()
-		packet.readBool()
-		packet.readBool()
-		packet.readBool()
+		kwargs = {
+			'quantity': packet.read8(),
+			'category': packet.read8(),
+			'is_event': packet.readBool(),
+			'can_use': packet.readBool()
+		}
+		packet.readBool() # similar to `can_use`
+		packet.readBool() # similar to `can_use`
 		packet.readBool()
 		packet.readBool()
 		if packet.readBool():
-			packet.readString()
-		packet.read8() # if equiped, this is the slot (1, 2, 3); otherwise this is 0
-		return cls(id, quantity=quantity)
+			kwargs['img_id'] = packet.readUTF()
+		kwargs['slot'] = packet.read8() # if equipped, this is the slot (1, 2, 3); otherwise this is 0
+		return cls(id, **kwargs)
 
 	async def use(self):
 		"""|coro|
