@@ -60,7 +60,7 @@ class Room:
 		if len(kwargs)>1:
 			raise AiotfmException('You cannot filter one player with more than one identifier.')
 
-		identifier, value = next(kwargs.items())
+		identifier, value = next(iter(kwargs.items()))
 
 		if identifier=='name' or identifier=='username':
 			def filter(p):
