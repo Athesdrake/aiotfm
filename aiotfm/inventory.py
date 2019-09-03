@@ -41,7 +41,7 @@ class InventoryItem:
 
 	@property
 	def image_url(self):
-		return 'https://transformice.com/images/x_transformice/x_inventaire/{.img_id}.jpg'.format(self)
+		return 'https://www.transformice.com/images/x_transformice/x_inventaire/{.img_id}.jpg'.format(self)
 
 	@property
 	def is_currency(self):
