@@ -209,7 +209,6 @@ class Client:
 			error = packet.read8()
 
 			if name == "":
-				print("internal error?", error)
 				if self.trade._other.username == name:
 					self.trade._close()
 					self.dispatch('trade_error', self.trade, error)
@@ -218,7 +217,6 @@ class Client:
 			else:
 				for trade in self.trades:
 					if trade._other.username == name:
-						print("trade error", error)
 						trade._close()
 						self.dispatch('trade_error', trade, error)
 						self.dispatch('trade_close', trade)
@@ -241,7 +239,6 @@ class Client:
 			id = packet.read16()
 			adding = packet.readBool()
 			quantity = packet.read8()
-			print("add item to trade", me, id, adding, quantity, packet.read8())
 			quantity = (1 if adding else -1) * quantity
 
 			items = self.trade.items_me if me else self.trade.items_other
@@ -354,7 +351,7 @@ class Client:
 			quantity = packet.read8()
 
 			item = InventoryItem(id=id, quantity=quantity, slot=None if slot == 0 else slot)
-			self.inventory.items.append(item)
+			self.inventory[id] = item
 			self.dispatch('new_item', item)
 
 		elif CCC==(144, 1): # Set player list
