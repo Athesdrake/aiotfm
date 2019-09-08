@@ -259,7 +259,6 @@ class Trade:
 			raise TypeError("Can not lock a trade when it is on the invite state.")
 		if self.locked_me:
 			raise TypeError("Can not lock a trade that is already locked by me.")
-		self.locked_me = True
 		await self._client.main.send(Packet.new(31, 9).writeBool(True))
 
 	async def unlock(self):
@@ -271,5 +270,4 @@ class Trade:
 			raise TypeError("Can not lock a trade when it is on the invite state.")
 		if not self.locked_me:
 			raise TypeError("Can not lock a trade that is already unlocked by me.")
-		self.locked_me = False
 		await self._client.main.send(Packet.new(31, 9).writeBool(False))
