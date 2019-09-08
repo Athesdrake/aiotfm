@@ -246,6 +246,9 @@ class Client:
 				items[id] += quantity
 			else:
 				items[id] = quantity
+			if items[id] == 0:
+				del items[id]
+				
 			self.trade.locked_me = False
 			self.trade.locked_other = False
 
