@@ -26,20 +26,21 @@ async def on_tribe_inv(author, tribe):
 	await bot.enterInvTribeHouse(author)
 
 @bot.event
-async def on_whisper(author, commu, receiver, message):
-	if message=='tribe':
+async def on_whisper(message):
+	print(message)
+	if message.content=='tribe':
 		await bot.enterTribeHouse()
-	await bot.whisper(author, message) # echo
+	await message.reply(message.content) # echo
 
 @bot.event
-async def on_room_message(author, message):
-	print('[{}] {}'.format(author.decode(), message.decode()))
-	if message=='tribe':
+async def on_room_message(message):
+	print(message)
+	if message.content=='tribe':
 		await bot.enterTribeHouse()
 
 @bot.event
-async def on_joined_room(room_name, is_private):
-	print('Joined room:', room_name.decode(), is_private)
+async def on_joined_room(room):
+	print('Joined room:', room)
 
 loop = asyncio.get_event_loop()
 loop.create_task(bot.start(config.pop('api_id'), config.pop('api_token')))

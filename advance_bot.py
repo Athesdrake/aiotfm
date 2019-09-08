@@ -6,9 +6,6 @@ import json
 class Bot(aiotfm.Client):
 	def __init__(self, community=0):
 		super().__init__(community)
-
-		self.room = None
-		self.username = None
 		self.pid = 0
 
 	async def handle_packet(self, conn, packet):
@@ -22,11 +19,16 @@ class Bot(aiotfm.Client):
 
 	async def getProfile(self, username, timeout=3):
 		username = username.lower()
+		def check(p):
+			if '#' not in username:
+				return p.username.split('#')[0].lower()==username
+			return p.username.lower()==username
+
 		try:
 			await self.sendCommand('profile {}'.format(username))
-			return await self.wait_for('on_profile', lambda p: p.username.lower()==username, timeout=timeout)
+			return await self.wait_for('on_profile', check, timeout=timeout)
 		except asyncio.TimeoutError:
-			return None # The player does not exists or is not connected.
+			return None
 
 	def run(self, block=True):
 		with open('bot.config') as f:
@@ -45,24 +47,22 @@ class Bot(aiotfm.Client):
 		with open('bot.config') as f:
 			config = json.load(f)
 			kwargs = {p:config.get(p) for p in ['password', 'encrypted', 'room'] if config.get(p, None) is not None}
-			self.username = config.get('username')
 
 			await self.login(self.username, **kwargs)
 
 	async def on_logged(self, player_id, username, played_time, community, pid):
-		self.username = username
 		self.pid = pid
 
 	async def on_ready(self):
 		print('Connected to the community platform.')
-		while self.room is None or '\x03' not in self.room:
+		while not self.room.is_tribe:
 			await self.enterTribeHouse()
 			try:
 				await self.wait_for('on_joined_room', timeout=3)
 			except:
 				pass
 
-	async def on_joined_room(self, room, private):
+	async def on_joined_room(self, room):
 		self.room = room.decode() if isinstance(room, bytes) else room
 		print(f'Joined room [{self.room}]')
 
