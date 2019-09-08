@@ -248,11 +248,11 @@ class Client:
 				items[id] = quantity
 			if items[id] == 0:
 				del items[id]
-				
+
 			self.trade.locked_me = False
 			self.trade.locked_other = False
 
-			self.dispatch('trade_item_change', self.trade, self if me else self.trade._other, id, quantity, items[id])
+			self.dispatch('trade_item_change', self.trade, self if me else self.trade._other, id, quantity, items[id] if id in items else 0)
 
 		elif CCC==(31, 9): # Trade lock
 			if packet.readBool():
