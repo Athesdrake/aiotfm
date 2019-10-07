@@ -46,9 +46,9 @@ class Bot(aiotfm.Client):
 
 		with open('bot.config') as f:
 			config = json.load(f)
-			kwargs = {p:config.get(p) for p in ['password', 'encrypted', 'room'] if config.get(p, None) is not None}
+			kwargs = {p:config.get(p) for p in ['username', 'password', 'encrypted', 'room'] if config.get(p, None) is not None}
 
-			await self.login(self.username, **kwargs)
+			await self.login(**kwargs)
 
 	async def on_logged(self, player_id, username, played_time, community, pid):
 		self.pid = pid
