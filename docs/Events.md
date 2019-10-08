@@ -108,4 +108,14 @@ Triggered when a tribe's member has disconnected.
 **Parameters**
 - member `str` The member username.
 
-[Client]: Client.md
+## on_emoji
+Triggered when a player in the room shows an emoji.
+
+**Parameters**
+- player [`Player`] The player who executed the emoji.
+- emoji `int` The emoji id.
+
+> References:
+>
+> \[`Client`]: Client.md
+> \[`Player`]: Player.md
