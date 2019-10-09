@@ -121,6 +121,11 @@ class Client:
 			t_args = [packet.readUTF() for i in range(packet.read8())]
 			self.dispatch('server_message', self.locale[t_key], *t_args)
 
+		elif CCC==(8, 5): # Show emoji
+			player = self.room.get_player(pid=packet.read32())
+			emoji = packet.read8()
+			self.dispatch('emoji', player, emoji)
+			
 		elif CCC==(8, 16): # Profile
 			self.dispatch('profile', Profile(packet))
 
