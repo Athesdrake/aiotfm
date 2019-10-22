@@ -53,3 +53,40 @@ class chatCommu(Enum):
 		if isinstance(key, int):
 			return 'int'
 		return 1
+
+class commu(Enum):
+	en = 0
+	fr = 1
+	br = 2
+	es = 3
+	cn = 4
+	tr = 5
+	vk = 6
+	pl = 7
+	hu = 8
+	nl = 9
+	ro = 10
+	id = 11
+	de = 12
+	e2 = 13
+	ar = 14
+	ph = 15
+	lt = 16
+	jp = 17
+	ch = 18
+	fi = 19
+	cz = 20
+	sk = 21
+	hr = 22
+	bu = 23
+	lv = 24
+	he = 25
+	it = 26
+	et = 27
+	az = 28
+	pt = 29
+
+	def __missing__(self, key):
+		if isinstance(key, int):
+			return 'int'
+		return 0
