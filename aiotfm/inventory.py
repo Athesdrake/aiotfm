@@ -99,6 +99,16 @@ class Inventory:
 	def __iter__(self):
 		return iter(self.items.values())
 
+	def __getitem__(self, index):
+		if not isinstance(index, int):
+			raise TypeError("Index must be int, not {}".format(type(index)))
+		return self.items[index]
+
+	def __setitem__(self, index, value):
+		if not isinstance(index, int):
+			raise TypeError("Index must be int, not {}".format(type(index)))
+		self.items[index] = value
+
 	@classmethod
 	def from_packet(cls, packet):
 		items = {}

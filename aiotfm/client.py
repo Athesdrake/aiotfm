@@ -121,6 +121,11 @@ class Client:
 			t_args = [packet.readUTF() for i in range(packet.read8())]
 			self.dispatch('server_message', self.locale[t_key], *t_args)
 
+		elif CCC==(8, 5): # Show emoji
+			player = self.room.get_player(pid=packet.read32())
+			emoji = packet.read8()
+			self.dispatch('emoji', player, emoji)
+			
 		elif CCC==(8, 16): # Profile
 			self.dispatch('profile', Profile(packet))
 
@@ -248,11 +253,11 @@ class Client:
 				items[id] = quantity
 			if items[id] == 0:
 				del items[id]
-				
+
 			self.trade.locked_me = False
 			self.trade.locked_other = False
 
-			self.dispatch('trade_item_change', self.trade, self if me else self.trade._other, id, quantity, items[id])
+			self.dispatch('trade_item_change', self.trade, self if me else self.trade._other, id, quantity, items[id] if id in items else 0)
 
 		elif CCC==(31, 9): # Trade lock
 			if packet.readBool():
