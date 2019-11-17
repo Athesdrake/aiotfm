@@ -125,7 +125,7 @@ class Client:
 			player = self.room.get_player(pid=packet.read32())
 			emoji = packet.read8()
 			self.dispatch('emoji', player, emoji)
-			
+
 		elif CCC==(8, 16): # Profile
 			self.dispatch('profile', Profile(packet))
 
@@ -448,13 +448,13 @@ class Client:
 		last_heartbeat = 0
 		while self.main.open:
 			if self.loop.time()-last_heartbeat>=15:
-				t = time.clock()
+				t = time.perf_counter()
 				await self.main.send(Packet.new(26, 26))
 				await self.main.send(Packet.new(26, 26))
 				if self.bulle is not None and self.bulle.open:
 					await self.bulle.send(Packet.new(26, 26))
 
-				self.dispatch('heartbeat', (time.clock()-t)*1000)
+				self.dispatch('heartbeat', (time.perf_counter()-t)*1000)
 				last_heartbeat = self.loop.time()
 			await asyncio.sleep(.5)
 
