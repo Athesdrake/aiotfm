@@ -1,15 +1,13 @@
-# Client
+# Client Documentation
 
-Represents a client that connects to Transformice.
-Two argument can be passed to the `Client`.
+## Client
+>**Represents the client that connects to Transformice.**
+>
+>| Parameters | Optional | Type | Description |
+>| :-: | :-: | :-: | :-- |
+>| `community` | ✔ | `integer`| The community the bot will connect to. Default is EN (0). 
+>| `loop` | ✔ | `eventLoop` | The [`event loop`](https://docs.python.org/3/library/asyncio-eventloops.html) that will be used for asynchronous operations. If `None` is passed (which is default), the event loop that will be used will be ``asyncio.get_event_loop()``.
 
-## Parameters
-
-community: Optional[`int`]
-	Defines the community of the client. Defaults to 0 (EN community).
-loop: Optional[event loop]
-	The [`event loop`](https://docs.python.org/3/library/asyncio-eventloops.html) to use for asynchronous operations. If `None` is passed (defaults),
-	the event loop used will be ``asyncio.get_event_loop()``.
 
 ## Methods
 
