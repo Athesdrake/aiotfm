@@ -10,47 +10,48 @@
 
 
 ## Methods
-
 ### _coroutine_ received_data(self, data, connection)
-This function is a *coroutine*.
+>
+>Dispatches the received data.
+>
+>| Parameters | Type | Description |
+>| :-: | :-: | :-- |
+>| **data** | `bytes` | The data recieved. 
+>| **connection** | `aiotfm.connection.Connection` | The connection (name) that recieved the data. 
 
-Dispatches the received data.
-
-* **data** `bytes` the received data.
-* **connection** `aiotfm.connection.Connection` the connection that received the data.
-
+---
 
 ### _coroutine_ handle_packet(self, connection:Connection, packet:Packet)
-This function is a *coroutine*.
+>
+>Handles the known packets and dispatches events.
+>The unhandled packets in this method should only be handled by subclasses.
+>
+>| Parameters | Type | Description |
+>| :-: | :-: | :-- |
+>| **connection** | `aiotfm.connection.Connection` | The connection that recieved the packet 
+>| **packet** | [`Packet`](Packet.md) | The packet recieved
+>
+>**Returns**: `True` if the packet got handled, otherwise `False`.
+>
+>**Example:**
+>```Python
+>class SubClient(aiotfm.Client):
+>	async def handle_packet(self, conn, packet):
+>		tmp = packet.copy()
+>		handled = await super().handle_packet(conn, packet)
+>		packet = tmp
+>
+>		if not handled:
+>			# Handle here the unhandled packets.
+>			pass
+>```
 
-Handles the known packets and dispatches events.
-Subclasses should handle only the unhandled packets from this method.
-
-**Example:**
-```Python
-class SubClient(aiotfm.Client):
-	async def handle_packet(self, conn, packet):
-		tmp = packet.copy()
-		handled = await super().handle_packet(conn, packet)
-		packet = tmp
-
-		if not handled:
-			# Handle here the unhandled packets.
-			pass
-```
-
-**Parameters**
-* **connection** `aiotfm.connection.Connection` the connection that received the packet.
-* **packet** [`Packet`](Packet.md) the packet.
-
-**Returns**
-True if the packet got handled, False otherwise.
-
+---
 
 ### _coroutine_ \_heartbeat_loop(self)
-This function is a *coroutine*.
+>This sends a packet every ten seconds to stay connected to the game.
 
-Send a packet every ten seconds to stay connected to the game.
+---
 
 ### event(self, coro)
 A decorator that registers an event.
