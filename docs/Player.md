@@ -27,7 +27,7 @@
 
 ---
 
-##Stats
+## Stats
 >**Represents the statistics of a player.**
 >
 >**Attributes:**
