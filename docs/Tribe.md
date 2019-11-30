@@ -34,6 +34,8 @@
 >| **rank** | [`Rank`](#rank) | The member's rank.
 >| **online** | `boolean`| Returns `True` if the player is currently online.
 
+---
+
 ## Rank
 >**This section represents the ranks in the [tribe](#tribe).**
 >
