@@ -11,8 +11,8 @@
 >| **name** | `string`| The tribe name.
 >| **welcomeMessage** | `string` | the tribe's greeting message.
 >| **mapcode** | `integer` | the tribehouse's mapcode.
->| **members** | `list` | The list of the [members](##member) in the tribe.
->| **ranks** | `list` | The list of the [ranks](##rank) in the tribe.
+>| **members** | `list` | The list of the [members](#member) in the tribe.
+>| **ranks** | `list` | The list of the [ranks](#rank) in the tribe.
 
 ---
 
@@ -23,7 +23,7 @@
 >
 >| Attribute | Type | Description 
 >| :-: | :-: | :--
->| **tribe** | [`Tribe`](##tribe) | The member's tribe.
+>| **tribe** | [`Tribe`](#tribe) | The member's tribe.
 >| **id** | `integer` | The player's unique id.
 >| **name** | `string` | Player name.
 >| **gender** | `integer` | Player's gender.
@@ -35,7 +35,7 @@
 >| **online** | `boolean`| Returns `True` if the player is currently online.
 
 ## Rank
->**This section represents the ranks in the [tribe](##tribe).**
+>**This section represents the ranks in the [tribe](#tribe).**
 >
 > **Attributes:**
 >
