@@ -31,7 +31,7 @@
 >| **rank_id** | `integer` | The id of the member's rank.
 >| **game_id** | `integer` | The game id the player is (currently) playing (if online).
 >| **room** | `string` | The room where the player currently is (if online).
->| **rank** | [`Rank`](##rank) | The member's rank.
+>| **rank** | [`Rank`](#rank) | The member's rank.
 >| **online** | `boolean`| Returns `True` if the player is currently online.
 
 ## Rank
