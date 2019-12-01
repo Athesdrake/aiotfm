@@ -1,38 +1,44 @@
-# Profile
+# Profile Documentation
 
-Represents a player's profile.
+## Profile
+>**This represents a player's profile.**
+>
+>**Attributes:**
+>
+>|Attribute|Type|Description
+>|:-:|:-:|:--
+>|**username**| `string` | The player's username.
+>|**id** | `integer` | The player's id.
+>|**registration_date**| `integer`| The registration timestamp of the player.
+>|**privLevel**| `integer`| The privilege level of the player.
+>|**gender**| `integer`| The player's gender.
+>|**tribe**| `string` | The player's tribe. Can be `None`.
+>|**soulmate**| `string`| Name of the player's soulmate. Can be `None`.
+>|**title**| `integer` | Player's current title.
+>|**titles**| `set` | The list of the unlocked titles.
+>|**titles_stars**| `dict` | A dictionary where the number of stars the player's title has is stored.
+>|**look**| `string` | The player's look.
+>|**level** | `integer` | The player's shaman level.
+>|**badges** | `dict` | All the badges unlocked by the player with their numbers.
+>|**stats** | [`stats`](#stats) | The player's staistics.
+>|**equippedOrb** | `integer` | The orb currently equipped by the player.
+>|**orbs** | `set` | The list of orbs the player currently has.
+>|**adventurePoints** | `integer` | Player's adventure points.
 
-## Attributes
+---
 
-username `str` the player's username.
-id `int` the player's id.
-registration_date `int` the registration timestamp of the player.
-privLevel `int` the privilege level of the player.
-gender `int` player's gender.
-tribe `str` player's tribe. Can be `None`.
-soulmate `str` player's soulmate. Can be `None`.
-title `int` the title above the player's head.
-titles `set` the list of the unlocked titles.
-titles_stars `dict` a dictionary where are stored the number of stars a title has.
-look `str` the player's look.
-level `int` the player's shaman level.
-badges `dict` all badges unlocked by the player and their number.
-stats [`Stats`](#stats) the player's stats.
-equippedOrb `int` the equipped orb of the player.
-orbs `set` the list of unlocked orbs.
-adventurePoints `int` number of adventure points the player has.
-
-# Stats
-
-Represents the statistics of a player.
-
-## Attributes
-
-normalModeSaves `int` number of shaman saves in normal mode.
-hardModeSaves `int`  number of shaman saves in hard mode.
-divineModeSaves `int` number of shaman saves in divine mode.
-shamanCheeses `int` number of cheese personally gathered.
-firsts `int` number of cheese gathered first.
-gatheredCheeses `int` total number of gathered cheeses.
-bootcamps `int` number of bootcamp.
-modeStats `list` a list of tuples that represents the stats in different mode. (id, progress, progressLimit, imageId)
+## Stats
+>**Represents the statistics of a player.**
+>
+>**Attributes:**
+>
+>|Attribute|Type|Description
+>|:-:|:-:|:--
+>|**normalModeSaves**|`integer`| Number of saves in normal mode.
+>|**hardModeSaves** | `integer` |  Number of  saves in hard mode.
+>|**divineModeSaves** | `integer`| Number of  saves in divine mode.
+>|**shamanCheeses**| `integer`| Number of cheese gathered as a shaman.
+>|**firsts** | `integer` | Number of cheese gathered first.
+>|**gatheredCheeses**| `integer` | Total amount of gathered cheese.
+>|**bootcamps**| `integer` | Number of bootcamp maps completed.
+>|**modeStats**| `list` | A list of tuples that represents the statistics in a different mode. (id, progress, progressLimit, imageId)

@@ -1,53 +1,64 @@
-# Tribe
+# Tribe Documentation
 
-Represent a tribe.
+## Tribe 
+>**This section represents the tribe.** 
+>
+>**Attributes:**
+>
+>| Attribute | Type | Description 
+>| :-: | :-: | :--
+>| **id** | `integer` | The tribe's id
+>| **name** | `string`| The tribe name.
+>| **welcomeMessage** | `string` | the tribe's greeting message.
+>| **mapcode** | `integer` | the tribehouse's mapcode.
+>| **members** | `list` | The list of the [members](#member) in the tribe.
+>| **ranks** | `list` | The list of the [ranks](#rank) in the tribe.
 
-## Attributes
+---
 
-id `int` the tribe's id.
-name `str` the tribe's name.
-welcomeMessage `str` the tribe's welcome message.
-mapcode `int` the tribehouse's mapcode.
-members `list` the list of the [members](#member) in the tribe.
-ranks `list` the list of the [ranks](#rank) in the tribe.
+## Member
+>**This section represents the tribe member(s).**
+>
+>**Attributes:**
+>
+>| Attribute | Type | Description 
+>| :-: | :-: | :--
+>| **tribe** | [`Tribe`](#tribe) | The member's tribe.
+>| **id** | `integer` | The player's unique id.
+>| **name** | `string` | Player name.
+>| **gender** | `integer` | Player's gender.
+>| **lastConnection** | `Date` | The date the player was last seen.
+>| **rank_id** | `integer` | The id of the member's rank.
+>| **game_id** | `integer` | The game id the player is (currently) playing (if online).
+>| **room** | `string` | The room where the player currently is (if online).
+>| **rank** | [`Rank`](#rank) | The member's rank.
+>| **online** | `boolean`| Returns `True` if the player is currently online.
 
-# Member
+---
 
-Represent a tribe's member.
-
-## Attributes
-
-tribe [`Tribe`](#tribe) the member's tribe.
-id `int` the player's id of the member.
-name `str` the username of the member.
-gender `int` the member's gender.
-lastConnection :class`Date` the last connection of the member.
-rank_id `int` the rank's id of the member.
-game_id `int` the game's id the player is playing.
-room `str` the room where the player is.
-rank [`Rank`](#rank) the member's rank.
-online `bool` return True if the member is online.
-
-# Rank
-
-Represent a [tribe](#tribe)'s rank.
-
-## Attributes
-
-id `int` the rank's id.
-name `str` the rank's name.
-perm `int` the rank's permissions.
-
-## Permissions
-
-isLeader `bool`
-canChangeGreetingMessage `bool`
-canEditRanks `bool`
-canChangeMembersRanks `bool`
-canInvite `bool`
-canExclude `bool`
-canPlayMusic `bool`
-canChangeTribeHouseMap `bool`
-canLoadMap `bool`
-canLoadLua `bool`
-canManageForum `bool`
+## Rank
+>**This section represents the ranks in the [tribe](#tribe).**
+>
+> **Attributes:**
+>
+>| Attribute | Type | Description 
+>| :-: | :-: | :--
+>| **id** | `integer` | The rank id.
+>| **name** | `string` | The rank name.
+>| **perm** | `int` | The rank permissions.
+>
+>**Permissions:**
+>
+>|Permission|Type
+>|:-:|:-:
+>|**isLeader** | `boolean`
+>|**canChangeGreetingMessage** | `boolean`
+>|**canEditRanks** | `boolean`
+>|**canChangeMembersRanks** | `boolean`
+>|**canInvite** | `boolean`
+>|**canExclude** | `boolean`
+>|**canPlayMusic** | `boolean`
+>|**canChangeTribeHouseMap** | `boolean`
+>|**canLoadMap** | `boolean`
+>|**canLoadLua** | `boolean`
+>**canManageForum**| `boolean`
