@@ -50,7 +50,7 @@ class Room:
 		:return: `Iterable` The filtered players."""
 		return [p for p in self.players if predicate(p)][:max]
 
-	def get_player(self, **kwargs):
+	def get_player(self, default=None, **kwargs):
 		"""Gets one player in the room with an identifier.
 
 		:param kwargs: Which identifier to use. Can be either name, username, id or pid.
@@ -77,3 +77,4 @@ class Room:
 		result = self.get_players(filter)
 		if len(result):
 			return result[0]
+		return default
