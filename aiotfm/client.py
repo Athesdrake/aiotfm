@@ -233,15 +233,26 @@ class Client:
 						break
 
 		elif CCC==(31, 7): # Trade start
-			player = self.room.get_player(pid=packet.read32())
-			player.trade.on_invite = False
-			player.trade.alive = True
+			pid = packet.read32()
+			player = self.room.get_player(pid=pid)
+			if player is None:
+				for t in self.trades:
+					if t._other.pid==pid:
+						trade = t
+						break
+				else:
+					raise AiotfmException(f'Cannot find the trade from {pid = }.')
+			else:
+				trade = player.trade
+
+			trade.on_invite = False
+			trade.alive = True
 
 			if self.trade is not None:
 				trade = self.trade
 				self.trade._close()
 				self.dispatch('trade_close', trade)
-			self.trade = player.trade
+			self.trade = trade
 			self.dispatch('trade_start', self.trade)
 
 		elif CCC==(31, 8): # Trade items
