@@ -113,7 +113,12 @@ class Client:
 			username = packet.readUTF()
 			commu = packet.read8()
 			message = packet.readUTF()
-			self.dispatch('room_message', Message(Player(username, pid=player_id), message, commu, self))
+			player = self.room.get_player(pid=pid)
+
+			if player is None:
+				player = Player(username, pid=pid)
+
+			self.dispatch('room_message', Message(player, message, commu, self))
 
 		elif CCC==(6, 20): # Server message
 			packet.readBool() # if False then the message will appear in the #Server channel
@@ -342,6 +347,8 @@ class Client:
 
 			elif TC==66: # Whisper
 				author, commu, receiver, message = Player(packet.readUTF()), packet.read32(), Player(packet.readUTF()), packet.readUTF()
+				author = self.room.get_player(name=author, default=author)
+				receiver = self.room.get_player(name=receiver, default=receiver)
 				self.dispatch('whisper', Whisper(author, commu, receiver, message, self))
 
 			elif TC==88: # tribe member connected
