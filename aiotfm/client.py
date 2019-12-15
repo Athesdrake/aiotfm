@@ -113,10 +113,10 @@ class Client:
 			username = packet.readUTF()
 			commu = packet.read8()
 			message = packet.readUTF()
-			player = self.room.get_player(pid=pid)
+			player = self.room.get_player(pid=player_id)
 
 			if player is None:
-				player = Player(username, pid=pid)
+				player = Player(username, pid=player_id)
 
 			self.dispatch('room_message', Message(player, message, commu, self))
 
