@@ -526,7 +526,7 @@ class Client:
 
 		self._waiters[event].append((condition, future, stopPropagation))
 
-		return asyncio.wait_for(future, timeout, loop=self.loop)
+		return asyncio.wait_for(future, timeout)
 
 	async def _run_event(self, coro, event_name, *args, **kwargs):
 		"""|coro|
