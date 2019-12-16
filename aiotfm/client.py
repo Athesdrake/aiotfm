@@ -235,7 +235,7 @@ class Client:
 		elif CCC==(31, 7): # Trade start
 			pid = packet.read32()
 			player = self.room.get_player(pid=pid)
-			if player is None:
+			if player is None or player.trade is None:
 				for t in self.trades:
 					if t._other.pid==pid:
 						trade = t
