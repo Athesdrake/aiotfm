@@ -25,7 +25,7 @@ class Socket:
 		Receive up to size bytes from the socket."""
 		try:
 			return await self._reader.readexactly(size)
-		except asyncio.streams.IncompleteReadError as e:
+		except asyncio.IncompleteReadError as e:
 			if e.partial==b'':
 				raise EOFError() # EOF found
 			else:
