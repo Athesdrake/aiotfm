@@ -235,30 +235,53 @@ class Trade:
 			raise TypeError("Can not accept an already accepted trade.")
 		self.accepted = True
 		await self._client.main.send(Packet.new(31, 5).writeString(self._other.username))
-
-	async def addItem(self, id, ten=False):
+	async def addItem(self, id, quantity):
 		"""|coro|
 		Adds an item to the trade.
 
 		:param id: :class:`int` The item id.
-		:param ten: Optional[:class:`bool`] Whether to add ten items or only one."""
 		if not self.alive:
 			raise TypeError("Can not add items to a dead trade.")
 		if self.on_invite:
 			raise TypeError("Can not add items to a trade when it is on the invite state.")
-		await self._client.main.send(Packet.new(31, 8).write16(id).writeBool(True).writeBool(ten))
+		:param quantity: :class:`int` The quanty of item to add."""
+		quantity = min(max(quantity, 0), 200)
+		packet = Packet.new(31, 8).write16(id).writeBool(True).buffer
 
-	async def removeItem(self, id, ten=False):
+		ten = packet + b'\x01'
+		for i in range(quantity//10):
+			await self.client.main.send(Packet(ten))
+			await asyncio.sleep(.05)
+
+		unit = packet + b'\x00'
+		for i in range(quantity%10):
+			await self.client.main.send(Packet(unit))
+			await asyncio.sleep(.05)
+
+	async def removeItem(self, id, quantity):
 		"""|coro|
 		Removes an item from the trade.
 
 		:param id: :class:`int` The item id.
-		:param ten: Optional[:class:`bool`] Whether to remove ten items or only one."""
 		if not self.alive:
 			raise TypeError("Can not remove items from a dead trade.")
 		if self.on_invite:
 			raise TypeError("Can not remove items from a trade when it is on the invite state.")
 		await self._client.main.send(Packet.new(31, 8).write16(id).writeBool(False).writeBool(ten))
+		:param quantity: :class:`int` The quanty of item to remove."""
+
+		quantity = min(max(quantity, 0), 200)
+		packet = Packet.new(31, 8).write16(id).writeBool(False).buffer
+
+		ten = packet + b'\x01'
+		for i in range(quantity//10):
+			await self.client.main.send(Packet(ten))
+			await asyncio.sleep(.05)
+
+		unit = packet + b'\x00'
+		for i in range(quantity%10):
+			await self.client.main.send(Packet(unit))
+			await asyncio.sleep(.05)
 
 	async def lock(self):
 		"""|coro|
