@@ -1,7 +1,11 @@
+import asyncio
+
 from functools import cmp_to_key
 
 from aiotfm.packet import Packet
 from aiotfm.player import Player
+from aiotfm.utils import TradeState
+from aiotfm.errors import TradeOnWrongState
 
 class InventoryItem:
 	"""Represents an inventory item.
@@ -39,6 +43,9 @@ class InventoryItem:
 	def __repr__(self):
 		return "<InventoryItem id={} quantity={}>".format(self.id, self.quantity)
 
+	def __eq__(self, other):
+		return self.id == other.id
+
 	@property
 	def image_url(self):
 		return 'https://www.transformice.com/images/x_transformice/x_inventaire/{.img_id}.jpg'.format(self)
@@ -75,6 +82,7 @@ class InventoryItem:
 		if self.inventory is None or self.inventory.client is None:
 			raise TypeError("InventoryItem doesn't have the inventory variable or Inventory doesn't have the client variable.")
 		await self.inventory.client.main.send(Packet.new(31, 3).write16(self.id))
+
 
 class Inventory:
 	"""Represents the bot's inventory.
@@ -122,7 +130,7 @@ class Inventory:
 	def get(self, id):
 		"""Gets an item from this :class:`aiotfm.inventory.Inventory`.
 		Shorthand for :class:`aiotfm.inventory.Inventory`.items.get"""
-		return self.items.get(id)
+		return self.items.get(id, InventoryItem(id))
 
 	def sort(self):
 		"""Sort the inventory the same way the client does.
@@ -139,112 +147,114 @@ class Inventory:
 
 		return sorted(iter(self), key=cmp_to_key(cmp))
 
+
+class TradeContainer:
+	def __init__(self, trade):
+		self.trade = trade
+		self._content = []
+
+	def get(self, *, id=None, slot=None):
+		if id is not None:
+			result = [item for item in self._content if item.id == id]
+			if len(result):
+				return result[0]
+		elif slot is not None and 0<=slot<len(self._content):
+			return self._content[slot]
+
+	def add(self, item):
+		if item in self._content:
+			self.get(id=item.id).quantity += item.quantity
+		elif len(self._content) < 5:
+			self._content.append(item)
+
+
 class Trade:
 	"""Represents a trade that the bot is participating (not started, in progress or ended).
 
 	Attributes
 	----------
-	traders: `list`
-		The users that are participating on the trade. One of them is an instance of :class:`aiotfm.client.Client` and the other one of :class:`aiotfm.player.Player`.
-		The first item is always who invited to trade.
-	locked_me: `bool`
-		Whether the bot has locked (confirmed) the trade.
-	locked_other: `bool`
-		Whether the other trader (not the bot itself) has locked (confirmed) the trade.
-	items_me: `dict`
-		A dict containing all the items that the bot offers. It is a dict where the key is the item id and the value is the quantity.
-	items_other: `dict`
-		A dict containing all the items that the other trader offers. It is a dict where the key is the item id and the value is the quantity.
-	on_invite: `bool`
-		Whether the trade is still on the invite screen.
-	accepted: `bool`
-		Whether the trade has been accepted (started).
-	alive: `bool`
-		Whether the trade didn't end yet (even if it is on the invite screen).
-	canceled: `bool`
-		Whether the trade was canceled by the bot."""
-	def __init__(self, host, destiny):
-		self.traders = [host, destiny]
-		self.locked_me = False
-		self.locked_other = False
+	client: :class:`aiotfm.Client`
+		The reference to the client involved in the trade.
+	trader: `str`
+		The player the client is trading with.
+	locked: List[`bool`]
+		A list of two `bool` describing the locked state of each party.
+	imports: :class:`aiotfm.inventory.TradeContainer`
+		The container of the items you will receive if the trade succeed.
+	exports: :class:`aiotfm.inventory.TradeContainer`
+		The container of the items you will give if the trade succeed.
+	state: :class:`aiotfm.utils.TradeState`
+		The current state of the trade.
+			ON_INVITE: an invitation has been received from/sent to the other party.
+			ACCEPTING: the client accepted and is waiting for the other party to be ready.
+			TRADING:   the only state of the trade you are able to add items.
+			CANCELLED: the trade has been cancelled by one of the parts.
+			SUCCESS:   the trade finished successfully."""
+	def __init__(self, client, trader):
+		self.client = client
+		self.trader = trader
+		self.locked = [False, False] # 0: client, 1: trader
 
-		self.items_me = {}
-		self.items_other = {}
+		self.imports = TradeContainer(self)
+		self.exports = TradeContainer(self)
 
-		self.on_invite = False
-		self.accepted = False
-		self.alive = False
-		self.canceled = False
+		self.state = TradeState.ON_INVITE
 
-		self._starter = None
-		self._client, self._other = None, None
-		for trader in self.traders:
-			if isinstance(trader, Player): # If we import client.py it will be an infinite import!
-				if self._client is None:
-					self._other_index = 0
-				else:
-					self._other_index = 1
-				self._other = trader
-			else:
-				self._client = trader
-
-		if self._client is None:
-			raise TypeError("Either host or destiny trader must be an instance of Client.")
-		if self._other is None:
-			raise TypeError("Either host or destiny trader must be an instance of Player.")
-
-		self._update_player(self._other)
+		if isinstance(trader, Player):
+			if self.trader.isGuest():
+				raise TypeError("You can not trade with a guest.")
+			if self.trader == self.client.username:
+				raise TypeError("You can not trade with yourself.")
+			if self.trader.pid == 0:
+				raise TypeError("You can not trade with a player having the same IP.")
+			self.trader = self.trader.username
+		elif isinstance(trader, str):
+			if '#' not in trader:
+				raise TypeError("The player tag is needed to begin a trade.")
+			if trader.startswith('*'):
+				raise TypeError("You can not trade with a guest.")
 
 	def __repr__(self):
-		return "<Trade on_invite={} accepted={} alive={} canceled={} locked_me={} locked_other={} traders={}>".format(
-			self.on_invite, self.accepted, self.alive, self.canceled, self.locked_me, self.locked_other, self.traders
-		)
+		return "<Trade state={} locked=[client:{}, trader:{}] traders={}>".format(TradeState[self.state], *self.locked, *self.traders)
 
-	def _update_player(self, player):
-		self.traders[self._other_index] = self._other = player
-		if player.trade != self:
-			player.trade = self
+	@property
+	def closed(self):
+		"""Returns True if the trade is closed."""
+		return self.state in (TradeState.SUCCESS, TradeState.CANCELLED)
 
-	def _close(self):
-		self.alive = False
-		if self._client.trade == self:
-			self._client.trade = None
-		if self._other.trade == self:
-			self._other.trade = None
-		if self in self._client.trades:
-			self._client.trades.remove(self)
+	def _close(self, succeed=False):
+		self.state = TradeState.SUCCESS if succeed else TradeState.CANCELLED
+		if self in self.client.trades:
+			self.client.trades.remove(self)
 
 	async def cancel(self):
 		"""|coro|
 		Cancels the trade."""
-		if not self.alive:
-			raise TypeError("Can not cancel a dead trade.")
+		if self.state != TradeState.TRADING:
+			raise TradeOnWrongState('cancel', TradeState[self.state])
+
 		self._close()
-		self.canceled = True
-		await self._client.main.send(Packet.new(31, 6).writeString(self._other.username).write8(2))
-		self._client.dispatch('trade_close', self)
+		await self.client.main.send(Packet.new(31, 6).writeString(self.trader).write8(2))
+		self.client.dispatch('trade_close', self) # TODO: check if the server send back a close trade packet
 
 	async def accept(self):
 		"""|coro|
 		Accepts the trade."""
-		if not self.alive:
-			raise TypeError("Can not accept a dead trade.")
-		if not self.on_invite:
-			raise TypeError("Can not accept a trade when it is not on the invite state.")
-		if self.accepted:
-			raise TypeError("Can not accept an already accepted trade.")
-		self.accepted = True
-		await self._client.main.send(Packet.new(31, 5).writeString(self._other.username))
+		if self.state != TradeState.ON_INVITE:
+			raise TradeOnWrongState('accept', TradeState[self.state])
+
+		self.state = TradeState.ACCEPTING
+		await self.client.main.send(Packet.new(31, 5).writeString(self.trader))
+
 	async def addItem(self, id, quantity):
 		"""|coro|
 		Adds an item to the trade.
 
 		:param id: :class:`int` The item id.
-		if not self.alive:
-			raise TypeError("Can not add items to a dead trade.")
-		if self.on_invite:
-			raise TypeError("Can not add items to a trade when it is on the invite state.")
 		:param quantity: :class:`int` The quanty of item to add."""
+		if self.state != TradeState.TRADING:
+			raise TradeOnWrongState('addItem', TradeState[self.state])
+
 		quantity = min(max(quantity, 0), 200)
 		packet = Packet.new(31, 8).write16(id).writeBool(True).buffer
 
@@ -263,12 +273,9 @@ class Trade:
 		Removes an item from the trade.
 
 		:param id: :class:`int` The item id.
-		if not self.alive:
-			raise TypeError("Can not remove items from a dead trade.")
-		if self.on_invite:
-			raise TypeError("Can not remove items from a trade when it is on the invite state.")
-		await self._client.main.send(Packet.new(31, 8).write16(id).writeBool(False).writeBool(ten))
 		:param quantity: :class:`int` The quanty of item to remove."""
+		if self.state != TradeState.TRADING:
+			raise TradeOnWrongState('removeItem', TradeState[self.state])
 
 		quantity = min(max(quantity, 0), 200)
 		packet = Packet.new(31, 8).write16(id).writeBool(False).buffer
@@ -286,21 +293,19 @@ class Trade:
 	async def lock(self):
 		"""|coro|
 		Locks (confirms) the trade."""
-		if not self.alive:
-			raise TypeError("Can not lock a dead trade.")
-		if self.on_invite:
-			raise TypeError("Can not lock a trade when it is on the invite state.")
-		if self.locked_me:
-			raise TypeError("Can not lock a trade that is already locked by me.")
-		await self._client.main.send(Packet.new(31, 9).writeBool(True))
+		if self.state != TradeState.TRADING:
+			raise TradeOnWrongState('lock', TradeState[self.state])
+		if self.locked[0]:
+			raise TypeError("Can not lock a trade that is already locked by the client.")
+
+		await self.client.main.send(Packet.new(31, 9).writeBool(True))
 
 	async def unlock(self):
 		"""|coro|
 		Unlocks (cancels the confirmation) the trade."""
-		if not self.alive:
-			raise TypeError("Can not lock a dead trade.")
-		if self.on_invite:
-			raise TypeError("Can not lock a trade when it is on the invite state.")
-		if not self.locked_me:
-			raise TypeError("Can not lock a trade that is already unlocked by me.")
-		await self._client.main.send(Packet.new(31, 9).writeBool(False))
+		if self.state != TradeState.TRADING:
+			raise TradeOnWrongState('lock', TradeState[self.state])
+		if not self.locked[0]:
+			raise TypeError("Can not unlock a trade that is not locked by the client.")
+
+		await self.client.main.send(Packet.new(31, 9).writeBool(False))

@@ -90,3 +90,11 @@ class commu(Enum):
 		if isinstance(key, int):
 			return 'int'
 		return 0
+
+
+class TradeState(Enum):
+	ON_INVITE = 0
+	TRADING = 1
+	ACCEPTING = 2
+	CANCELLED = 3
+	SUCCESS = 4
