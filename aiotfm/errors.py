@@ -85,3 +85,5 @@ class CommunityPlatformError(AiotfmException):
 	"""Exception thrown when the community platform send an error code."""
 	def __init__(self, category, code):
 		super().__init__('Internal error: {}-{}'.format(category, code))
+		self.category = category
+		self.code = code
