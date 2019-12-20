@@ -153,19 +153,24 @@ class TradeContainer:
 		self.trade = trade
 		self._content = []
 
-	def get(self, *, id=None, slot=None):
-		if id is not None:
-			result = [item for item in self._content if item.id == id]
-			if len(result):
-				return result[0]
-		elif slot is not None and 0<=slot<len(self._content):
-			return self._content[slot]
+	def get(self, id, default=0):
+		for item in self._content:
+			if item.id == id:
+				return item.quantity
+		return default
 
-	def add(self, item):
-		if item in self._content:
-			self.get(id=item.id).quantity += item.quantity
-		elif len(self._content) < 5:
-			self._content.append(item)
+	def getSlot(self, index):
+		return self._content[index]
+
+	def add(self, id, quantity):
+		for item in self._content:
+			if item.id == id:
+				item.quantity += quantity
+				if item.quantity == 0:
+					self._content.remove(item)
+				break
+		else:
+			self._content.append(InventoryItem(id, quantity=quantity))
 
 
 class Trade:
