@@ -192,8 +192,8 @@ class Trade:
 		The current state of the trade.
 			ON_INVITE: an invitation has been received from/sent to the other party.
 			ACCEPTING: the client accepted and is waiting for the other party to be ready.
-			TRADING:   the only state of the trade you are able to add items.
-			CANCELLED: the trade has been cancelled by one of the parts.
+			TRADING:   the only state of the trade where you are able to add items.
+			CANCELLED: the trade has been cancelled by one of the parties.
 			SUCCESS:   the trade finished successfully."""
 	def __init__(self, client, trader):
 		self.client = client

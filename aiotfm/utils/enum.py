@@ -94,7 +94,7 @@ class commu(Enum):
 
 class TradeState(Enum):
 	ON_INVITE = 0
-	TRADING = 1
-	ACCEPTING = 2
+	ACCEPTING = 1
+	TRADING = 2
 	CANCELLED = 3
 	SUCCESS = 4
