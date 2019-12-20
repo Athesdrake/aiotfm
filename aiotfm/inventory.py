@@ -199,33 +199,47 @@ class Trade:
 		self.exports = TradeContainer(self)
 
 		self.state = TradeState.ON_INVITE
+		self.pid = -1
 
 		if isinstance(trader, Player):
-			if self.trader.isGuest():
+			if self.trader.isGuest:
 				raise TypeError("You can not trade with a guest.")
 			if self.trader == self.client.username:
 				raise TypeError("You can not trade with yourself.")
 			if self.trader.pid == 0:
 				raise TypeError("You can not trade with a player having the same IP.")
 			self.trader = self.trader.username
+			self.pid = trader.pid
 		elif isinstance(trader, str):
 			if '#' not in trader:
 				raise TypeError("The player tag is needed to begin a trade.")
 			if trader.startswith('*'):
 				raise TypeError("You can not trade with a guest.")
+		else:
+			raise TypeError(f"Trade excepted 'Player' or 'str' type, got '{type(trader)}")
 
 	def __repr__(self):
 		return "<Trade state={} locked=[client:{}, trader:{}] traders={}>".format(TradeState[self.state], *self.locked, *self.traders)
+
+	def __eq__(self, other):
+		if self.pid == -1 or other.pid == -1:
+			return self.trader.lower() == other.trader.lower()
+		return self.pid == other.pid
 
 	@property
 	def closed(self):
 		"""Returns True if the trade is closed."""
 		return self.state in (TradeState.SUCCESS, TradeState.CANCELLED)
 
+	def _start(self, pid):
+		self.state = TradeState.TRADING
+		self.client.trade = self
+		self.pid = pid
+
 	def _close(self, succeed=False):
 		self.state = TradeState.SUCCESS if succeed else TradeState.CANCELLED
-		if self in self.client.trades:
-			self.client.trades.remove(self)
+		if self.client.trades.pop(self.pid) is None:
+			self.client.pending_trades.remove(self)
 
 	async def cancel(self):
 		"""|coro|
@@ -251,7 +265,7 @@ class Trade:
 		Adds an item to the trade.
 
 		:param id: :class:`int` The item id.
-		:param quantity: :class:`int` The quanty of item to add."""
+		:param quantity: :class:`int` The quantity of item to add."""
 		if self.state != TradeState.TRADING:
 			raise TradeOnWrongState('addItem', TradeState[self.state])
 
@@ -273,7 +287,7 @@ class Trade:
 		Removes an item from the trade.
 
 		:param id: :class:`int` The item id.
-		:param quantity: :class:`int` The quanty of item to remove."""
+		:param quantity: :class:`int` The quantity of item to remove."""
 		if self.state != TradeState.TRADING:
 			raise TradeOnWrongState('removeItem', TradeState[self.state])
 

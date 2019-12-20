@@ -56,7 +56,8 @@ class Client:
 
 		self.room = None
 		self.trade = None
-		self.trades = []
+		self.trades = {}
+		self.pending_trades = [] # Trades without pid
 		self.inventory = None
 
 		self.username = None
@@ -207,85 +208,82 @@ class Client:
 				self.dispatch('new_item', item)
 
 		elif CCC==(31, 5): # Trade invite
-			player = self.room.get_player(pid=packet.read32())
-			trade = Trade(player, self)
-			self.trades.append(trade)
-			trade.alive = True
-			trade.on_invite = True
-			self.dispatch('trade_invite', trade)
+			pid = packet.read32()
+
+			self.trades[pid] = Trade(self, self.room.get_player(pid=pid))
+			self.dispatch('trade_invite', self.trades[pid])
 
 		elif CCC==(31, 6): # Trade error
-			name = packet.readUTF()
+			name = packet.readUTF().lower()
 			error = packet.read8()
 
-			if name == "":
-				if self.trade._other.username == name:
-					self.trade._close()
-					self.dispatch('trade_error', self.trade, error)
-					self.dispatch('trade_close', self.trade)
+			messages = [
+				'The player is already trading',
+				'The player declined your trade invite',
+				'The trade has been cancelled by one of the party',
+				'The player is not in the room',
+				'Trade succeed',
+				'You cannot trade with the shaman',
+				'The player is not connected',
+				'Internal error'
+			]
 
+			if name == self.username.lower():
+				trade = self.trade
 			else:
-				for trade in self.trades:
-					if trade._other.username == name:
-						trade._close()
-						self.dispatch('trade_error', trade, error)
-						self.dispatch('trade_close', trade)
+				for t in self.trades.values() + self.pending_trades:
+					if t.trader.lower() == name:
+						trade = t
 						break
+
+			trade._close()
+			self.dispatch('trade_error', trade, messages[error], error)
+			self.dispatch('trade_close', trade, False)
 
 		elif CCC==(31, 7): # Trade start
 			pid = packet.read32()
-			player = self.room.get_player(pid=pid)
-			if player is None or player.trade is None:
-				for t in self.trades:
-					if t._other.pid==pid:
-						trade = t
+			trade = self.trades.get(pid)
+			if trade is None:
+				player = self.room.get_player(pid=pid)
+				if player is None:
+					raise AiotfmException(f'Cannot find the trade from pid {pid}.')
+
+				for t in self.pending_trades:
+					if t.trader == player:
+						self.pending_trades.remove(t)
+						self.trades[pid] = trade = t
 						break
 				else:
-					raise AiotfmException(f'Cannot find the trade from {pid = }.')
-			else:
-				trade = player.trade
+					raise AiotfmException(f'Cannot find the trade from pid {pid}.')
 
-			trade.on_invite = False
-			trade.alive = True
-
-			if self.trade is not None:
-				trade = self.trade
-				self.trade._close()
-				self.dispatch('trade_close', trade)
-			self.trade = trade
-			self.dispatch('trade_start', self.trade)
+			trade._start(pid)
+			self.dispatch('trade_start', trade)
 
 		elif CCC==(31, 8): # Trade items
-			me = packet.readBool()
+			export = packet.readBool()
 			id = packet.read16()
-			adding = packet.readBool()
-			quantity = packet.read8()
-			quantity = (1 if adding else -1) * quantity
+			quantity = (1 if packet.readBool() else -1) * packet.read8()
 
-			items = self.trade.items_me if me else self.trade.items_other
-			if id in items:
-				items[id] += quantity
-			else:
-				items[id] = quantity
-			if items[id] == 0:
-				del items[id]
+			items = self.trade.exports if export else self.trade.imports
+			items.add(id, quantity)
 
-			self.trade.locked_me = False
-			self.trade.locked_other = False
-
-			self.dispatch('trade_item_change', self.trade, self if me else self.trade._other, id, quantity, items[id] if id in items else 0)
+			self.trade.locked = [False, False]
+			self.dispatch('trade_item_change', self if export else self.trade.trader, id, quantity, items.get(id))
 
 		elif CCC==(31, 9): # Trade lock
-			if packet.readBool():
-				self.trade.locked_me = packet.readBool()
-				self.dispatch('trade_lock', self.trade, self, self.trade.locked_me)
+			index = packet.read8()
+			locked = packet.readBool()
+			if index > 1:
+				self.trade.locked = [locked, locked]
 			else:
-				self.trade.locked_other = packet.readBool()
-				self.dispatch('trade_lock', self.trade, self.trade._other, self.trade.locked_other)
+				self.trade.locked[index] = locked
+
+			self.dispatch('trade_lock', index, locked)
 
 		elif CCC==(31, 10): # Trade complete
 			trade = self.trade
-			self.trade._close()
+			self.trade = False
+			self.trade._close(success=True)
 			self.dispatch('trade_complete', trade)
 
 		elif CCC==(44, 1): # Bulle switching
@@ -895,10 +893,14 @@ class Client:
 
 		:param player: :class:`aiotfm.player.Player` the player to trade with.
 		:return: :class:`aiotfm.inventory.Trade` the resulting trade"""
+		if player.pid == -1:
+			player = self.room.get_player(username=player.username)
+			if player is None:
+				raise AiotfmException("The player must be in your room to start a trade.")
+
 		trade = Trade(self, player)
-		self.trades.append(trade)
-		trade.alive = True
-		trade.on_invite = True
+
+		self.trades[player.pid] = trade
 		await trade.accept()
 		return trade
 
