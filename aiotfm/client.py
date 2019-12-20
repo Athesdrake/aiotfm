@@ -274,7 +274,7 @@ class Client:
 
 		elif CCC==(31, 10): # Trade complete
 			trade = self.trade
-			self.trade._close(success=True)
+			self.trade._close(succeed=True)
 
 		elif CCC==(44, 1): # Bulle switching
 			bulle_id = packet.read32()
