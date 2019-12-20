@@ -224,7 +224,7 @@ class Trade:
 			raise TypeError(f"Trade excepted 'Player' or 'str' type, got '{type(trader)}")
 
 	def __repr__(self):
-		return "<Trade state={} locked=[client:{}, trader:{}] traders={}>".format(TradeState[self.state], *self.locked, *self.traders)
+		return "<Trade state={} locked=[client:{}, trader:{}] trader={} pid={}>".format(TradeState[self.state], *self.locked, self.trader, self.pid)
 
 	def __eq__(self, other):
 		if self.pid == -1 or other.pid == -1:
