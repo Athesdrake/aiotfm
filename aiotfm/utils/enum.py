@@ -98,3 +98,13 @@ class TradeState(Enum):
 	TRADING = 2
 	CANCELLED = 3
 	SUCCESS = 4
+
+class TradeError(Enum):
+	ALREADY_TRADING = 0
+	INVITE_DECLINED = 1
+	CANCELLED = 2
+	SAME_ROOM = 3
+	SUCCEED = 4
+	SHAMAN = 5
+	NOT_CONNECTED = 6
+	INTERNAL = 7
