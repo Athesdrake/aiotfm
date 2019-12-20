@@ -78,9 +78,9 @@ class Bot(aiotfm.Client):
 			name = msg.author if len(args)<1 else args[0]
 			profile = await self.getProfile(name)
 			if profile is None:
-				await self.reply("The player doesn't exists or is'nt connected.")
+				await msg.reply("The player doesn't exists or is'nt connected.")
 			else:
-				await self.reply(f"{profile.username} has {profile.stats.firsts} firsts.")
+				await msg.reply(f"{profile.username} has {profile.stats.firsts} firsts.")
 
 
 if __name__ == '__main__':
