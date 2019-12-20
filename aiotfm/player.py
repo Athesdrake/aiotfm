@@ -80,7 +80,7 @@ class Player:
 
 	@property
 	def isGuest(self):
-		return self.name[0]=="*"
+		return self.username.startswith('*')
 
 class Profile:
 	"""Represents a player's profile.
