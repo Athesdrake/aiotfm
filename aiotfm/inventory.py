@@ -243,7 +243,7 @@ class Trade:
 
 	def _close(self, succeed=False):
 		self.state = TradeState.SUCCESS if succeed else TradeState.CANCELLED
-		if self.client.trades.pop(self.pid) is None:
+		if self.client.trades.pop(self.pid, None) is None:
 			self.client.pending_trades.remove(self)
 
 	async def cancel(self):
