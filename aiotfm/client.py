@@ -257,7 +257,7 @@ class Client:
 					raise AiotfmException(f'Cannot find the trade from pid {pid}.')
 
 			trade._start(pid)
-			self.dispatch('trade_start', trade)
+			self.dispatch('trade_start')
 
 		elif CCC==(31, 8): # Trade items
 			export = packet.readBool()
@@ -273,18 +273,20 @@ class Client:
 		elif CCC==(31, 9): # Trade lock
 			index = packet.read8()
 			locked = packet.readBool()
+			who = None
 			if index > 1:
 				self.trade.locked = [locked, locked]
 			else:
 				self.trade.locked[index] = locked
+				who = self if index == 0 else self.trade.trader
 
-			self.dispatch('trade_lock', index, locked)
+			self.dispatch('trade_lock', who, locked)
 
 		elif CCC==(31, 10): # Trade complete
 			trade = self.trade
 			self.trade = False
 			self.trade._close(success=True)
-			self.dispatch('trade_complete', trade)
+			self.dispatch('trade_close', trade, True)
 
 		elif CCC==(44, 1): # Bulle switching
 			bulle_id = packet.read32()
