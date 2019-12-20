@@ -227,6 +227,8 @@ class Trade:
 		return "<Trade state={} locked=[client:{}, trader:{}] trader={} pid={}>".format(TradeState[self.state], *self.locked, self.trader, self.pid)
 
 	def __eq__(self, other):
+		if other is None:
+			return False
 		if self.pid == -1 or other.pid == -1:
 			return self.trader.lower() == other.trader.lower()
 		return self.pid == other.pid
