@@ -231,7 +231,7 @@ class Client:
 			if name == self.username.lower():
 				trade = self.trade
 			else:
-				for t in self.trades.values() + self.pending_trades:
+				for t in list(self.trades.values()) + self.pending_trades:
 					if t.trader.lower() == name:
 						trade = t
 						break
