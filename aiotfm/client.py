@@ -378,17 +378,6 @@ class Client:
 			for player in range(packet.read16()):
 				self.room.players.append(Player.from_packet(packet))
 
-			for player in before:
-				if player.trade is not None:
-					after = self.room.get_player(pid=player.pid)
-
-					if after is not None:
-						player.trade._update_player(after)
-					else:
-						trade = player.trade
-						player.trade._close()
-						self.dispatch('trade_close', trade)
-
 			self.dispatch('bulk_player_update', before, self.room.players)
 
 		elif CCC==(144, 2): # Add a player
@@ -400,8 +389,6 @@ class Client:
 				self.dispatch('player_join', after)
 			else:
 				self.room.players.remove(before)
-				if before.trade is not None:
-					before.trade._update_player(after)
 				self.dispatch('player_update', before, after)
 
 		else:
@@ -435,10 +422,6 @@ class Client:
 
 			if player is not None:
 				self.room.players.remove(player)
-				if player.trade is not None:
-					trade = player[1].trade
-					player.trade._close()
-					self.dispatch('trade_close', trade)
 				self.dispatch('player_remove', player)
 
 		else:
