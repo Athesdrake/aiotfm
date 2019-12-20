@@ -263,12 +263,12 @@ class Client:
 		elif CCC==(31, 9): # Trade lock
 			index = packet.read8()
 			locked = packet.readBool()
-			who = None
 			if index > 1:
 				self.trade.locked = [locked, locked]
+				who = "both"
 			else:
 				self.trade.locked[index] = locked
-				who = self if index == 0 else self.trade.trader
+				who = self.trade.trader if index == 0 else self
 
 			self.dispatch('trade_lock', who, locked)
 

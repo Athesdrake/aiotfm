@@ -198,7 +198,7 @@ class Trade:
 	def __init__(self, client, trader):
 		self.client = client
 		self.trader = trader
-		self.locked = [False, False] # 0: client, 1: trader
+		self.locked = [False, False] # 0: trader, 1: client
 
 		self.imports = TradeContainer(self)
 		self.exports = TradeContainer(self)
@@ -224,7 +224,7 @@ class Trade:
 			raise TypeError(f"Trade excepted 'Player' or 'str' type, got '{type(trader)}")
 
 	def __repr__(self):
-		return "<Trade state={} locked=[client:{}, trader:{}] trader={} pid={}>".format(TradeState[self.state], *self.locked, self.trader, self.pid)
+		return "<Trade state={} locked=[trader:{}, client:{}] trader={} pid={}>".format(TradeState[self.state], *self.locked, self.trader, self.pid)
 
 	def __eq__(self, other):
 		if other is None:
@@ -315,7 +315,7 @@ class Trade:
 		Locks (confirms) the trade."""
 		if self.state != TradeState.TRADING:
 			raise TradeOnWrongState('lock', TradeState[self.state])
-		if self.locked[0]:
+		if self.locked[1]:
 			raise TypeError("Can not lock a trade that is already locked by the client.")
 
 		await self.client.main.send(Packet.new(31, 9).writeBool(True))
@@ -325,7 +325,7 @@ class Trade:
 		Unlocks (cancels the confirmation) the trade."""
 		if self.state != TradeState.TRADING:
 			raise TradeOnWrongState('lock', TradeState[self.state])
-		if not self.locked[0]:
+		if not self.locked[1]:
 			raise TypeError("Can not unlock a trade that is not locked by the client.")
 
 		await self.client.main.send(Packet.new(31, 9).writeBool(False))
