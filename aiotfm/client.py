@@ -236,9 +236,8 @@ class Client:
 						trade = t
 						break
 
-			trade._close()
 			self.dispatch('trade_error', trade, messages[error], error)
-			self.dispatch('trade_close', trade, False)
+			trade._close()
 
 		elif CCC==(31, 7): # Trade start
 			pid = packet.read32()
@@ -286,7 +285,6 @@ class Client:
 			trade = self.trade
 			self.trade = False
 			self.trade._close(success=True)
-			self.dispatch('trade_close', trade, True)
 
 		elif CCC==(44, 1): # Bulle switching
 			bulle_id = packet.read32()

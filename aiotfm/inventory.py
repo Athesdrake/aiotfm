@@ -246,6 +246,8 @@ class Trade:
 		if self.client.trades.pop(self.pid, None) is None:
 			self.client.pending_trades.remove(self)
 
+		self.client.dispatch('trade_close', self, succeed)
+
 	async def cancel(self):
 		"""|coro|
 		Cancels the trade."""
