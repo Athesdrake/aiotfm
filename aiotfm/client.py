@@ -274,7 +274,6 @@ class Client:
 
 		elif CCC==(31, 10): # Trade complete
 			trade = self.trade
-			self.trade = False
 			self.trade._close(success=True)
 
 		elif CCC==(44, 1): # Bulle switching
