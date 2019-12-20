@@ -57,7 +57,6 @@ class Client:
 		self.room = None
 		self.trade = None
 		self.trades = {}
-		self.pending_trades = [] # Trades without pid
 		self.inventory = None
 
 		self.username = None
@@ -231,7 +230,7 @@ class Client:
 			if name == self.username.lower():
 				trade = self.trade
 			else:
-				for t in list(self.trades.values()) + self.pending_trades:
+				for t in self.trades.values():
 					if t.trader.lower() == name:
 						trade = t
 						break
@@ -242,18 +241,9 @@ class Client:
 		elif CCC==(31, 7): # Trade start
 			pid = packet.read32()
 			trade = self.trades.get(pid)
-			if trade is None:
-				player = self.room.get_player(pid=pid)
-				if player is None:
-					raise AiotfmException(f'Cannot find the trade from pid {pid}.')
 
-				for t in self.pending_trades:
-					if t.trader == player:
-						self.pending_trades.remove(t)
-						self.trades[pid] = trade = t
-						break
-				else:
-					raise AiotfmException(f'Cannot find the trade from pid {pid}.')
+			if trade is None:
+				raise AiotfmException(f'Cannot find the trade from pid {pid}.')
 
 			trade._start(pid)
 			self.dispatch('trade_start')

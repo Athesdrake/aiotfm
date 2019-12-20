@@ -206,6 +206,11 @@ class Trade:
 		self.state = TradeState.ON_INVITE
 		self.pid = -1
 
+		if isinstance(trader, str):
+			trader = client.room.get_player(name=trader)
+			if trader is None:
+				TypeError(f"Can not find the player '{self.trader}' in the room.")
+
 		if isinstance(trader, Player):
 			if self.trader.isGuest:
 				raise TypeError("You can not trade with a guest.")
@@ -215,11 +220,6 @@ class Trade:
 				raise TypeError("You can not trade with a player having the same IP.")
 			self.trader = self.trader.username
 			self.pid = trader.pid
-		elif isinstance(trader, str):
-			if '#' not in trader:
-				raise TypeError("The player tag is needed to begin a trade.")
-			if trader.startswith('*'):
-				raise TypeError("You can not trade with a guest.")
 		else:
 			raise TypeError(f"Trade excepted 'Player' or 'str' type, got '{type(trader)}")
 
@@ -236,16 +236,16 @@ class Trade:
 		"""Returns True if the trade is closed."""
 		return self.state in (TradeState.SUCCESS, TradeState.CANCELLED)
 
-	def _start(self, pid):
+	def _start(self):
 		self.state = TradeState.TRADING
 		self.client.trade = self
-		self.pid = pid
 
 	def _close(self, succeed=False):
 		self.state = TradeState.SUCCESS if succeed else TradeState.CANCELLED
-		if self.client.trades.pop(self.pid, None) is None:
-			self.client.pending_trades.remove(self)
+		if self.client.trade == self:
+			self.client.trade = None
 
+		self.client.trades.pop(self.pid, None)
 		self.client.dispatch('trade_close', self, succeed)
 
 	async def cancel(self):
