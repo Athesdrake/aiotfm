@@ -4,7 +4,7 @@ from functools import cmp_to_key
 
 from aiotfm.packet import Packet
 from aiotfm.player import Player
-from aiotfm.utils import TradeState
+from aiotfm.enums import TradeState
 from aiotfm.errors import TradeOnWrongState
 
 class InventoryItem:

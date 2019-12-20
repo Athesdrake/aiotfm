@@ -13,6 +13,7 @@ from aiotfm.shop import Shop
 from aiotfm.inventory import Inventory, InventoryItem, Trade
 from aiotfm.room import Room
 from aiotfm.locale import Locale
+from aiotfm.enums import TradeError
 from aiotfm.errors import *
 
 class Client:
@@ -216,17 +217,6 @@ class Client:
 			name = packet.readUTF().lower()
 			error = packet.read8()
 
-			messages = [
-				'The player is already trading',
-				'The player declined your trade invite',
-				'The trade has been cancelled by one of the party',
-				'The player is not in the room',
-				'Trade succeed',
-				'You cannot trade with the shaman',
-				'The player is not connected',
-				'Internal error'
-			]
-
 			if name == self.username.lower():
 				trade = self.trade
 			else:
@@ -235,7 +225,7 @@ class Client:
 						trade = t
 						break
 
-			self.dispatch('trade_error', trade, messages[error], error)
+			self.dispatch('trade_error', trade, TradeError[error])
 			trade._close()
 
 		elif CCC==(31, 7): # Trade start
