@@ -457,7 +457,7 @@ class Client:
 
 	def get_trade(self, player):
 		if not isinstance(player, (str, Player)):
-			raise TypeError(f"Excepted Player or str types got {type(player)}")
+			raise TypeError(f"Expected Player or str types got {type(player)}")
 
 		if isinstance(player, Player):
 			return self.trades.get(player.pid)

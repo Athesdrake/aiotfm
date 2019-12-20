@@ -221,7 +221,7 @@ class Trade:
 			self.trader = self.trader.username
 			self.pid = trader.pid
 		else:
-			raise TypeError(f"Trade excepted 'Player' or 'str' type, got '{type(trader)}")
+			raise TypeError(f"Trade expected 'Player' or 'str' type, got '{type(trader)}")
 
 	def __repr__(self):
 		return "<Trade state={} locked=[trader:{}, client:{}] trader={} pid={}>".format(TradeState[self.state], *self.locked, self.trader, self.pid)
