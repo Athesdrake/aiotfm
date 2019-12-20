@@ -238,7 +238,6 @@ class Trade:
 
 	def _start(self):
 		self.state = TradeState.TRADING
-		self.client.trade = self
 
 	def _close(self, succeed=False):
 		self.state = TradeState.SUCCESS if succeed else TradeState.CANCELLED

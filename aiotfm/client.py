@@ -245,7 +245,8 @@ class Client:
 			if trade is None:
 				raise AiotfmException(f'Cannot find the trade from pid {pid}.')
 
-			trade._start(pid)
+			trade._start()
+			self.trade = trade
 			self.dispatch('trade_start')
 
 		elif CCC==(31, 8): # Trade items
