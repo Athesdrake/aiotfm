@@ -472,6 +472,18 @@ class Client:
 			if channel.name==name:
 				return channel
 
+	def get_trade(self, player):
+		if not isinstance(player, (str, Player)):
+			raise TypeError(f"Excepted Player or str types got {type(player)}")
+
+		if isinstance(player, Player):
+			return self.trades.get(player.pid)
+
+		player = player.lower()
+		for trade in self.trades.values():
+			if trade.trader.lower() == player:
+				return trade
+
 	def event(self, coro):
 		"""A decorator that registers an event.
 
