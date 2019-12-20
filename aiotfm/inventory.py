@@ -252,9 +252,7 @@ class Trade:
 		if self.state != TradeState.TRADING:
 			raise TradeOnWrongState('cancel', TradeState[self.state])
 
-		self._close()
 		await self.client.main.send(Packet.new(31, 6).writeString(self.trader).write8(2))
-		self.client.dispatch('trade_close', self) # TODO: check if the server send back a close trade packet
 
 	async def accept(self):
 		"""|coro|
