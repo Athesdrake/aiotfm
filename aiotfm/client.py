@@ -868,8 +868,11 @@ class Client:
 
 		:param player: :class:`aiotfm.player.Player` the player to trade with.
 		:return: :class:`aiotfm.inventory.Trade` the resulting trade"""
-		if player.pid == -1:
-			player = self.room.get_player(username=player.username)
+		if isinstance(player, Player) and player.pid == -1:
+			player = player.username
+
+		if isinstance(player, str):
+			player = self.room.get_player(username=player)
 			if player is None:
 				raise AiotfmException("The player must be in your room to start a trade.")
 
