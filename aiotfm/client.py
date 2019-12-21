@@ -4,7 +4,7 @@ import time
 import traceback
 
 from aiotfm.packet import Packet
-from aiotfm.get_keys import get_keys
+from aiotfm.utils import get_keys
 from aiotfm.connection import Connection
 from aiotfm.player import Profile, Player
 from aiotfm.tribe import Tribe
@@ -12,7 +12,7 @@ from aiotfm.message import Message, Whisper, Channel, ChannelMessage
 from aiotfm.shop import Shop
 from aiotfm.inventory import Inventory, InventoryItem, Trade
 from aiotfm.room import Room
-from aiotfm.locale import Locale
+from aiotfm.utils import Locale
 from aiotfm.enums import TradeError
 from aiotfm.errors import *
 
