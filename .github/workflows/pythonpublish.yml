@@ -1,8 +1,11 @@
 name: Upload Python Package
 
 on:
-  release:
-    types: [created]
+ push:
+   branches: 
+     - master
+   paths: 
+     - 'aiotfm/__version__.py'
 
 jobs:
   deploy:
