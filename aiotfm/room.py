@@ -15,7 +15,7 @@ class Room:
 	def __init__(self, name, private=True):
 		self.name = name
 		self.private = private
-		self.players = []
+		self.players = {}
 
 	def __repr__(self):
 		return "<Room name={} private={}>".format(self.name, self.private)
@@ -48,33 +48,34 @@ class Room:
 		:param predicate: A function that returns a boolean-like result to filter through the players.
 		:param max: Optional[:class:`int`] The maximum amount of players to return.
 		:return: `Iterable` The filtered players."""
-		return [p for p in self.players if predicate(p)][:max]
+		return [p for p in self.players.values() if predicate(p)][:max]
 
 	def get_player(self, default=None, **kwargs):
 		"""Gets one player in the room with an identifier.
 
 		:param kwargs: Which identifier to use. Can be either name, username, id or pid.
 		:return: :class:`aiotfm.player.Player` The player or None"""
-		if len(kwargs)==0:
+		length = len(kwargs.keys())
+
+		if length == 0:
 			raise AiotfmException('You did not provide any identifier.')
-		if len(kwargs)>1:
+		if length > 1:
 			raise AiotfmException('You cannot filter one player with more than one identifier.')
 
 		identifier, value = next(iter(kwargs.items()))
 
-		if identifier=='name' or identifier=='username':
+		if identifier == 'name' or identifier == 'username':
 			def filter(p):
-				return p==value
+				return p == value
 		elif identifier=='id':
 			def filter(p):
-				return p.id==int(value)
-		elif identifier=='pid':
-			def filter(p):
-				return p.pid==int(value)
+				return p.id == int(value)
+		elif identifier == 'pid':
+			return self.players.get(int(value), default)
 		else:
 			raise AiotfmException('Invalid filter.')
 
-		result = self.get_players(filter)
-		if len(result):
-			return result[0]
+		for player in self.players.values():
+			if filter(player):
+				return player
 		return default

@@ -106,7 +106,7 @@ class Client:
 			return await self.handle_old_packet(connection, oldCCC, data)
 
 		elif CCC==(5, 21): # Joined room
-			room = self.room = Room(private=not packet.readBool(), name=packet.readUTF())
+			self.room = room = Room(private=not packet.readBool(), name=packet.readUTF())
 			self.dispatch('joined_room', room)
 
 		elif CCC==(6, 6): # Room message
@@ -362,22 +362,22 @@ class Client:
 
 		elif CCC==(144, 1): # Set player list
 			before = self.room.players
-			self.room.players = []
+			self.room.players = {}
 
-			for player in range(packet.read16()):
-				self.room.players.append(Player.from_packet(packet))
+			for _ in range(packet.read16()):
+				player = Player.from_packet(packet)
+				self.room.players[player.pid] = player
 
 			self.dispatch('bulk_player_update', before, self.room.players)
 
 		elif CCC==(144, 2): # Add a player
 			after = Player.from_packet(packet)
-			before = self.room.get_player(pid=after.pid)
+			before = self.room.players.pop(after.pid, None)
 
-			self.room.players.append(after)
+			self.room.players[after.pid] = after
 			if before is None:
 				self.dispatch('player_join', after)
 			else:
-				self.room.players.remove(before)
 				self.dispatch('player_update', before, after)
 
 		else:
@@ -407,10 +407,9 @@ class Client:
 		:return: True if the packet got handled, False otherwise.
 		"""
 		if oldCCC==(8, 7): # Remove a player
-			player = self.room.get_player(pid=int(data[0]))
+			player = self.room.players.pop(int(data[0]))
 
 			if player is not None:
-				self.room.players.remove(player)
 				self.dispatch('player_remove', player)
 
 		else:
