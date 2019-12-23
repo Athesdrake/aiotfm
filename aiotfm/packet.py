@@ -11,6 +11,7 @@ class Packet:
 		self.pos = 0
 
 		self.exported = False
+		self._fp = 0
 
 	def __repr__(self):
 		return '<Packet {!r}>'.format(bytes(self))
@@ -121,7 +122,7 @@ class Packet:
 
 	def export(self, fp=0):
 		"""Generates the header then converts the whole packet to bytes and returns it."""
-		if self.exported:
+		if self.exported and self._fp == fp:
 			return self.bytes
 
 		m = Packet()
@@ -138,6 +139,7 @@ class Packet:
 
 		self.bytes = bytes(m.buffer + self.buffer)
 		self.exported = True
+		self._fp = fp
 
 		return self.bytes
 

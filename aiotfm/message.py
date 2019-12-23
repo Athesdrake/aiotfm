@@ -1,4 +1,4 @@
-from aiotfm.utils import chatCommu
+from aiotfm.enums import chatCommu
 from aiotfm.packet import Packet
 
 class Message:

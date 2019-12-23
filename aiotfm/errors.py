@@ -85,3 +85,13 @@ class CommunityPlatformError(AiotfmException):
 	"""Exception thrown when the community platform send an error code."""
 	def __init__(self, category, code):
 		super().__init__('Internal error: {}-{}'.format(category, code))
+		self.category = category
+		self.code = code
+
+
+class TradeOnWrongState(AiotfmException):
+	"""Exception thrown when the client try an impossible action on trade due to its state."""
+	def __init__(self, action, state):
+		super().__init__(f'Can not {action} when the trade is {state}.')
+		self.action = action
+		self.state = state
