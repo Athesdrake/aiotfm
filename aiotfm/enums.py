@@ -11,9 +11,8 @@ class Enum(metaclass=EnumMeta):
 	def __getitem__(self, key):
 		if isinstance(key, int):
 			for k in dir(self):
-				if len(k)==2:
-					if getattr(self, k)==key:
-						return k
+				if getattr(self, k)==key:
+					return k
 			return self.__missing__(key)
 		return getattr(self, key, self.__missing__(key))
 
@@ -98,6 +97,7 @@ class TradeState(Enum):
 	TRADING = 2
 	CANCELLED = 3
 	SUCCESS = 4
+
 
 class TradeError(Enum):
 	ALREADY_TRADING = 0
