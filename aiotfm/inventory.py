@@ -253,7 +253,7 @@ class Trade:
 		"""|coro|
 		Cancels the trade."""
 		if self.state != TradeState.TRADING:
-			raise TradeOnWrongState('cancel', TradeState[self.state])
+			raise TradeOnWrongState('cancel', self.state)
 
 		await self.client.main.send(Packet.new(31, 6).writeString(self.trader).write8(2))
 
@@ -261,7 +261,7 @@ class Trade:
 		"""|coro|
 		Accepts the trade."""
 		if self.state != TradeState.ON_INVITE:
-			raise TradeOnWrongState('accept', TradeState[self.state])
+			raise TradeOnWrongState('accept', self.state)
 
 		self.state = TradeState.ACCEPTING
 		await self.client.main.send(Packet.new(31, 5).writeString(self.trader))
@@ -273,7 +273,7 @@ class Trade:
 		:param id: :class:`int` The item id.
 		:param quantity: :class:`int` The quantity of item to add."""
 		if self.state != TradeState.TRADING:
-			raise TradeOnWrongState('addItem', TradeState[self.state])
+			raise TradeOnWrongState('addItem', self.state)
 
 		quantity = min(max(quantity, 0), 200)
 		packet = Packet.new(31, 8).write16(id).writeBool(True).buffer
@@ -295,7 +295,7 @@ class Trade:
 		:param id: :class:`int` The item id.
 		:param quantity: :class:`int` The quantity of item to remove."""
 		if self.state != TradeState.TRADING:
-			raise TradeOnWrongState('removeItem', TradeState[self.state])
+			raise TradeOnWrongState('removeItem', self.state)
 
 		quantity = min(max(quantity, 0), 200)
 		packet = Packet.new(31, 8).write16(id).writeBool(False).buffer
@@ -314,7 +314,7 @@ class Trade:
 		"""|coro|
 		Locks (confirms) the trade."""
 		if self.state != TradeState.TRADING:
-			raise TradeOnWrongState('lock', TradeState[self.state])
+			raise TradeOnWrongState('lock', self.state)
 		if self.locked[1]:
 			raise TypeError("Can not lock a trade that is already locked by the client.")
 
@@ -324,7 +324,7 @@ class Trade:
 		"""|coro|
 		Unlocks (cancels the confirmation) the trade."""
 		if self.state != TradeState.TRADING:
-			raise TradeOnWrongState('lock', TradeState[self.state])
+			raise TradeOnWrongState('lock', self.state)
 		if not self.locked[1]:
 			raise TypeError("Can not unlock a trade that is not locked by the client.")
 
