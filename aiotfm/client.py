@@ -409,7 +409,7 @@ class Client:
 		:return: True if the packet got handled, False otherwise.
 		"""
 		if oldCCC==(8, 7): # Remove a player
-			player = self.room.players.pop(int(data[0]))
+			player = self.room.players.pop(int(data[0]), None)
 
 			if player is not None:
 				self.dispatch('player_remove', player)
