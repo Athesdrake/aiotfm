@@ -270,13 +270,14 @@ class Client:
 
 		elif CCC==(44, 1): # Bulle switching
 			bulle_id = packet.read32()
-			bulle_ip = packet.readString().decode()
+			bulle_ip = packet.readUTF()
+			ports = packet.readUTF().split('-')
 
 			if self.bulle is not None:
 				self.bulle.close()
 
 			self.bulle = Connection('bulle', self, self.loop)
-			await self.bulle.connect(bulle_ip, self.main.address[1])
+			await self.bulle.connect(bulle_ip, ports[round(self.loop.time()*1000) % len(ports)])
 			await self.bulle.send(Packet.new(*CCC).write32(bulle_id))
 
 		elif CCC==(44, 22): # Fingerprint offset changed
@@ -427,9 +428,8 @@ class Client:
 		"""
 		last_heartbeat = 0
 		while self.main.open:
-			if self.loop.time()-last_heartbeat>=15:
+			if self.loop.time() - last_heartbeat >= 15:
 				t = time.perf_counter()
-				await self.main.send(Packet.new(26, 26))
 				await self.main.send(Packet.new(26, 26))
 				if self.bulle is not None and self.bulle.open:
 					await self.bulle.send(Packet.new(26, 26))
