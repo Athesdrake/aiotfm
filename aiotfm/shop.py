@@ -122,7 +122,10 @@ class ShopItem(Item):
 
 	@classmethod
 	def from_packet(cls, packet:Packet):
-		return cls(*packet.unpack('2HB?B2IH'))
+		return cls(
+			packet.read16(), packet.read16(), packet.read8(), packet.readBool(),
+			packet.read8(), packet.read32(), packet.read32(), packet.read16()
+		)
 
 class Outfit:
 	def __init__(self, look, id=-1, flag=-1):
@@ -213,7 +216,10 @@ class ShamanObject:
 
 	@classmethod
 	def from_packet(cls, packet:Packet):
-		return cls(*packet.unpack('IB?BIH'))
+		return cls(
+			packet.read32(), packet.read8(), packet.readBool(), packet.read8(),
+			packet.read32(), packet.read16()
+		)
 
 class OwnedShamanObject(ShamanObject):
 	def __init__(self, id, equiped, colors):
