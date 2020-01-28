@@ -1,5 +1,7 @@
 from aiotfm.errors import PacketError, PacketTooLarge, XXTEAInvalidPacket, XXTEAInvalidKeys
 
+import struct
+
 class Packet:
 	def __init__(self, buffer=None):
 		if buffer is None:
@@ -55,19 +57,19 @@ class Packet:
 
 	def read16(self):
 		"""Read a short (two bytes) from the buffer"""
-		return (self.read8() << 8) | self.read8()
+		return struct.unpack('>H', self.readBytes(2))[0]
 
 	def read24(self):
 		"""Read three bytes from the buffer"""
-		return (self.read16() << 8) | self.read8()
+		return int.from_bytes(self.readBytes(3), 'big')
 
 	def read32(self):
 		"""Read an int (four bytes) from the buffer"""
-		return (self.read24() << 8) | self.read8()
+		return struct.unpack('>I', self.readBytes(4))[0]
 
 	def readBool(self):
 		"""Read a boolean (one byte) from the buffer"""
-		return self.read8()==1
+		return self.read8() == 1
 
 	def readString(self):
 		"""return a encoded string (in bytes)"""
@@ -91,20 +93,23 @@ class Packet:
 
 	def write8(self, value):
 		"""Write a single byte to the buffer"""
-		self.buffer.append(value&0xff)
+		self.buffer.append(value & 0xff)
 		return self
 
 	def write16(self, value):
 		"""Write a short (two bytes) to the buffer"""
-		return self.write8(value>>8).write8(value)
+		self.buffer.extend(struct.pack('>H', value & 0xffff))
+		return self
 
 	def write24(self, value):
 		"""Write three bytes to the buffer"""
-		return self.write16(value>>8).write8(value)
+		self.buffer.extend((value & 0xffffff).to_bytes(3, byteorder='big', signed=False))
+		return self
 
 	def write32(self, value):
 		"""Write an int (four bytes) to the buffer"""
-		return self.write24(value>>8).write8(value)
+		self.buffer.extend(struct.pack('>I', value & 0xffffffff))
+		return self
 
 	def writeBool(self, value):
 		"""Write a boolean (one byte) to the buffer"""
