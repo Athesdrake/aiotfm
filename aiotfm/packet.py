@@ -50,10 +50,7 @@ class Packet:
 	def read8(self):
 		"""Read a single byte from the buffer."""
 		self.pos += 1
-		try:
-			return self.buffer[self.pos-1]
-		except:
-			return 0
+		return self.buffer[self.pos-1]
 
 	def read16(self):
 		"""Read a short (two bytes) from the buffer"""
@@ -103,7 +100,7 @@ class Packet:
 
 	def write24(self, value):
 		"""Write three bytes to the buffer"""
-		self.buffer.extend((value & 0xffffff).to_bytes(3, byteorder='big', signed=False))
+		self.buffer.extend((value & 0xffffff).to_bytes(3, 'big'))
 		return self
 
 	def write32(self, value):
@@ -163,20 +160,16 @@ class Packet:
 		if len(key)<4:
 			raise XXTEAInvalidKeys(str(key))
 
-		chunks = []
 		ccc = self.read16()
 		length = len(self.buffer)-2
-
 		if length % 4 > 0:
 			self.buffer.extend(bytes(4 - length % 4))
-		for i in range(length//4+(length%4>0)):
-			chunks.append(self.read32())
 
-		chunks = xxtea_encode(chunks, len(chunks), key)
+		chunks = struct.unpack(f'>{length//4}I', self.readBytes(length))
+		chunks = xxtea_encode(list(chunks), len(chunks), key)
 
 		packet = Packet.new(ccc).write16(len(chunks))
-		for chunk in chunks:
-			packet.write32(chunk)
+		packet.writeBytes(struct.pack(f'>{len(chunks)}I', *chunks))
 
 		self.buffer = packet.buffer
 		return self
