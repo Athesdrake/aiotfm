@@ -163,7 +163,9 @@ class Packet:
 		ccc = self.read16()
 		length = len(self.buffer)-2
 		if length % 4 > 0:
-			self.buffer.extend(bytes(4 - length % 4))
+			pad = 4 - length % 4
+			self.buffer.extend(bytes(pad))
+			length += pad
 
 		chunks = struct.unpack(f'>{length//4}I', self.readBytes(length))
 		chunks = xxtea_encode(list(chunks), len(chunks), key)
