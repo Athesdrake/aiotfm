@@ -162,12 +162,13 @@ class Packet:
 			raise XXTEAInvalidPacket("The Packet is empty.")
 		if len(key)<4:
 			raise XXTEAInvalidKeys(str(key))
-		while len(self.buffer)<10:
-			self.write8(0)
 
 		chunks = []
 		ccc = self.read16()
 		length = len(self.buffer)-2
+
+		if length % 4 > 0:
+			self.buffer.extend(bytes(4 - length % 4))
 		for i in range(length//4+(length%4>0)):
 			chunks.append(self.read32())
 
