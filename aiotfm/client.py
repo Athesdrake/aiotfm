@@ -535,7 +535,7 @@ class Client:
 					if not self.auto_restart:
 						self.close()
 				finally:
-					if self.auto_restart
+					if self.auto_restart:
 						asyncio.ensure_future(self.restart_soon(), loop=self.loop)
 		return False
 
