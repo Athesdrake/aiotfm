@@ -638,8 +638,8 @@ class Client:
 		await self.sendHandshake()
 		await self.locale.load()
 
-	async def restart_soon(self, *args, **kwargs):
-		await asyncio.sleep(5.0)
+	async def restart_soon(self, *args, delay=5.0, **kwargs):
+		await asyncio.sleep(delay)
 		await self.restart(*args, **kwargs)
 
 	async def restart(self, keys=None):
