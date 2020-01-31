@@ -95,7 +95,16 @@ class Connection:
 				data = await self.socket.recv(length)
 				await self.client.received_data(data, self)
 		except Exception as e:
-			self.client.dispatch('connection_error', self, e)
+			future = self.client.dispatch('connection_error', self, e)
+			if future is not None:
+				# This future is a wrapper for _run_event, which returns True if the event ran successfully, False otherwise.
+				# If it returns False, it already handled the auto_restart.
+				if not await future:
+					return
+			if self.client.auto_restart:
+				await self.client.restart()
+			else:
+				self.client.close()
 
 	async def send(self, packet, cipher=False):
 		"""|coro|
