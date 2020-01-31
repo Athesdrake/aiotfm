@@ -25,7 +25,7 @@ class Translation:
 		return re.sub(r'%(\d+)', repl, self.value)
 
 class Locale:
-	BASE_URL = 'http://transformice.com/langues/tfz_{.locale}'
+	BASE_URL = 'http://transformice.com/langues/tfz_{}'
 
 	def __init__(self, locale='en'):
 		self._locale = locale
@@ -46,7 +46,7 @@ class Locale:
 
 	async def reload(self, locale=None):
 		if locale is None:
-			locale = self.locale
+			locale = self._locale
 
 		# Deletes the locale then load it
 		del self.locales[locale]
@@ -57,12 +57,12 @@ class Locale:
 			self._locale = locale
 
 		# Check if the locale is cached
-		if locale in self.locales:
+		if self._locale in self.locales:
 			return
 
 		# Download the locale
 		async with aiohttp.ClientSession() as session:
-			async with session.get(self.BASE_URL.format(self)) as r:
+			async with session.get(self.BASE_URL.format(self._locale)) as r:
 				if r.status==404:
 					raise InvalidLocale()
 
@@ -70,4 +70,4 @@ class Locale:
 				content = zlib.decompress(await r.read()).decode('utf-8')
 				table = {k:v for k,v in [t.split('=', 1) for t in content.split('¤') if t]}
 				# Add the translation table
-				self.locales[locale] = table
+				self.locales[self._locale] = table
