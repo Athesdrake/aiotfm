@@ -2,6 +2,7 @@ import asyncio
 import sys
 import time
 import traceback
+import warnings
 
 from aiotfm.packet import Packet
 from aiotfm.utils import get_keys
@@ -26,6 +27,8 @@ class Client:
 	----------
 	community: Optional[:class:`int`]
 		Defines the community of the client. Defaults to 0 (EN community).
+	auto_restart: Optional[:class:`bool`]
+		Whether the client should automatically restart on error. Defaults to False.
 	loop: Optional[event loop]
 		The `event loop`_ to use for asynchronous operations. If ``None`` is passed (defaults),
 		the event loop used will be ``asyncio.get_event_loop()``.
@@ -47,7 +50,7 @@ class Client:
 	"""
 	LOG_UNHANDLED_PACKETS = False
 
-	def __init__(self, community=0, loop=None):
+	def __init__(self, community=0, auto_restart=False, loop=None):
 		self.loop = loop or asyncio.get_event_loop()
 
 		self.main = Connection('main', self, self.loop)
@@ -64,6 +67,10 @@ class Client:
 		self.locale = Locale()
 		self.community = community # EN
 		self.cp_fingerprint = 0
+
+		self.auto_restart = auto_restart
+		self.api_tfmid = None
+		self.api_token = None
 
 		self._channels = []
 
@@ -510,17 +517,27 @@ class Client:
 		:param event_name: :class:`str` the event's name.
 		:param args: arguments to pass to the coro.
 		:param kwargs: keyword arguments to pass to the coro.
+
+		:return: :class:`bool` whether the event ran successfully or not
 		"""
 		try:
 			await coro(*args, **kwargs)
+			return True
 		except asyncio.CancelledError:
-			pass
+			raise
 		except Exception as e:
 			if hasattr(self, 'on_error'):
 				try:
 					await self.on_error(event_name, e, *args, **kwargs)
 				except asyncio.CancelledError:
-					pass
+					raise
+				except Exception as e:
+					if not self.auto_restart:
+						self.close()
+				finally:
+					if self.auto_restart
+						asyncio.ensure_future(self.restart_soon(), loop=self.loop)
+		return False
 
 	def dispatch(self, event, *args, **kwargs):
 		"""Dispatches events
@@ -528,6 +545,8 @@ class Client:
 		:param event: :class:`str` event's name. (without 'on_')
 		:param args: arguments to pass to the coro.
 		:param kwargs: keyword arguments to pass to the coro.
+
+		:return: :class:`Task` the _run_event wrapper task
 		"""
 		method = 'on_' + event
 
@@ -560,7 +579,7 @@ class Client:
 
 		coro = getattr(self, method, None)
 		if coro is not None:
-			asyncio.ensure_future(self._run_event(coro, method, *args, **kwargs), loop=self.loop)
+			return asyncio.ensure_future(self._run_event(coro, method, *args, **kwargs), loop=self.loop)
 
 	async def on_error(self, event, err, *a, **kw):
 		message = '\nAn error occurred while dispatching the event "{0}":\n\n{2}'
@@ -571,20 +590,10 @@ class Client:
 	async def on_connection_error(self, conn, error):
 		print('{0.__class__.__name__}: {0}'.format(error), file=sys.stderr)
 
-		if isinstance(error, EOFError):
-			self.close()
-
-	async def start(self, api_tfmid, api_token, keys=None):
+	async def connect(self):
 		"""|coro|
-		Connects the client to the game.
-
-		:param api_tfmid: :class:`int` or :class:`str` your Transformice id.
-		:param api_token: :class:`str` your token to access the API.
+		Creates a connection with the main server.
 		"""
-		if keys is not None:
-			self.keys = keys
-		else:
-			self.keys = keys = await get_keys(api_tfmid, api_token)
 
 		for port in [13801, 11801, 12801, 14801]:
 			try:
@@ -599,13 +608,52 @@ class Client:
 		while not self.main.socket.connected:
 			await asyncio.sleep(.1)
 
-		packet = Packet.new(28, 1).write16(keys.version).writeString(keys.connection)
+	async def sendHandshake(self):
+		"""|coro|
+		Sends the handshake packet so the server recognizes this socket as a player.
+		"""
+		packet = Packet.new(28, 1).write16(self.keys.version).writeString(self.keys.connection)
 		packet.writeString('Desktop').writeString('-').write32(0x1fbd).writeString('')
 		packet.writeString('74696720697320676f6e6e61206b696c6c206d7920626f742e20736f20736164')
 		packet.writeString("A=t&SA=t&SV=t&EV=t&MP3=t&AE=t&VE=t&ACC=t&PR=t&SP=f&SB=f&DEB=f&V=LNX 29,0,0,140&M=Adobe Linux&R=1920x1080&COL=color&AR=1.0&OS=Linux&ARCH=x86&L=en&IME=t&PR32=t&PR64=t&LS=en-US&PT=Desktop&AVD=f&LFD=f&WD=f&TLS=t&ML=5.1&DP=72")
 		packet.write32(0).write32(0x6257).writeString('')
 
 		await self.main.send(packet)
+
+	async def start(self, api_tfmid, api_token, keys=None):
+		"""|coro|
+		Starts the client.
+
+		:param api_tfmid: :class:`int` or :class:`str` your Transformice id.
+		:param api_token: :class:`str` your token to access the API.
+		"""
+		if keys is not None:
+			self.keys = keys
+		else:
+			self.api_tfmid = api_tfmid
+			self.api_token = api_token
+			self.keys = await get_keys(api_tfmid, api_token)
+
+		await self.connect()
+		await self.sendHandshake()
+		await self.locale.load()
+
+	async def restart_soon(self, *args, delay=5.0, **kwargs):
+		await asyncio.sleep(delay)
+		await self.restart(*args, **kwargs)
+
+	async def restart(self, keys=None):
+		self.dispatch("restart")
+
+		self.close()
+
+		if keys is not None:
+			self.keys = keys
+		else:
+			self.keys = keys = await get_keys(self.api_tfmid, self.api_token)
+
+		await self.connect()
+		await self.sendHandshake()
 		await self.locale.load()
 
 	async def login(self, username, password, encrypted=True, room='1'):
@@ -640,22 +688,28 @@ class Client:
 			loop.create_task(bot.start(api_id, api_token))
 			loop.run_forever()
 		"""
+		if self.auto_restart:
+			self.auto_restart = False
+			warnings.warn(
+				"The usage of Client.run and Client.auto_restart is not allowed. "
+				"Use Client.start method to enable automatic restart."
+			)
+
 		asyncio.ensure_future(self.start(api_tfmid, api_token, keys=kwargs.pop('keys', None)), loop=self.loop)
 		self.loop.run_until_complete(self.wait_for('on_login_ready'))
 		asyncio.ensure_future(self.login(username, password, **kwargs), loop=self.loop)
 
 		try:
 			self.loop.run_forever()
-		except Exception as e:
+		except:
 			# add self.close
 			# asyncio.ensure_future(self.close())
-			raise e
+			raise
 
 	def close(self):
 		self.main.close()
 		if self.bulle is not None:
 			self.bulle.close()
-		self.loop.stop()
 
 	async def sendCP(self, code, data=b''):
 		"""|coro|
