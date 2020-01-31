@@ -536,7 +536,7 @@ class Client:
 						self.close()
 				finally:
 					if self.auto_restart
-						asyncio.ensure_future(self.restart(), loop=self.loop)
+						asyncio.ensure_future(self.restart_soon(), loop=self.loop)
 		return False
 
 	def dispatch(self, event, *args, **kwargs):
@@ -638,7 +638,13 @@ class Client:
 		await self.sendHandshake()
 		await self.locale.load()
 
+	async def restart_soon(self, *args, **kwargs):
+		await asyncio.sleep(5.0)
+		await self.restart(*args, **kwargs)
+
 	async def restart(self, keys=None):
+		self.dispatch("restart")
+
 		self.close()
 
 		if keys is not None:

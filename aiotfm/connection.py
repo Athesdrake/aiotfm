@@ -102,7 +102,7 @@ class Connection:
 				if not await future:
 					return
 			if self.client.auto_restart:
-				await self.client.restart()
+				await self.client.restart_soon()
 			else:
 				self.client.close()
 
