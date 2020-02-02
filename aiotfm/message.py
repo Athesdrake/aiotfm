@@ -1,4 +1,4 @@
-from aiotfm.enums import chatCommu
+from aiotfm.enums import ChatCommunity
 from aiotfm.packet import Packet
 
 class Message:
@@ -9,14 +9,14 @@ class Message:
 	----------
 	author: `aiotfm.Player`
 		The message's author.
-	community: `aiotfm.enum.chatCommu`
+	community: `aiotfm.enum.ChatCommunity`
 		The author's community. Note: the community isn't the author's language!
 	content: `str`
 		The actual content of the message.
 	"""
 	def __init__(self, author, content, community, client):
 		self.author = author
-		self.community = chatCommu[community]
+		self.community = ChatCommunity(community)
 		self.content = content
 		self._client = client
 
@@ -37,7 +37,7 @@ class Whisper(Message):
 		The message's author.
 	receiver: `aiotfm.Player`
 		The message's addressee.
-	community: `aiotfm.enum.chatCommu`
+	community: `aiotfm.enum.ChatCommunity`
 		The author's community. Note: the community isn't the author's language!
 	content: `str`
 		The actual content of the message.
@@ -53,7 +53,7 @@ class Whisper(Message):
 	def __str__(self):
 		direction = '<' if self.sent else '>'
 		author = self.receiver if self.sent else self.author
-		commu = '' if self.sent else '[{}] '.format(self.community)
+		commu = '' if self.sent else '[{}] '.format(self.community.name)
 		return f'{direction} {commu}[{author}] {self.content}'
 
 	async def reply(self, msg):
@@ -113,7 +113,7 @@ class ChannelMessage(Message):
 		The channel where the message is from.
 	author: `aiotfm.Player`
 		The message's author.
-	community: `aiotfm.enum.chatCommu`
+	community: `aiotfm.enum.ChatCommunity`
 		The author's community. Note: the community isn't the author's language!
 	content: `str`
 		The actual content of the message."""
@@ -129,4 +129,4 @@ class ChannelMessage(Message):
 		await self.channel.send(message)
 
 	def __str__(self):
-		return '{0.channel.name} [{0.community}] [{0.author}] {0.content}'.format(self)
+		return '{0.channel.name} [{0.community.value}] [{0.author}] {0.content}'.format(self)

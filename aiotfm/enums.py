@@ -1,25 +1,12 @@
-class EnumMeta(type):
-	base = False
-	def __new__(cls, name, bases, kw):
-		klass = type.__new__(cls, name, bases, kw)
-		if not EnumMeta.base:
-			EnumMeta.base = True
-			return klass
-		return klass()
+from enum import IntEnum
 
-class Enum(metaclass=EnumMeta):
-	def __getitem__(self, key):
-		if isinstance(key, int):
-			for k in dir(self):
-				if getattr(self, k)==key:
-					return k
-			return self.__missing__(key)
-		return getattr(self, key, self.__missing__(key))
+class _CommunityEnum(IntEnum):
+	@classmethod
+	def _missing_(cls, value):
+		return cls.int
 
-	def __missing__(self, key):
-		return None
-
-class chatCommu(Enum):
+class ChatCommunity(_CommunityEnum):
+	int = -1
 	en = 1
 	fr = 2
 	ru = 3
@@ -48,13 +35,9 @@ class chatCommu(Enum):
 	it = 28
 	pt = 31
 
-	def __missing__(self, key):
-		if isinstance(key, int):
-			return 'int'
-		return 1
-
-class commu(Enum):
+class Community(_CommunityEnum):
 	en = 0
+	int = 0
 	fr = 1
 	br = 2
 	es = 3
@@ -85,13 +68,8 @@ class commu(Enum):
 	az = 28
 	pt = 29
 
-	def __missing__(self, key):
-		if isinstance(key, int):
-			return 'int'
-		return 0
 
-
-class TradeState(Enum):
+class TradeState(IntEnum):
 	ON_INVITE = 0
 	ACCEPTING = 1
 	TRADING = 2
@@ -99,7 +77,7 @@ class TradeState(Enum):
 	SUCCESS = 4
 
 
-class TradeError(Enum):
+class TradeError(IntEnum):
 	ALREADY_TRADING = 0
 	INVITE_DECLINED = 1
 	CANCELLED = 2

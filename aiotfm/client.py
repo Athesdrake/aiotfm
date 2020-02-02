@@ -5,7 +5,7 @@ import traceback
 import warnings
 
 from aiotfm.packet import Packet
-from aiotfm.utils import get_keys
+from aiotfm.utils import Locale, get_keys
 from aiotfm.connection import Connection
 from aiotfm.player import Profile, Player
 from aiotfm.tribe import Tribe
@@ -13,8 +13,7 @@ from aiotfm.message import Message, Whisper, Channel, ChannelMessage
 from aiotfm.shop import Shop
 from aiotfm.inventory import Inventory, InventoryItem, Trade
 from aiotfm.room import Room
-from aiotfm.utils import Locale
-from aiotfm.enums import TradeError
+from aiotfm.enums import TradeError, Community
 from aiotfm.errors import *
 
 class Client:
@@ -50,7 +49,7 @@ class Client:
 	"""
 	LOG_UNHANDLED_PACKETS = False
 
-	def __init__(self, community=0, auto_restart=False, loop=None):
+	def __init__(self, community=Community.en, auto_restart=False, loop=None):
 		self.loop = loop or asyncio.get_event_loop()
 
 		self.main = Connection('main', self, self.loop)
@@ -65,7 +64,7 @@ class Client:
 
 		self.username = None
 		self.locale = Locale()
-		self.community = community # EN
+		self.community = Community(community)
 		self.cp_fingerprint = 0
 
 		self.auto_restart = auto_restart
@@ -163,20 +162,20 @@ class Client:
 			player_id = packet.read32()
 			self.username = username = packet.readUTF()
 			played_time = packet.read32()
-			community = packet.read8()
+			community = Community(packet.read8())
 			pid = packet.read32()
 			self.dispatch('logged', player_id, username, played_time, community, pid)
 
 		elif CCC==(26, 3): # Handshake OK
-			online_players = packet.read32() # online players
+			online_players = packet.read32()
 			connection.fingerprint = packet.read8()
-			community = packet.readUTF() # community
-			country = packet.readUTF() # country
+			community = Community[packet.readUTF()]
+			country = packet.readUTF()
 			self.authkey = packet.read32()
 
 			self.loop.create_task(self._heartbeat_loop())
 
-			await connection.send(Packet.new(8,2).write8(self.community).write8(0))
+			await connection.send(Packet.new(8,2).write8(self.community.value).write8(0))
 
 			os_info = Packet.new(28,17).writeString('en').writeString('Linux')
 			os_info.writeString('LNX 29,0,0,140').write8(0)
@@ -869,7 +868,7 @@ class Client:
 		:param community: Optional[:class:`int`] the room's community.
 		:param auto: Optional[:class:`bool`] joins a random room (I think).
 		"""
-		packet = Packet.new(5, 38).write8(community or self.community)
+		packet = Packet.new(5, 38).write8(Community(community or self.community).value)
 		packet.writeString(room_name).writeBool(auto)
 		await self.main.send(packet)
 
