@@ -9,7 +9,7 @@ class Socket:
 
 		self.__socket = asyncio.open_connection(host, port, loop=self.loop)
 		self._reader:asyncio.StreamReader = None
-		self._writer:asyncio.StreamWrite = None
+		self._writer:asyncio.StreamWriter = None
 		self.connected = False
 
 	async def connect(self):

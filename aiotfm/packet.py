@@ -13,6 +13,7 @@ class Packet:
 		self.pos = 0
 
 		self.exported = False
+		self.bytes = None
 		self._fp = 0
 
 	def __repr__(self):

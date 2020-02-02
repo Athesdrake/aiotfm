@@ -1,6 +1,7 @@
 from enum import IntEnum
 
 class _CommunityEnum(IntEnum):
+	int = -1
 	@classmethod
 	def _missing_(cls, value):
 		return cls.int

@@ -498,8 +498,9 @@ class Client:
 		future = self.loop.create_future()
 
 		if condition is None:
-			def condition(*a):
+			def everything(*a):
 				return True
+			condition = everything
 
 		if event not in self._waiters:
 			self._waiters[event] = []
