@@ -7,6 +7,7 @@ from aiotfm.player import Player
 from aiotfm.enums import TradeState
 from aiotfm.errors import TradeOnWrongState
 
+
 class InventoryItem:
 	"""Represents an inventory item.
 
@@ -29,8 +30,8 @@ class InventoryItem:
 	slot: `int`
 		Define the equipped slot with this item. If slot is 0 then the item is not equipped.
 	"""
-	def __init__(self, id, **kwargs):
-		self.id = id
+	def __init__(self, item_id, **kwargs):
+		self.id = item_id
 		self.quantity = kwargs.get("quantity", 0)
 		self.inventory = kwargs.get("inventory", None)
 
@@ -48,19 +49,27 @@ class InventoryItem:
 
 	@property
 	def image_url(self):
-		return 'https://www.transformice.com/images/x_transformice/x_inventaire/{.img_id}.jpg'.format(self)
+		"""The image's url of the item."""
+		url = 'https://www.transformice.com/images/x_transformice/x_inventaire/{.img_id}.jpg'
+		return url.format(self)
 
 	@property
 	def is_currency(self):
+		"""Return True if the item is a currency."""
 		return self.id in (800, 801, 2253, 2254, 2257, 2260, 2261)
 
 	@property
 	def is_equipped(self):
-		return self.slot>0
+		"""Return True if the item is equipped"""
+		return self.slot > 0
 
 	@classmethod
 	def from_packet(cls, packet):
-		id = packet.read16()
+		"""Read an item from a packet.
+		:param packet: :class:`aiotfm.Packet` the packet.
+		:return: :class:`aiotfm.inventory.InventoryItem` the item.
+		"""
+		item_id = packet.read16()
 		kwargs = {
 			'quantity': packet.read8(),
 			'category': packet.read8(),
@@ -73,26 +82,31 @@ class InventoryItem:
 		packet.readBool()
 		if packet.readBool():
 			kwargs['img_id'] = packet.readUTF()
-		kwargs['slot'] = packet.read8() # if equipped, this is the slot (1, 2, 3); otherwise this is 0
-		return cls(id, **kwargs)
+
+		# if equipped, this is the slot (1, 2, 3); otherwise this is 0
+		kwargs['slot'] = packet.read8()
+		return cls(item_id, **kwargs)
 
 	async def use(self):
 		"""|coro|
 		Uses this item."""
 		if self.inventory is None or self.inventory.client is None:
-			raise TypeError("InventoryItem doesn't have the inventory variable or Inventory doesn't have the client variable.")
+			message = "InventoryItem doesn't have the inventory variable ""or Inventory doesn't \
+				have the client variable."
+			raise TypeError(message)
 		await self.inventory.client.main.send(Packet.new(31, 3).write16(self.id))
 
 
 class Inventory:
-	"""Represents the bot's inventory.
+	"""Represents the client's inventory.
 
 	Attributes
 	----------
 	items: `dict`
-		A dict containing all the items. The key is an :class:`int` and the value is an :class:`aiotfm.inventory.InventoryItem`.
+		A dict containing all the items. The key is an :class:`int` and the value is
+		an :class:`aiotfm.inventory.InventoryItem`.
 	client: `aiotfm.client.Client`
-		The bot that this inventory belongs to.
+		The client that this inventory belongs to.
 	"""
 	def __init__(self, client=None, items=None):
 		self.items = items or {}
@@ -119,6 +133,10 @@ class Inventory:
 
 	@classmethod
 	def from_packet(cls, packet):
+		"""Read the inventory from a packet.
+		:param packet: :class:`aiotfm.Packet` the packet.
+		:return: :class:`aiotfm.inventory.Inventory` the inventory.
+		"""
 		items = {}
 
 		for item in range(packet.read16()):
@@ -127,10 +145,10 @@ class Inventory:
 
 		return cls(items=items)
 
-	def get(self, id):
+	def get(self, item_id):
 		"""Gets an item from this :class:`aiotfm.inventory.Inventory`.
 		Shorthand for :class:`aiotfm.inventory.Inventory`.items.get"""
-		return self.items.get(id, InventoryItem(id))
+		return self.items.get(item_id, InventoryItem(item_id))
 
 	def sort(self):
 		"""Sort the inventory the same way the client does.
@@ -141,7 +159,7 @@ class Inventory:
 				return -1 if a.is_currency else 1 # Currency are always on the top
 			if (a.is_event or b.is_event) and not (a.is_event and b.is_event):
 				return -1 if a.is_event else 1 # Event items comes always after the currency
-			if a.category!=b.category:
+			if a.category != b.category:
 				return b.category - a.category # Higher means first
 			return a.id - b.id # Lastly the items are sorted by their ids
 
@@ -149,32 +167,46 @@ class Inventory:
 
 
 class TradeContainer:
+	"""Represents the content of a Trade."""
 	def __init__(self, trade):
 		self.trade = trade
 		self._content = []
 
-	def get(self, id, default=0):
+	def get(self, item_id, default=0):
+		"""Returns the quantity of an item inside the TradeContainer.
+		:param item_id: :class:`int` the item's id.
+		:param default: Optional[:class:`int`] the default value if the item is not present.
+		:return: :class:`int` the quantity of the item.
+		"""
 		for item in self._content:
-			if item.id == id:
+			if item.id == item_id:
 				return item.quantity
 		return default
 
 	def getSlot(self, index):
+		"""Returns the item inside a certain slot.
+		:param index: :class:`int` the index.
+		:return: :class:`aiotfm.inventory.InventoryItem` the item.
+		"""
 		return self._content[index]
 
-	def add(self, id, quantity):
+	def add(self, item_id, quantity):
+		"""Add a quantity of an item inside the container.
+		:param item_id: :class:`int` the item's id.
+		:param quantity: :class:`int` the quantity to add. Can be negative.
+		"""
 		for item in self._content:
-			if item.id == id:
+			if item.id == item_id:
 				item.quantity += quantity
 				if item.quantity == 0:
 					self._content.remove(item)
 				break
 		else:
-			self._content.append(InventoryItem(id, quantity=quantity))
+			self._content.append(InventoryItem(item_id, quantity=quantity))
 
 
 class Trade:
-	"""Represents a trade that the bot is participating (not started, in progress or ended).
+	"""Represents a trade that the client is participating (not started, in progress or ended).
 
 	Attributes
 	----------
@@ -224,7 +256,8 @@ class Trade:
 			raise TypeError(f"Trade expected 'Player' or 'str' type, got '{type(trader)}")
 
 	def __repr__(self):
-		return "<Trade state={} locked=[trader:{}, client:{}] trader={} pid={}>".format(TradeState[self.state], *self.locked, self.trader, self.pid)
+		return "<Trade state={} locked=[trader:{}, client:{}] trader={} pid={}>".format(
+			TradeState[self.state], *self.locked, self.trader, self.pid)
 
 	def __eq__(self, other):
 		if other is None:
@@ -239,9 +272,11 @@ class Trade:
 		return self.state in (TradeState.SUCCESS, TradeState.CANCELLED)
 
 	def _start(self):
+		"""Set the state of the trade as TRADING."""
 		self.state = TradeState.TRADING
 
 	def _close(self, succeed=False):
+		"""Closes the trade."""
 		self.state = TradeState.SUCCESS if succeed else TradeState.CANCELLED
 		if self.client.trade == self:
 			self.client.trade = None
@@ -266,47 +301,47 @@ class Trade:
 		self.state = TradeState.ACCEPTING
 		await self.client.main.send(Packet.new(31, 5).writeString(self.trader))
 
-	async def addItem(self, id, quantity):
+	async def addItem(self, item_id, quantity):
 		"""|coro|
 		Adds an item to the trade.
 
-		:param id: :class:`int` The item id.
+		:param item_id: :class:`int` The item id.
 		:param quantity: :class:`int` The quantity of item to add."""
 		if self.state != TradeState.TRADING:
 			raise TradeOnWrongState('addItem', self.state)
 
 		quantity = min(max(quantity, 0), 200)
-		packet = Packet.new(31, 8).write16(id).writeBool(True).buffer
+		packet = Packet.new(31, 8).write16(item_id).writeBool(True).buffer
 
 		ten = packet + b'\x01'
-		for i in range(quantity//10):
+		for i in range(quantity // 10):
 			await self.client.main.send(Packet(ten))
 			await asyncio.sleep(.05)
 
 		unit = packet + b'\x00'
-		for i in range(quantity%10):
+		for i in range(quantity % 10):
 			await self.client.main.send(Packet(unit))
 			await asyncio.sleep(.05)
 
-	async def removeItem(self, id, quantity):
+	async def removeItem(self, item_id, quantity):
 		"""|coro|
 		Removes an item from the trade.
 
-		:param id: :class:`int` The item id.
+		:param item_id: :class:`int` The item id.
 		:param quantity: :class:`int` The quantity of item to remove."""
 		if self.state != TradeState.TRADING:
 			raise TradeOnWrongState('removeItem', self.state)
 
 		quantity = min(max(quantity, 0), 200)
-		packet = Packet.new(31, 8).write16(id).writeBool(False).buffer
+		packet = Packet.new(31, 8).write16(item_id).writeBool(False).buffer
 
 		ten = packet + b'\x01'
-		for i in range(quantity//10):
+		for i in range(quantity // 10):
 			await self.client.main.send(Packet(ten))
 			await asyncio.sleep(.05)
 
 		unit = packet + b'\x00'
-		for i in range(quantity%10):
+		for i in range(quantity % 10):
 			await self.client.main.send(Packet(unit))
 			await asyncio.sleep(.05)
 

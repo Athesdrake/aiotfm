@@ -57,7 +57,11 @@ class Whisper(Message):
 		return f'{direction} {commu}[{author}] {self.content}'
 
 	async def reply(self, msg):
-		return await self._client.whisper(self.author, msg)
+		"""|coro|
+		Reply to the author of the message. Shortcut to :meth:`Client.whisper`.
+		:param msg: :class:`str` the message."""
+		await self._client.whisper(self.author, msg)
+
 
 class Channel:
 	"""Represents a channel (#chat) in the game.
@@ -105,7 +109,7 @@ class Channel:
 		return players
 
 class ChannelMessage(Message):
-	"""Represent a message from a :class:`Channel`.
+	"""Represents a message from a :class:`Channel`.
 
 	Attributes
 	----------

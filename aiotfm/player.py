@@ -1,10 +1,64 @@
 from aiotfm.packet import Packet
 
+
 class Player:
-	def __init__(self, username, id=-1, pid=-1, **kwargs):
+	"""Represents a player in game.
+
+	Attributes
+	----------
+	username: :class:`str`
+		The player's username.
+	uid: :class:`int`
+		The player's id. -1 if unknown
+	pid: :class:`int`
+		The player's pid. -1 if unknown
+	look: :class:`str`
+		The player's look. '' if unknown
+	gender: :class:`int`
+		The player's gender.
+	title: :class:`int`
+		The player's title id. 0 if unknown
+	title_stars: :class:`int`
+		The player's title's stars.
+	hasCheese: :class:`bool`
+		True if the player has the cheese.
+	isDead: :class:`bool`
+		True if the player is dead.
+	isShaman: :class:`bool`
+		True if the player is shaman.
+	isVampire: :class:`bool`
+		True if the player is vampire.
+	score: :class:`int`
+		The player's score.
+	mouseColor: :class:`int`
+		The color of the player's fur.
+	nameColor: :class:`int`
+		The color of the player's name.
+	shamanColor: :class:`int`
+		The color of the player's shaman's feather.
+	facingRight: :class:`bool`
+		True if the player is facing right.
+	movingLeft: :class:`bool`
+		True if the player is moving to the left.
+	movingRight: :class:`bool`
+		True if the player is moving to the right.
+	x: :class:`int`
+		The player's x position.
+	y: :class:`int`
+		The player's y position.
+	vx: :class:`int`
+		The player's horizontal speed.
+	vy: :class:`int`
+		The player's vertical speed.
+	ducking: :class:`bool`
+		True if the player is ducking (crouching).
+	jumping: :class:`bool`
+		True if the player is jumping.
+	"""
+	def __init__(self, username, uid=-1, pid=-1, **kwargs):
 		self.gender = kwargs.get('gender', 0)
 		self.look = kwargs.get('look', '')
-		self.id = id
+		self.id = uid
 		self.pid = pid
 		self.title = kwargs.get('title', 0)
 		self.title_stars = kwargs.get('title_stars', 0)
@@ -32,7 +86,11 @@ class Player:
 		self.jumping = False
 
 	@classmethod
-	def from_packet(cls, packet:Packet):
+	def from_packet(cls, packet: Packet):
+		"""Reads a Player from a packet.
+		:param packet: :class:`aiotfm.Packet` the packet.
+		:return: :class:`aiotfm.player.Player` the player.
+		"""
 		name = packet.readUTF()
 		pid = packet.read32()
 		kwargs = {
@@ -69,16 +127,18 @@ class Player:
 
 	def __eq__(self, other):
 		if isinstance(other, str):
-			return str(self)==other or self.username.lower()==other.lower()
+			return str(self) == other or self.username.lower() == other.lower()
 		if -1 not in [self.id, other.id]:
-			return self.id==other.id
+			return self.id == other.id
 		if -1 not in [self.pid, other.pid]:
-			return self.pid==other.pid
-		return self.username.lower()==other.username.lower()
+			return self.pid == other.pid
+		return self.username.lower() == other.username.lower()
 
 	@property
 	def isGuest(self):
+		"""Return True if the player is a guest (Souris)"""
 		return self.username.startswith('*')
+
 
 class Profile:
 	"""Represents a player's profile.
@@ -86,7 +146,7 @@ class Profile:
 	## Attributes
 
 	username `str` the player's username.
-	id `int` the player's id.
+	uid `int` the player's id.
 	registration_date `int` the registration timestamp of the player.
 	privLevel `int` the privilege level of the player.
 	gender `int` player's gender.
@@ -103,7 +163,7 @@ class Profile:
 	orbs `set` the list of unlocked orbs.
 	adventurePoints `int` number of adventure points the player has.
 	"""
-	def __init__(self, packet:Packet):
+	def __init__(self, packet: Packet):
 		self.username = packet.readUTF()
 		self.id = packet.read32()
 
@@ -117,31 +177,32 @@ class Profile:
 
 		self.titles = set()
 		self.titles_stars = {}
-		for i in range(packet.read16()):
+		for _ in range(packet.read16()):
 			title_id, stars = packet.read16(), packet.read8()
 			self.titles.add(title_id)
-			if stars>1:
+			if stars > 1:
 				self.titles_stars[title_id] = stars
 
 		self.look = packet.readUTF()
 		self.level = packet.read16()
 
 		self.badges = {}
-		for i in range(round(packet.read16()/2)):
-			id, quantity = packet.read16(), packet.read16()
-			self.badges[id] = quantity
+		for _ in range(round(packet.read16() / 2)):
+			badge, quantity = packet.read16(), packet.read16()
+			self.badges[badge] = quantity
 
 		modeStats = []
-		for i in range(packet.read8()):
+		for _ in range(packet.read8()):
 			modeStats.append((packet.read8(), packet.read32(), packet.read32(), packet.read8()))
 		self.stats = Stats(stats, modeStats)
 
 		self.equippedOrb = packet.read8()
 		self.orbs = set()
-		for i in range(packet.read8()):
+		for _ in range(packet.read8()):
 			self.orbs.add(packet.read8())
 
 		self.adventurePoints = packet.read32()
+
 
 class Stats:
 	"""Represents the statistics of a player.
@@ -155,7 +216,8 @@ class Stats:
 	firsts `int` number of cheese gathered first.
 	gatheredCheese `int` total number of gathered cheese.
 	bootcamps `int` number of bootcamp.
-	modeStats `list` a list of tuples that represents the stats in different mode. (id, progress, progressLimit, imageId)
+	modeStats `list` a list of tuples that represents the stats in different mode.
+		(id, progress, progressLimit, imageId)
 	"""
 	def __init__(self, stats, modeStats):
 		self.normalModeSaves = stats[0]

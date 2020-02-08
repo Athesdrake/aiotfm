@@ -3,6 +3,19 @@ from aiotfm.errors import PacketError, PacketTooLarge, XXTEAInvalidPacket, XXTEA
 import struct
 
 class Packet:
+	"""Represents a network packet.
+
+	Parameters
+	----------
+	buffer: Optional[:class:`bytes`]
+
+	Attributes
+	----------
+	buffer: :class:`bytearray`
+		The content of the packet.
+	pos: :class:`int`
+		The position inside the buffer.
+	"""
 	def __init__(self, buffer=None):
 		if buffer is None:
 			buffer = bytearray()

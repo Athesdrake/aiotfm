@@ -445,6 +445,10 @@ class Client:
 			await asyncio.sleep(.5)
 
 	def get_channel(self, name):
+		"""Returns a channel from it's name or None if not found.
+		:param name: :class:`str` the name of the channel.
+		:return: :class:`aiotfm.messages.ChannelMessage` or None
+		"""
 		if name is None:
 			return None
 
@@ -453,6 +457,10 @@ class Client:
 				return channel
 
 	def get_trade(self, player):
+		"""Returns the pending/current trade with a player.
+		:param player: :class:`aiotfm.room.Player` or :class:`str` the player.
+		:return: :class:`aiotfm.trade.Trade` the trade with the player.
+		"""
 		if not isinstance(player, (str, Player)):
 			raise TypeError(f"Expected Player or str types got {type(player)}")
 
@@ -582,13 +590,24 @@ class Client:
 			return asyncio.ensure_future(self._run_event(coro, method, *args, **kwargs), loop=self.loop)
 
 	async def on_error(self, event, err, *a, **kw):
+		"""Default on_error event handler. Prints the traceback of the error."""
 		message = '\nAn error occurred while dispatching the event "{0}":\n\n{2}'
 		tb = traceback.format_exc(limit=-1)
 		print(message.format(event, err, tb), file=sys.stderr)
 		return message.format(event, err, tb)
 
 	async def on_connection_error(self, conn, error):
+		"""Default on_connection_error event handler. Prints the error."""
 		print('{0.__class__.__name__}: {0}'.format(error), file=sys.stderr)
+
+	async def on_login_result(self, code, *args):
+		"""Default on_login_result handler. Raise an error and closes the connection."""
+		self.loop.call_later(5, self.close)
+		if code == 1:
+			raise AlreadyConnected()
+		if code == 2:
+			raise IncorrectPassword()
+		raise LoginError(code)
 
 	async def connect(self):
 		"""|coro|
@@ -639,10 +658,16 @@ class Client:
 		await self.locale.load()
 
 	async def restart_soon(self, *args, delay=5.0, **kwargs):
+		"""Restarts the client in several seconds.
+		:param delay: :class:`int` the delay before restarting. Default is 5 seconds.
+		:param args: arguments to pass to the :meth:`restart` method.
+		:param kwargs: keyword arguments to pass to the :meth:`restart` method."""
 		await asyncio.sleep(delay)
 		await self.restart(*args, **kwargs)
 
 	async def restart(self, keys=None):
+		"""Restarts the client.
+		:param keys:"""
 		self.dispatch("restart")
 
 		self.close()
@@ -707,6 +732,7 @@ class Client:
 			raise
 
 	def close(self):
+		"""Closes the sockets."""
 		self.main.close()
 		if self.bulle is not None:
 			self.bulle.close()
@@ -941,11 +967,3 @@ class Client:
 		"""|coro|
 		Send a request to the server to get the bot's inventory."""
 		await self.main.send(Packet.new(31, 1))
-
-	async def on_login_result(self, code, *args):
-		self.loop.call_later(5, self.close)
-		if code==1:
-			raise AlreadyConnected()
-		elif code==2:
-			raise IncorrectPassword()
-		raise LoginError(code)
