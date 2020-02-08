@@ -1,5 +1,6 @@
 from aiotfm.errors import AiotfmException
 
+
 class Room:
 	"""Represents the room that the bot currently is in.
 
@@ -42,13 +43,14 @@ class Room:
 			return self.name
 		return self.name.split('-', 1)[1]
 
-	def get_players(self, predicate, max=None):
+	def get_players(self, predicate, max_=None):
 		"""Filters players from the room.
 
-		:param predicate: A function that returns a boolean-like result to filter through the players.
-		:param max: Optional[:class:`int`] The maximum amount of players to return.
+		:param predicate: A function that returns a boolean-like result to filter through
+			the players.
+		:param max_: Optional[:class:`int`] The maximum amount of players to return.
 		:return: `Iterable` The filtered players."""
-		return [p for p in self.players.values() if predicate(p)][:max]
+		return [p for p in self.players.values() if predicate(p)][:max_]
 
 	def get_player(self, default=None, **kwargs):
 		"""Gets one player in the room with an identifier.
@@ -64,11 +66,11 @@ class Room:
 
 		identifier, value = next(iter(kwargs.items()))
 
-		if identifier == 'name' or identifier == 'username':
-			def filter(p):
+		if identifier in ('name', 'username'):
+			def filter_(p):
 				return p == value
-		elif identifier=='id':
-			def filter(p):
+		elif identifier == 'id':
+			def filter_(p):
 				return p.id == int(value)
 		elif identifier == 'pid':
 			return self.players.get(int(value), default)
@@ -76,6 +78,6 @@ class Room:
 			raise AiotfmException('Invalid filter.')
 
 		for player in self.players.values():
-			if filter(player):
+			if filter_(player):
 				return player
 		return default

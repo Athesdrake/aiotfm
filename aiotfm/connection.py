@@ -2,14 +2,15 @@ import asyncio
 
 from aiotfm.errors import InvalidSocketData
 
+
 class Socket:
 	"""A socket class with asyncio."""
 	def __init__(self, host, port, loop=None):
 		self.loop = loop or asyncio.get_event_loop()
 
 		self.__socket = asyncio.open_connection(host, port, loop=self.loop)
-		self._reader:asyncio.StreamReader = None
-		self._writer:asyncio.StreamWriter = None
+		self._reader: asyncio.StreamReader = None
+		self._writer: asyncio.StreamWriter = None
 		self.connected = False
 
 	async def connect(self):
@@ -26,10 +27,9 @@ class Socket:
 		try:
 			return await self._reader.readexactly(size)
 		except asyncio.IncompleteReadError as e:
-			if e.partial==b'':
+			if e.partial == b'':
 				raise EOFError() # EOF found
-			else:
-				return b'\x00' # Return dummy packet to prevent crash while parsing.
+			return b'\x00' # Return dummy packet to prevent crash while parsing.
 
 	async def send(self, data):
 		"""|coro|
@@ -47,6 +47,7 @@ class Socket:
 		"""Close the socket."""
 		self.connected = False
 		self._writer.close()
+
 
 class Connection:
 	"""Represents the connection between the client and the host."""
@@ -88,8 +89,9 @@ class Connection:
 					self.close()
 					break
 				else:
-					if lensize[0]>3:
-						raise InvalidSocketData('The connection {.name} receive a non-valid type of {} bytes.'.format(self, lensize[0]))
+					if lensize[0] > 3:
+						message = 'The connection {.name} receive a non-valid type of {} bytes.'
+						raise InvalidSocketData(message.format(self, lensize[0]))
 
 				length = int.from_bytes(await self.socket.recv(lensize[0]), 'big')
 				data = await self.socket.recv(length)
@@ -97,7 +99,8 @@ class Connection:
 		except Exception as e:
 			future = self.client.dispatch('connection_error', self, e)
 			if future is not None:
-				# This future is a wrapper for _run_event, which returns True if the event ran successfully, False otherwise.
+				# This future is a wrapper for _run_event, which returns True if the event
+				# ran successfully, False otherwise.
 				# If it returns False, it already handled the auto_restart.
 				if not await future:
 					return

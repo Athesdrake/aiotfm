@@ -1,6 +1,7 @@
 from aiotfm.enums import ChatCommunity
 from aiotfm.packet import Packet
 
+
 class Message:
 	"""Represents any message from the chat.
 	Convert an instance to string to get the representation in game of the message.
@@ -24,8 +25,11 @@ class Message:
 		return '[{0.author}] {0.content}'.format(self)
 
 	def __repr__(self):
-		text = ' '.join('{}={}'.format(k,repr(v)[:32]) for k,v in vars(self).items() if not k.startswith('_'))
-		return '<{.__class__.__name__} {}>'.format(self, text)
+		return '<{.__class__.__name__} {}>'.format(self, ' '.join(
+			'='.join((k, repr(v)[:32])) for k, v in vars(self).items()
+			if not k.startswith('_')
+		))
+
 
 class Whisper(Message):
 	"""Represents a whisper from the chat.
@@ -48,7 +52,7 @@ class Whisper(Message):
 		super().__init__(author, content, community, client)
 		self.receiver = receiver
 
-		self.sent = self.author==client.username
+		self.sent = self.author == client.username
 
 	def __str__(self):
 		direction = '<' if self.sent else '>'
@@ -80,8 +84,8 @@ class Channel:
 
 	def __eq__(self, other):
 		if isinstance(other, str):
-			return self.name==other
-		return self.name==other.name
+			return self.name == other
+		return self.name == other.name
 
 	async def send(self, message):
 		"""|coro|
@@ -102,11 +106,12 @@ class Channel:
 		:throws: `asyncio.TimeoutError`
 		:return: List[`aiotfm.Player`]"""
 		def check(idseq, players):
-			return idseq==idSequence
+			return idseq == idSequence
 
 		idSequence = await self._client.sendCP(58, Packet().writeString(self.name))
 		_, players = await self._client.wait_for('on_channel_who', check, timeout=3)
 		return players
+
 
 class ChannelMessage(Message):
 	"""Represents a message from a :class:`Channel`.

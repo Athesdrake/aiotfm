@@ -5,7 +5,7 @@ import traceback
 import warnings
 
 from aiotfm.packet import Packet
-from aiotfm.utils import Locale, get_keys
+from aiotfm.utils import Locale, get_keys, shakikoo
 from aiotfm.connection import Connection
 from aiotfm.player import Profile, Player
 from aiotfm.tribe import Tribe
@@ -14,7 +14,9 @@ from aiotfm.shop import Shop
 from aiotfm.inventory import Inventory, InventoryItem, Trade
 from aiotfm.room import Room
 from aiotfm.enums import TradeError, Community
-from aiotfm.errors import *
+from aiotfm.errors import AiotfmException, InvalidEvent, CommunityPlatformError, \
+	AlreadyConnected, IncorrectPassword, LoginError, ServerUnreachable
+
 
 class Client:
 	"""Represents a client that connects to Transformice.
@@ -43,7 +45,8 @@ class Client:
 	trades: :class:`list`[:class:`aiotfm.inventory.Trade`]
 		All the trades that the bot participates. Most of them might be invitations only.
 	inventory: Optional[:class:`aiotfm.inventory.Inventory`]
-		The bot's inventory. Might be None if the bot didn't log in yet or it didn't receive anything.
+		The bot's inventory. Might be None if the bot didn't log in yet or it didn't receive
+		anything.
 	locale: :class:`aiotfm.locale.Locale`
 		The bot's locale (translations).
 	"""
@@ -67,6 +70,9 @@ class Client:
 		self.community = Community(community)
 		self.cp_fingerprint = 0
 
+		self.keys = None
+		self.authkey = 0
+
 		self.auto_restart = auto_restart
 		self.api_tfmid = None
 		self.api_token = None
@@ -78,7 +84,8 @@ class Client:
 		Dispatches the received data.
 
 		:param data: :class:`bytes` the received data.
-		:param connection: :class:`aiotfm.connection.Connection` the connection that received the data.
+		:param connection: :class:`aiotfm.connection.Connection` the connection that received
+			the data.
 		"""
 		self.dispatch('raw_socket', connection, Packet(data))
 		try:
@@ -86,7 +93,7 @@ class Client:
 		except Exception:
 			traceback.print_exc()
 
-	async def handle_packet(self, connection:Connection, packet:Packet):
+	async def handle_packet(self, connection: Connection, packet: Packet):
 		"""|coro|
 		Handles the known packets and dispatches events.
 		Subclasses should handle only the unhandled packets from this method.
@@ -100,12 +107,13 @@ class Client:
 						# Handle here the unhandled packets.
 						pass
 
-		:param connection: :class:`aiotfm.connection.Connection` the connection that received the packet.
+		:param connection: :class:`aiotfm.connection.Connection` the connection that received
+			the packet.
 		:param packet: :class:`aiotfm.Packet` the packet.
 		:return: True if the packet got handled, False otherwise.
 		"""
 		CCC = packet.readCode()
-		if CCC==(1, 1): # Old packets
+		if CCC == (1, 1): # Old packets
 			oldCCC, *data = packet.readString().split(b'\x01')
 			data = list(map(bytes.decode, data))
 			oldCCC = tuple(oldCCC[:2])
@@ -113,11 +121,11 @@ class Client:
 			self.dispatch('old_packet', connection, oldCCC, data)
 			return await self.handle_old_packet(connection, oldCCC, data)
 
-		elif CCC==(5, 21): # Joined room
+		if CCC == (5, 21): # Joined room
 			self.room = room = Room(private=not packet.readBool(), name=packet.readUTF())
 			self.dispatch('joined_room', room)
 
-		elif CCC==(6, 6): # Room message
+		elif CCC == (6, 6): # Room message
 			player_id = packet.read32()
 			username = packet.readUTF()
 			commu = packet.read8()
@@ -129,36 +137,36 @@ class Client:
 
 			self.dispatch('room_message', Message(player, message, commu, self))
 
-		elif CCC==(6, 20): # Server message
+		elif CCC == (6, 20): # Server message
 			packet.readBool() # if False then the message will appear in the #Server channel
 			t_key = packet.readUTF()
 			t_args = [packet.readUTF() for i in range(packet.read8())]
 			self.dispatch('server_message', self.locale[t_key], *t_args)
 
-		elif CCC==(8, 5): # Show emoji
+		elif CCC == (8, 5): # Show emoji
 			player = self.room.get_player(pid=packet.read32())
 			emoji = packet.read8()
 			self.dispatch('emoji', player, emoji)
 
-		elif CCC==(8, 16): # Profile
+		elif CCC == (8, 16): # Profile
 			self.dispatch('profile', Profile(packet))
 
-		elif CCC==(8, 20): # Shop
+		elif CCC == (8, 20): # Shop
 			self.dispatch('shop', Shop(packet))
 
-		elif CCC==(8, 22): # Skills
+		elif CCC == (8, 22): # Skills
 			skills = {}
-			for i in range(packet.read8()):
+			for _ in range(packet.read8()):
 				key, value = packet.read8(), packet.read8()
 				skills[key] = value
 			self.dispatch('skills', skills)
 
-		elif CCC==(16, 2): # Tribe invitation received
+		elif CCC == (16, 2): # Tribe invitation received
 			author = packet.readUTF()
 			tribe = packet.readUTF()
 			self.dispatch('tribe_inv', author, tribe)
 
-		elif CCC==(26, 2): # Logged in successfully
+		elif CCC == (26, 2): # Logged in successfully
 			player_id = packet.read32()
 			self.username = username = packet.readUTF()
 			played_time = packet.read32()
@@ -166,7 +174,7 @@ class Client:
 			pid = packet.read32()
 			self.dispatch('logged', player_id, username, played_time, community, pid)
 
-		elif CCC==(26, 3): # Handshake OK
+		elif CCC == (26, 3): # Handshake OK
 			online_players = packet.read32()
 			connection.fingerprint = packet.read8()
 			community = Community[packet.readUTF()]
@@ -175,53 +183,53 @@ class Client:
 
 			self.loop.create_task(self._heartbeat_loop())
 
-			await connection.send(Packet.new(8,2).write8(self.community.value).write8(0))
+			await connection.send(Packet.new(8, 2).write8(self.community.value).write8(0))
 
-			os_info = Packet.new(28,17).writeString('en').writeString('Linux')
+			os_info = Packet.new(28, 17).writeString('en').writeString('Linux')
 			os_info.writeString('LNX 29,0,0,140').write8(0)
 
 			await connection.send(os_info)
 			self.dispatch('login_ready', online_players, community, country)
 
-		elif CCC==(26, 12): # Login result
+		elif CCC == (26, 12): # Login result
 			self.dispatch('login_result', packet.read8(), packet.readUTF(), packet.readUTF())
 
-		elif CCC==(26, 25): # Ping
+		elif CCC == (26, 25): # Ping
 			self.dispatch('ping')
 
-		elif CCC==(28, 6): # Server ping
+		elif CCC == (28, 6): # Server ping
 			await connection.send(Packet.new(28, 6).write8(packet.read8()))
 
-		elif CCC==(29, 6): # Lua logs
+		elif CCC == (29, 6): # Lua logs
 			self.dispatch('lua_log', packet.readUTF())
 
-		elif CCC==(31, 1): # Inventory data
+		elif CCC == (31, 1): # Inventory data
 			self.inventory = Inventory.from_packet(packet)
 			self.inventory.client = self
 			self.dispatch('inventory_update', self.inventory)
 
-		elif CCC==(31, 2): # Update inventory item
-			id = packet.read16()
+		elif CCC == (31, 2): # Update inventory item
+			item_id = packet.read16()
 			quantity = packet.read8()
 
-			if id in self.inventory.items:
-				item = self.inventory.items[id]
+			if item_id in self.inventory.items:
+				item = self.inventory.items[item_id]
 				previous = item.quantity
 				item.quantity = quantity
 				self.dispatch('item_update', item, previous)
 
 			else:
-				item = InventoryItem(id=id, quantity=quantity)
+				item = InventoryItem(item_id=item_id, quantity=quantity)
 				self.inventory.items[item.id] = item
 				self.dispatch('new_item', item)
 
-		elif CCC==(31, 5): # Trade invite
+		elif CCC == (31, 5): # Trade invite
 			pid = packet.read32()
 
 			self.trades[pid] = Trade(self, self.room.get_player(pid=pid))
 			self.dispatch('trade_invite', self.trades[pid])
 
-		elif CCC==(31, 6): # Trade error
+		elif CCC == (31, 6): # Trade error
 			name = packet.readUTF().lower()
 			error = packet.read8()
 
@@ -236,7 +244,7 @@ class Client:
 			self.dispatch('trade_error', trade, TradeError[error])
 			trade._close()
 
-		elif CCC==(31, 7): # Trade start
+		elif CCC == (31, 7): # Trade start
 			pid = packet.read32()
 			trade = self.trades.get(pid)
 
@@ -247,18 +255,19 @@ class Client:
 			self.trade = trade
 			self.dispatch('trade_start')
 
-		elif CCC==(31, 8): # Trade items
+		elif CCC == (31, 8): # Trade items
 			export = packet.readBool()
-			id = packet.read16()
+			id_ = packet.read16()
 			quantity = (1 if packet.readBool() else -1) * packet.read8()
 
 			items = self.trade.exports if export else self.trade.imports
-			items.add(id, quantity)
+			items.add(id_, quantity)
 
+			trader = self if export else self.trade.trader
 			self.trade.locked = [False, False]
-			self.dispatch('trade_item_change', self if export else self.trade.trader, id, quantity, items.get(id))
+			self.dispatch('trade_item_change', trader, id_, quantity, items.get(id_))
 
-		elif CCC==(31, 9): # Trade lock
+		elif CCC == (31, 9): # Trade lock
 			index = packet.read8()
 			locked = packet.readBool()
 			if index > 1:
@@ -270,11 +279,11 @@ class Client:
 
 			self.dispatch('trade_lock', who, locked)
 
-		elif CCC==(31, 10): # Trade complete
+		elif CCC == (31, 10): # Trade complete
 			trade = self.trade
 			self.trade._close(succeed=True)
 
-		elif CCC==(44, 1): # Bulle switching
+		elif CCC == (44, 1): # Bulle switching
 			bulle_id = packet.read32()
 			bulle_ip = packet.readUTF()
 			ports = packet.readUTF().split('-')
@@ -283,52 +292,52 @@ class Client:
 				self.bulle.close()
 
 			self.bulle = Connection('bulle', self, self.loop)
-			await self.bulle.connect(bulle_ip, ports[round(self.loop.time()*1000) % len(ports)])
+			await self.bulle.connect(bulle_ip, ports[round(self.loop.time() * 1000) % len(ports)])
 			await self.bulle.send(Packet.new(*CCC).write32(bulle_id))
 
-		elif CCC==(44, 22): # Fingerprint offset changed
+		elif CCC == (44, 22): # Fingerprint offset changed
 			connection.fingerprint = packet.read8()
 
-		elif CCC==(60, 3): # Community platform
+		elif CCC == (60, 3): # Community platform
 			TC = packet.read16()
 			self.dispatch('raw_cp', TC, packet.copy(True))
 
-			if TC==3: # Connected to the community platform
+			if TC == 3: # Connected to the community platform
 				self.dispatch('ready')
 
-			elif TC==55: # Channel join result
+			elif TC == 55: # Channel join result
 				result = packet.read8()
 				self.dispatch('channel_joined_result', result)
 
-			elif TC==57: # Channel leave result
+			elif TC == 57: # Channel leave result
 				result = packet.read8()
 				self.dispatch('channel_leaved_result', result)
 
-			elif TC==59: # Channel /who result
+			elif TC == 59: # Channel /who result
 				idSequence = packet.read32()
 				result = packet.read8()
 				players = [Player(packet.readUTF()) for _ in range(packet.read16())]
 				self.dispatch('channel_who', idSequence, players)
 
-			elif TC==62: # Joined a channel
+			elif TC == 62: # Joined a channel
 				name = packet.readUTF()
 
 				if name in self._channels:
-					channel = [c for c in self._channels if c==name][0]
+					channel = [c for c in self._channels if c == name][0]
 				else:
 					channel = Channel(name, self)
 					self._channels.append(channel)
 
 				self.dispatch('channel_joined', channel)
 
-			elif TC==63: # Quit a channel
+			elif TC == 63: # Quit a channel
 				name = packet.readUTF()
 				if name in self._channels:
 					self._channels.remove(name)
 
 				self.dispatch('channel_closed', name)
 
-			elif TC==64: # Channel message
+			elif TC == 64: # Channel message
 				author, community = packet.readUTF(), packet.read32()
 				channel_name, message = packet.readUTF(), packet.readUTF()
 				channel = self.get_channel(channel_name)
@@ -337,22 +346,27 @@ class Client:
 					channel = Channel(channel_name, self)
 					self._channels.append(channel)
 
-				self.dispatch('channel_message', ChannelMessage(author, community, message, channel))
+				channel_message = ChannelMessage(author, community, message, channel)
+				self.dispatch('channel_message', channel_message)
 
-			elif TC==65: # Tribe message
+			elif TC == 65: # Tribe message
 				author, message = packet.readUTF(), packet.readUTF()
 				self.dispatch('tribe_message', author, message)
 
-			elif TC==66: # Whisper
-				author, commu, receiver, message = Player(packet.readUTF()), packet.read32(), Player(packet.readUTF()), packet.readUTF()
+			elif TC == 66: # Whisper
+				author = Player(packet.readUTF())
+				commu = packet.read32()
+				receiver = Player(packet.readUTF())
+				message = packet.readUTF()
+
 				author = self.room.get_player(name=author, default=author)
 				receiver = self.room.get_player(name=receiver, default=receiver)
 				self.dispatch('whisper', Whisper(author, commu, receiver, message, self))
 
-			elif TC==88: # tribe member connected
+			elif TC == 88: # tribe member connected
 				self.dispatch('member_connected', packet.readUTF())
 
-			elif TC==90: # tribe member disconnected
+			elif TC == 90: # tribe member disconnected
 				self.dispatch('member_disconnected', packet.readUTF())
 
 			else:
@@ -360,16 +374,17 @@ class Client:
 					print(CCC, TC, bytes(packet.buffer)[4:])
 				return False
 
-		elif CCC==(100, 67): # New inventory item
+		elif CCC == (100, 67): # New inventory item
 			slot = packet.read8()
-			id = packet.read16()
+			slot = None if slot == 0 else slot
+			item_id = packet.read16()
 			quantity = packet.read8()
 
-			item = InventoryItem(id=id, quantity=quantity, slot=None if slot == 0 else slot)
-			self.inventory[id] = item
+			item = InventoryItem(item_id=item_id, quantity=quantity, slot=slot)
+			self.inventory[item_id] = item
 			self.dispatch('new_item', item)
 
-		elif CCC==(144, 1): # Set player list
+		elif CCC == (144, 1): # Set player list
 			before = self.room.players
 			self.room.players = {}
 
@@ -379,7 +394,7 @@ class Client:
 
 			self.dispatch('bulk_player_update', before, self.room.players)
 
-		elif CCC==(144, 2): # Add a player
+		elif CCC == (144, 2): # Add a player
 			after = Player.from_packet(packet)
 			before = self.room.players.pop(after.pid, None)
 
@@ -396,7 +411,7 @@ class Client:
 
 		return True
 
-	async def handle_old_packet(self, connection:Connection, oldCCC:tuple, data:list):
+	async def handle_old_packet(self, connection: Connection, oldCCC: tuple, data: list):
 		"""|coro|
 		Handles the known packets from the old protocol and dispatches events.
 		Subclasses should handle only the unhandled packets from this method.
@@ -410,12 +425,13 @@ class Client:
 						# Handle here the unhandled packets.
 						pass
 
-		:param connection: :class:`aiotfm.connection.Connection` the connection that received the packet.
+		:param connection: :class:`aiotfm.connection.Connection` the connection that received
+			the packet.
 		:param oldCCC: :class:`tuple` the packet identifiers on the old protocol.
 		:param data: :class:`list` the packet data.
 		:return: True if the packet got handled, False otherwise.
 		"""
-		if oldCCC==(8, 7): # Remove a player
+		if oldCCC == (8, 7): # Remove a player
 			player = self.room.players.pop(int(data[0]), None)
 
 			if player is not None:
@@ -440,7 +456,7 @@ class Client:
 				if self.bulle is not None and self.bulle.open:
 					await self.bulle.send(Packet.new(26, 26))
 
-				self.dispatch('heartbeat', (time.perf_counter()-t)*1000)
+				self.dispatch('heartbeat', (time.perf_counter() - t) * 1000)
 				last_heartbeat = self.loop.time()
 			await asyncio.sleep(.5)
 
@@ -453,7 +469,7 @@ class Client:
 			return None
 
 		for channel in self._channels:
-			if channel.name==name:
+			if channel.name == name:
 				return channel
 
 	def get_trade(self, player):
@@ -481,7 +497,8 @@ class Client:
 		if not name.startswith('on_'):
 			raise InvalidEvent("'{}' isn't a correct event naming.".format(name))
 		if not asyncio.iscoroutinefunction(coro):
-			raise InvalidEvent("Couldn't register a non-coroutine function for the event {}.".format(name))
+			message = "Couldn't register a non-coroutine function for the event {}.".format(name)
+			raise InvalidEvent(message)
 
 		setattr(self, name, coro)
 		return coro
@@ -492,14 +509,16 @@ class Client:
 		Example: ::
 			@client.event
 			async def on_room_message(author, message):
-				if message=='id':
+				if message == 'id':
 					await client.sendCommand('profile '+author)
-					profile = await client.wait_for('on_profile', lambda p: p.username==author)
+					profile = await client.wait_for('on_profile', lambda p: p.username == author)
 					await client.sendRoomMessage('Your id: {}'.format(profile.id))
 
 		:param event: :class:`str` the event name.
-		:param condition: Optionnal[:class:`function`] A predicate to check what to wait for. The arguments must meet the parameters of the event being waited for.
-		:param timeout: Optionnal[:class:`int`] the number of seconds before raise asyncio.TimeoutError
+		:param condition: Optionnal[:class:`function`] A predicate to check what to wait for.
+			The arguments must meet the parameters of the event being waited for.
+		:param timeout: Optionnal[:class:`int`] the number of seconds before
+			throwing asyncio.TimeoutError
 		:return: :class:`asyncio.Future` a future that you must await.
 		"""
 		event = event.lower()
@@ -531,15 +550,15 @@ class Client:
 		try:
 			await coro(*args, **kwargs)
 			return True
-		except asyncio.CancelledError:
-			raise
+		# except asyncio.CancelledError:
+		# 	raise
 		except Exception as e:
 			if hasattr(self, 'on_error'):
 				try:
 					await self.on_error(event_name, e, *args, **kwargs)
-				except asyncio.CancelledError:
-					raise
-				except Exception as e:
+				# except asyncio.CancelledError:
+				# 	raise
+				except Exception:
 					if not self.auto_restart:
 						self.close()
 				finally:
@@ -572,14 +591,13 @@ class Client:
 					fut.set_exception(e)
 				else:
 					if result:
-						fut.set_result(args[0] if len(args)==1 else args if len(args) else None)
+						fut.set_result(args[0] if len(args) == 1 else args if len(args) > 0 else None)
 						if stop:
 							del waiters[i]
-							return
-						else:
-							to_remove.append(i)
+							return None
+						to_remove.append(i)
 
-			if len(to_remove)==len(waiters):
+			if len(to_remove) == len(waiters):
 				del self._waiters[method]
 			else:
 				for i in to_remove[::-1]:
@@ -587,7 +605,8 @@ class Client:
 
 		coro = getattr(self, method, None)
 		if coro is not None:
-			return asyncio.ensure_future(self._run_event(coro, method, *args, **kwargs), loop=self.loop)
+			dispatch = self._run_event(coro, method, *args, **kwargs)
+			return asyncio.ensure_future(dispatch, loop=self.loop)
 
 	async def on_error(self, event, err, *a, **kw):
 		"""Default on_error event handler. Prints the traceback of the error."""
@@ -617,12 +636,12 @@ class Client:
 		for port in [13801, 11801, 12801, 14801]:
 			try:
 				await self.main.connect('94.23.193.229', port)
-			except:
+			except Exception:
 				pass
 			else:
 				break
 		else:
-			raise ConnectionError('Unable to connect to the server.')
+			raise ServerUnreachable('Unable to connect to the server.')
 
 		while not self.main.socket.connected:
 			await asyncio.sleep(.1)
@@ -634,7 +653,10 @@ class Client:
 		packet = Packet.new(28, 1).write16(self.keys.version).writeString(self.keys.connection)
 		packet.writeString('Desktop').writeString('-').write32(0x1fbd).writeString('')
 		packet.writeString('74696720697320676f6e6e61206b696c6c206d7920626f742e20736f20736164')
-		packet.writeString("A=t&SA=t&SV=t&EV=t&MP3=t&AE=t&VE=t&ACC=t&PR=t&SP=f&SB=f&DEB=f&V=LNX 29,0,0,140&M=Adobe Linux&R=1920x1080&COL=color&AR=1.0&OS=Linux&ARCH=x86&L=en&IME=t&PR32=t&PR64=t&LS=en-US&PT=Desktop&AVD=f&LFD=f&WD=f&TLS=t&ML=5.1&DP=72")
+		packet.writeString(
+			"A=t&SA=t&SV=t&EV=t&MP3=t&AE=t&VE=t&ACC=t&PR=t&SP=f&SB=f&DEB=f&V=LNX 29,0,0,140&M=Adobe"
+			" Linux&R=1920x1080&COL=color&AR=1.0&OS=Linux&ARCH=x86&L=en&IME=t&PR32=t&PR64=t&LS=en-U"
+			"S&PT=Desktop&AVD=f&LFD=f&WD=f&TLS=t&ML=5.1&DP=72")
 		packet.write32(0).write32(0x6257).writeString('')
 
 		await self.main.send(packet)
@@ -691,12 +713,11 @@ class Client:
 		:param room: Optional[:class:`str`] the room where the client will be logged in.
 		"""
 		if not encrypted:
-			from .utils import shakikoo
 			password = shakikoo(password)
 
 		packet = Packet.new(26, 8).writeString(username).writeString(password)
 		packet.writeString("app:/TransformiceAIR.swf/[[DYNAMIC]]/2/[[DYNAMIC]]/4")
-		packet.writeString(room).write32(self.authkey^self.keys.auth).write8(0).writeString('')
+		packet.writeString(room).write32(self.authkey ^ self.keys.auth).write8(0).writeString('')
 		packet.cipher(self.keys.identification).write8(0)
 
 		await self.main.send(packet)
@@ -720,16 +741,18 @@ class Client:
 				"Use Client.start method to enable automatic restart."
 			)
 
-		asyncio.ensure_future(self.start(api_tfmid, api_token, keys=kwargs.pop('keys', None)), loop=self.loop)
+		keys = kwargs.pop('keys', None)
+		asyncio.ensure_future(self.start(api_tfmid, api_token, keys=keys), loop=self.loop)
 		self.loop.run_until_complete(self.wait_for('on_login_ready'))
 		asyncio.ensure_future(self.login(username, password, **kwargs), loop=self.loop)
 
-		try:
-			self.loop.run_forever()
-		except:
-			# add self.close
-			# asyncio.ensure_future(self.close())
-			raise
+		self.loop.run_forever()
+		# try:
+		# 	self.loop.run_forever()
+		# except:
+		# 	# add self.close
+		# 	# asyncio.ensure_future(self.close())
+		# 	raise
 
 	def close(self):
 		"""Closes the sockets."""
@@ -788,7 +811,8 @@ class Client:
 
 		:param username: :class:`str` the player to whisper.
 		:param message: :class:`str` the content of the whisper.
-		:param overflow: :class:`bool` will send the complete message if True, splitted in several messages.
+		:param overflow: :class:`bool` will send the complete message if True, splitted
+			in several messages.
 		"""
 		if isinstance(username, Player):
 			username = username.username
@@ -803,7 +827,7 @@ class Client:
 		await send(message[:255])
 		for i in range(255, len(message), 255):
 			await asyncio.sleep(1)
-			await self.whisper(username, message[i:i+255])
+			await self.whisper(username, message[i:i + 255])
 
 	async def getTribe(self, disconnected=True):
 		"""|coro|
@@ -814,40 +838,44 @@ class Client:
 		"""
 		sid = self.cp_fingerprint + 1
 		await self.sendCP(108, Packet().writeBool(disconnected))
-		tc, packet = await self.wait_for('on_raw_cp', lambda tc, p: (tc==109 and p.read32()==sid) or tc==130)
-		if tc==109:
+
+		def is_tribe(tc, packet):
+			return (tc == 109 and packet.read32() == sid) or tc == 130
+
+		tc, packet = await self.wait_for('on_raw_cp', is_tribe)
+		if tc == 109:
 			result = packet.readByte()
-			if result==1:
-				tc, packet = await self.wait_for('on_raw_cp', lambda tc, p: tc==130)
-			elif result==17:
+			if result == 1:
+				tc, packet = await self.wait_for('on_raw_cp', lambda tc, p: tc == 130)
+			elif result == 17:
 				return None
 			else:
 				raise CommunityPlatformError(118, result)
 		return Tribe(packet)
 
-	async def playEmote(self, id, flag='be'):
+	async def playEmote(self, emote, flag='be'):
 		"""|coro|
 		Play an emote.
 
-		:param id: :class:`int` the emote's id.
+		:param emote: :class:`int` the emote's id.
 		:param flag: Optional[:class:`str`] the flag for the emote id 10. Defaults to 'be'.
 		"""
 		packet = Packet.new(8, 1).write8(id).write32(0)
-		if id==10:
+		if emote == 10:
 			packet.writeString(flag)
 
 		await self.bulle.send(packet)
 
-	async def sendSmiley(self, id):
+	async def sendSmiley(self, smiley):
 		"""|coro|
 		Makes the client showing a smiley above it's head.
 
-		:param id: :class:`int` the smiley's id. (from 0 to 9)
+		:param smiley: :class:`int` the smiley's id. (from 0 to 9)
 		"""
-		if id<0 or id>9:
+		if smiley < 0 or smiley > 9:
 			raise AiotfmException('Invalid smiley id')
 
-		packet = Packet.new(8, 5).write8(id).write32(0)
+		packet = Packet.new(8, 5).write8(smiley).write32(0)
 
 		await self.bulle.send(packet)
 
@@ -902,10 +930,12 @@ class Client:
 	async def joinChannel(self, name, permanent=True):
 		"""|coro|
 		Join a #channel.
-		The event 'on_channel_joined' is dispatched when the client has successfully joined a channel.
+		The event 'on_channel_joined' is dispatched when the client has successfully joined
+		a channel.
 
 		:param name: :class:`str` the channel's name
-		:param permanent: Optional[:class:`bool`] if True (default) the server will automatically reconnect the user to this channel when logged in.
+		:param permanent: Optional[:class:`bool`] if True (default) the server will automatically
+		reconnect the user to this channel when logged in.
 		"""
 		await self.sendCP(54, Packet().writeString(name).writeBool(permanent))
 

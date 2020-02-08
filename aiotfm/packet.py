@@ -1,6 +1,7 @@
-from aiotfm.errors import PacketError, PacketTooLarge, XXTEAInvalidPacket, XXTEAInvalidKeys
-
 import struct
+
+from aiotfm.errors import PacketTooLarge, XXTEAInvalidPacket, XXTEAInvalidKeys
+
 
 class Packet:
 	"""Represents a network packet.
@@ -55,7 +56,7 @@ class Packet:
 	def readBytes(self, nbr=1):
 		"""Read raw bytes from the buffer."""
 		self.pos += nbr
-		return self.buffer[self.pos-nbr:self.pos]
+		return self.buffer[self.pos - nbr:self.pos]
 
 	def readCode(self):
 		"""Read two bytes: c and cc."""
@@ -64,7 +65,7 @@ class Packet:
 	def read8(self):
 		"""Read a single byte from the buffer."""
 		self.pos += 1
-		return self.buffer[self.pos-1]
+		return self.buffer[self.pos - 1]
 
 	def read16(self):
 		"""Read a short (two bytes) from the buffer"""
@@ -90,12 +91,12 @@ class Packet:
 		"""return a decoded string"""
 		return self.readString().decode()
 
-	def writeBytes(self, bytes):
+	def writeBytes(self, content):
 		"""Write raw bytes to the buffer"""
-		if isinstance(bytes, Packet):
-			self.buffer.extend(bytes.buffer)
+		if isinstance(content, Packet):
+			self.buffer.extend(content.buffer)
 		else:
-			self.buffer.extend(bytes)
+			self.buffer.extend(content)
 		return self
 
 	def writeCode(self, c, cc):
@@ -143,11 +144,11 @@ class Packet:
 
 		m = Packet()
 		size = len(self.buffer)
-		if size<=0xff:
+		if size <= 0xff:
 			m.write8(1).write8(size)
-		elif size<=0xffff:
+		elif size <= 0xffff:
 			m.write8(2).write16(size)
-		elif size<=0xffffff:
+		elif size <= 0xffffff:
 			m.write8(3).write24(size)
 		else:
 			raise PacketTooLarge("The Packet maximum size of 16777215 has been exceeded.")
@@ -163,19 +164,21 @@ class Packet:
 		"""Cipher the packet with the XOR algorithm."""
 		fp += 1
 		ccc = self.readBytes(2)
-		tmp = bytearray([(byte^key[(fp+i)%20])&0xff for i, byte in enumerate(self.buffer[2:])])
-		self.buffer = ccc+tmp
+		tmp = bytearray(
+			(byte ^ key[(fp + i) % 20]) & 0xff for i, byte in enumerate(self.buffer[2:])
+		)
+		self.buffer = ccc + tmp
 		return self
 
 	def cipher(self, key):
 		"""Cipher the packet with the XXTEA algorithm."""
-		if len(self.buffer)<2:
+		if len(self.buffer) < 2:
 			raise XXTEAInvalidPacket("The Packet is empty.")
-		if len(key)<4:
+		if len(key) < 4:
 			raise XXTEAInvalidKeys(str(key))
 
 		ccc = self.read16()
-		length = len(self.buffer)-2
+		length = len(self.buffer) - 2
 		if length % 4 > 0:
 			pad = 4 - length % 4
 			self.buffer.extend(bytes(pad))
@@ -190,17 +193,21 @@ class Packet:
 		self.buffer = packet.buffer
 		return self
 
+
 DELTA = 0x9e3779b9
+
 
 def xxtea_encode(v, n, key):
 	"""https://en.wikipedia.org/wiki/XXTEA"""
-	cycles = 6 + 52//n
-	sum = 0
+	cycles = 6 + 52 // n
+	sum_ = 0
 	z = v[-1]
 	for _ in range(cycles):
-		sum = (sum + DELTA) & 0xffffffff
-		e = sum >> 2 & 3
+		sum_ = (sum_ + DELTA) & 0xffffffff
+		e = sum_ >> 2 & 3
 		for p in range(n):
-			y = v[(p+1)%n]
-			z = v[p] = (v[p] + (((z>>5^y<<2) + (y>>3^z<<4)) ^ ((sum^y) + (key[(p&3)^e] ^ z))))&0xffffffff
+			y = v[(p + 1) % n]
+			z = v[p] = (v[p] + (
+				((z >> 5 ^ y << 2) + (y >> 3 ^ z << 4)) ^ ((sum_ ^ y) + (key[(p & 3) ^ e] ^ z))
+			)) & 0xffffffff
 	return v
