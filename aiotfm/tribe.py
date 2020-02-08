@@ -1,19 +1,9 @@
 from aiotfm.utils import Date
+from aiotfm.enums import Permissions
 
-IS_LEADER = 2
-CAN_CHANGE_GREETING_MESSAGE = 4
-CAN_EDIT_RANKS = 8
-CAN_CHANGE_MEMBERS_RANKS = 16
-CAN_INVITE = 32
-CAN_EXCLUDE = 64
-CAN_PLAY_MUSIC = 128
-CAN_CHANGE_TRIBE_HOUSE_MAP = 256
-CAN_LOAD_MAP = 512
-CAN_LOAD_LUA = 512
-CAN_MANAGE_FORUM = 1024
 
 class Tribe:
-	"""Represent a tribe.
+	"""Represents a tribe.
 
 	## Attributes
 
@@ -38,8 +28,9 @@ class Tribe:
 		for i in range(packet.read16()):
 			self.ranks.append(Rank.from_packet(i, packet))
 
+
 class Member:
-	"""Represent a tribe's member.
+	"""Represents a tribe's member.
 
 	## Attributes
 
@@ -73,10 +64,11 @@ class Member:
 	@property
 	def online(self):
 		"""return True if the member is online."""
-		return self.game_id!=1
+		return self.game_id != 1
+
 
 class Rank:
-	"""Represent a tribe's rank.
+	"""Represents a tribe's rank.
 
 	## Attributes
 
@@ -98,23 +90,69 @@ class Rank:
 	canLoadLua :class:`bool`
 	canManageForum :class:`bool`
 	"""
-	def __init__(self, id, name, perm):
-		self.id = id
+	def __init__(self, id_, name, perm):
+		self.id = id_
 		self.name = name
 		self.perm = perm
 
-		self.isLeader = bool(perm&IS_LEADER)
-		self.canChangeGreetingMessage = bool(perm&CAN_CHANGE_GREETING_MESSAGE)
-		self.canEditRanks = bool(perm&CAN_EDIT_RANKS)
-		self.canChangeMembersRanks = bool(perm&CAN_CHANGE_MEMBERS_RANKS)
-		self.canInvite = bool(perm&CAN_INVITE)
-		self.canExclude = bool(perm&CAN_EXCLUDE)
-		self.canPlayMusic = bool(perm&CAN_PLAY_MUSIC)
-		self.canChangeTribeHouseMap = bool(perm&CAN_CHANGE_TRIBE_HOUSE_MAP)
-		self.canLoadMap = bool(perm&CAN_LOAD_MAP)
-		self.canLoadLua = bool(perm&CAN_LOAD_LUA)
-		self.canManageForum = bool(perm&CAN_MANAGE_FORUM)
+	@property
+	def isLeader(self):
+		"""True if it's the tribe's leader's rank."""
+		return bool(self.perm & Permissions.IS_LEADER)
+
+	@property
+	def canChangeGreetingMessage(self):
+		"""True if it has the permission to change the greeting message."""
+		return bool(self.perm & Permissions.CAN_CHANGE_GREETING_MESSAGE)
+
+	@property
+	def canEditRanks(self):
+		"""True if it has the permission to edit ranks."""
+		return bool(self.perm & Permissions.CAN_EDIT_RANKS)
+
+	@property
+	def canChangeMembersRanks(self):
+		"""True if it has the permission to change members' rank."""
+		return bool(self.perm & Permissions.CAN_CHANGE_MEMBERS_RANKS)
+
+	@property
+	def canInvite(self):
+		"""True if it has the permission to invite someone to the tribe."""
+		return bool(self.perm & Permissions.CAN_INVITE)
+
+	@property
+	def canExclude(self):
+		"""True if it has the permission to exclude someone of the tribe."""
+		return bool(self.perm & Permissions.CAN_EXCLUDE)
+
+	@property
+	def canPlayMusic(self):
+		"""True if it has the permission to play music inside the tribe's house."""
+		return bool(self.perm & Permissions.CAN_PLAY_MUSIC)
+
+	@property
+	def canChangeTribeHouseMap(self):
+		"""True if it has the permission to change the tribe's house's map."""
+		return bool(self.perm & Permissions.CAN_CHANGE_TRIBE_HOUSE_MAP)
+
+	@property
+	def canLoadMap(self):
+		"""True if it has the permission to load maps inside the tribe's house."""
+		return bool(self.perm & Permissions.CAN_LOAD_MAP)
+
+	@property
+	def canLoadLua(self):
+		"""True if it has the permission to load Lua inside the tribe's house."""
+		return bool(self.perm & Permissions.CAN_LOAD_LUA)
+
+	@property
+	def canManageForum(self):
+		"""True if it has the permission to mange the tribe's forum."""
+		return bool(self.perm & Permissions.CAN_MANAGE_FORUM)
 
 	@classmethod
-	def from_packet(cls, id, packet):
-		return cls(id, packet.readUTF(), packet.read32())
+	def from_packet(cls, id_, packet):
+		"""Reads a Tribe from a packet.
+		:param id: :class:`int` the tribe's id.
+		:param packet: :class:`aiotfm.Packet`"""
+		return cls(id_, packet.readUTF(), packet.read32())

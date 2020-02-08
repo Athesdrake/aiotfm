@@ -1,12 +1,8 @@
 from enum import IntEnum
 
-class _CommunityEnum(IntEnum):
-	int = -1
-	@classmethod
-	def _missing_(cls, value):
-		return cls.int
 
-class ChatCommunity(_CommunityEnum):
+class ChatCommunity(IntEnum):
+	"""Enumerate the different chat's communities."""
 	int = -1
 	en = 1
 	fr = 2
@@ -36,7 +32,13 @@ class ChatCommunity(_CommunityEnum):
 	it = 28
 	pt = 31
 
-class Community(_CommunityEnum):
+	@classmethod
+	def _missing_(cls, value):
+		return cls.int
+
+
+class Community(IntEnum):
+	"""Enumerate the different game's communities."""
 	en = 0
 	int = 0
 	fr = 1
@@ -69,8 +71,13 @@ class Community(_CommunityEnum):
 	az = 28
 	pt = 29
 
+	@classmethod
+	def _missing_(cls, value):
+		return cls.int
+
 
 class TradeState(IntEnum):
+	"""Enumerate the different states a trade can have."""
 	ON_INVITE = 0
 	ACCEPTING = 1
 	TRADING = 2
@@ -79,6 +86,7 @@ class TradeState(IntEnum):
 
 
 class TradeError(IntEnum):
+	"""Enumerate the different error codes the server could send."""
 	ALREADY_TRADING = 0
 	INVITE_DECLINED = 1
 	CANCELLED = 2
@@ -87,3 +95,18 @@ class TradeError(IntEnum):
 	SHAMAN = 5
 	NOT_CONNECTED = 6
 	INTERNAL = 7
+
+
+class Permissions(IntEnum):
+	"""Enumerate the different tribe's rank's permissions."""
+	IS_LEADER = 2
+	CAN_CHANGE_GREETING_MESSAGE = 4
+	CAN_EDIT_RANKS = 8
+	CAN_CHANGE_MEMBERS_RANKS = 16
+	CAN_INVITE = 32
+	CAN_EXCLUDE = 64
+	CAN_PLAY_MUSIC = 128
+	CAN_CHANGE_TRIBE_HOUSE_MAP = 256
+	CAN_LOAD_MAP = 512
+	CAN_LOAD_LUA = 512
+	CAN_MANAGE_FORUM = 1024
