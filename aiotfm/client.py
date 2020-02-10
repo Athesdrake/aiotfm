@@ -79,7 +79,7 @@ class Client:
 
 		self._channels = []
 
-	async def received_data(self, data, connection):
+	def data_received(self, data, connection):
 		"""|coro|
 		Dispatches the received data.
 
@@ -89,7 +89,7 @@ class Client:
 		"""
 		self.dispatch('raw_socket', connection, Packet(data))
 		try:
-			await self.handle_packet(connection, Packet(data))
+			asyncio.create_task(self.handle_packet(connection, Packet(data)))
 		except Exception:
 			traceback.print_exc()
 
@@ -643,7 +643,7 @@ class Client:
 		else:
 			raise ServerUnreachable('Unable to connect to the server.')
 
-		while not self.main.socket.connected:
+		while not self.main.open:
 			await asyncio.sleep(.1)
 
 	async def sendHandshake(self):
@@ -759,6 +759,10 @@ class Client:
 		self.main.close()
 		if self.bulle is not None:
 			self.bulle.close()
+
+		if not self.auto_restart:
+			# The process is not exited if the loop is still running
+			self.loop.close()
 
 	async def sendCP(self, code, data=b''):
 		"""|coro|
