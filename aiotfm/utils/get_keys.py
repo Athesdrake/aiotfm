@@ -5,14 +5,15 @@ from aiotfm.errors import EndpointError, InternalError, MaintenanceError
 
 
 class Keys:
-	"""Represents the keys used byt the client to communicate to the server."""
-	def __init__(self, version, connection_key, auth_key, packet_keys, identification_keys, msg_keys):
-		self.version = version
-		self.connection = connection_key
-		self.auth = auth_key
-		self.packet = packet_keys
-		self.identification = identification_keys
-		self.msg = msg_keys
+	"""Represents the keys used by the client to communicate to the server."""
+	def __init__(self, **keys):
+		self.auth = keys.pop('auth_key', 0)
+		self.connection = keys.pop('connection_key', '')
+		self.identification = keys.pop('identification_keys', [])
+		self.msg = keys.pop('msg_keys', [])
+		self.packet = keys.pop('packet_keys', [])
+		self.version = keys.pop('version', 0)
+		self.kwargs = keys
 
 
 async def get_keys(tfm_id, token):
@@ -30,18 +31,23 @@ async def get_keys(tfm_id, token):
 		async with session.get(url, params=params, headers=headers) as resp:
 			data = await resp.json()
 
-	if data.get('success', False):
-		if not data.get('internal_error', True):
+	success = data.pop('success', False)
+	internal_error = data.pop('internal_error', True)
+	internal_error_step = data.pop('internal_error_step', 0)
+	error = data.pop('error', None)
+
+	if success:
+		if not internal_error:
 			keys = Keys(**data)
 			if len(keys.packet) > 0 and len(keys.identification) > 0 and len(keys.msg) > 0:
 				return keys
 
 			raise EndpointError('Something goes wrong: A key is empty ! {}'.format(data))
 
-		if data.get('internal_error_step') == 2:
+		if internal_error_step == 2:
 			raise MaintenanceError('The game might be in maintenance mode.')
 
-		message = 'An internal error occur: {}'.format(data.get('internal_error_step'))
+		message = 'An internal error occur: {}'.format(internal_error_step)
 		raise InternalError(message)
 
-	raise EndpointError("Can't get the keys. Error info: {}".format(data.get('error')))
+	raise EndpointError("Can't get the keys. Error info: {}".format(error))
