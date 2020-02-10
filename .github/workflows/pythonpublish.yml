@@ -2,9 +2,9 @@ name: Upload Python Package
 
 on:
  push:
-   branches: 
+   branches:
      - master
-   paths: 
+   paths:
      - 'aiotfm/__version__.py'
 
 jobs:
@@ -19,7 +19,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install setuptools wheel twine
+        pip install setuptools wheel twine flake8
+        pip install -r requirements.txt
+    - name: Lint with flake8
+      run: |
+        # cancel the build if a syntax error or an undefined name is found.
+        flake8 aiotfm --count --select F6,F7,F82,E9
     - name: Build and publish
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
