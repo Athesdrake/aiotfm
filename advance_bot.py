@@ -14,15 +14,16 @@ class Bot(aiotfm.Client):
 		if not handled: # Add compatibility to more packets
 			CCC = packet.readCode()
 
-			if CCC==(60, 4): # Tribulle V2 enabled
+			if CCC == (60, 4): # Tribulle V2 enabled
 				print(f'Tribulle 2 : {packet.readBool()}')
 
 	async def getProfile(self, username, timeout=3):
 		username = username.lower()
+
 		def check(p):
 			if '#' not in username:
-				return p.username.split('#')[0].lower()==username
-			return p.username.lower()==username
+				return p.username.split('#')[0].lower() == username
+			return p.username.lower() == username
 
 		try:
 			await self.sendCommand('profile {}'.format(username))
@@ -46,9 +47,11 @@ class Bot(aiotfm.Client):
 
 		with open('bot.config') as f:
 			config = json.load(f)
-			kwargs = {p:config.get(p) for p in ['username', 'password', 'encrypted', 'room'] if config.get(p, None) is not None}
+			username = config.get('username')
+			password = config.get('password')
+			kwargs = {k: config.get(k) for k in ('encrypted', 'room') if config.get(k) is not None}
 
-			await self.login(**kwargs)
+			await self.login(username, password, **kwargs)
 
 	async def on_logged(self, player_id, username, played_time, community, pid):
 		self.pid = pid
@@ -59,7 +62,7 @@ class Bot(aiotfm.Client):
 			await self.enterTribeHouse()
 			try:
 				await self.wait_for('on_joined_room', timeout=3)
-			except:
+			except asyncio.TimeoutError:
 				pass
 
 	async def on_joined_room(self, room):
@@ -68,14 +71,14 @@ class Bot(aiotfm.Client):
 
 	async def on_whisper(self, message):
 		print(message)
-		if message.author!=self.username and message.content.startswith('!'):
+		if message.author != self.username and message.content.startswith('!'):
 			await self.execute(message, *message.content[1:].split(' '))
 
 	async def execute(self, msg, cmd, *args):
-		if cmd=='hi':
+		if cmd == 'hi':
 			await msg.reply("Hoi!")
-		elif cmd=='firsts':
-			name = msg.author if len(args)<1 else args[0]
+		elif cmd == 'firsts':
+			name = msg.author if len(args) < 1 else args[0]
 			profile = await self.getProfile(name)
 			if profile is None:
 				await msg.reply("The player doesn't exists or isn't connected.")
