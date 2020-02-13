@@ -89,7 +89,7 @@ class Client:
 		"""
 		self.dispatch('raw_socket', connection, Packet(data))
 		try:
-			asyncio.create_task(self.handle_packet(connection, Packet(data)))
+			self.loop.create_task(self.handle_packet(connection, Packet(data)))
 		except Exception:
 			traceback.print_exc()
 
