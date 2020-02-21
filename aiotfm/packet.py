@@ -144,14 +144,12 @@ class Packet:
 
 		m = Packet()
 		size = len(self.buffer)
-		if size <= 0xff:
-			m.write8(1).write8(size)
-		elif size <= 0xffff:
-			m.write8(2).write16(size)
-		elif size <= 0xffffff:
-			m.write8(3).write24(size)
-		else:
-			raise PacketTooLarge("The Packet maximum size of 16777215 has been exceeded.")
+		size_type = size >> 7
+		while size_type != 0:
+			m.write8(size & 127 | 128)
+			size = size_type
+			size_type >>= 7
+		m.write8(size & 127)
 		m.write8(fp)
 
 		self.bytes = bytes(m.buffer + self.buffer)
