@@ -1,5 +1,6 @@
 import asyncio
 
+
 class TFMProtocol(asyncio.Protocol):
 	def __init__(self, conn):
 		self.buffer = bytearray()
