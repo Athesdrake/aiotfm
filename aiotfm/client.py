@@ -1,4 +1,5 @@
 import asyncio
+import random
 import sys
 import time
 import traceback
@@ -293,7 +294,7 @@ class Client:
 				self.bulle.close()
 
 			self.bulle = Connection('bulle', self, self.loop)
-			await self.bulle.connect(bulle_ip, ports[round(self.loop.time() * 1000) % len(ports)])
+			await self.bulle.connect(bulle_ip, random.choice(ports))
 			await self.bulle.send(Packet.new(*CCC).write32(bulle_cred_1).write32(bulle_cred_2))
 
 		elif CCC == (44, 22): # Fingerprint offset changed
@@ -634,7 +635,7 @@ class Client:
 		Creates a connection with the main server.
 		"""
 
-		for port in [13801, 11801, 12801, 14801]:
+		for port in random.sample([13801, 11801, 12801, 14801], 4):
 			try:
 				await self.main.connect('94.23.193.229', port)
 			except Exception:
