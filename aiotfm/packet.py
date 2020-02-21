@@ -1,6 +1,6 @@
 import struct
 
-from aiotfm.errors import PacketTooLarge, XXTEAInvalidPacket, XXTEAInvalidKeys
+from aiotfm.errors import XXTEAInvalidPacket, XXTEAInvalidKeys
 
 
 class Packet:

@@ -1,8 +1,4 @@
 import asyncio
-import struct
-
-from aiotfm.errors import InvalidSocketData
-
 
 class TFMProtocol(asyncio.Protocol):
 	def __init__(self, conn):
