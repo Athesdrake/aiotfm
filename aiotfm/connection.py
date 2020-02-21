@@ -43,6 +43,9 @@ class TFMProtocol(asyncio.Protocol):
 				self.length = 0
 				self.read_length = False
 
+			else:
+				break
+
 	def connection_lost(self, exc):
 		self.connection.open = False
 
