@@ -1,7 +1,4 @@
 import asyncio
-import struct
-
-from aiotfm.errors import InvalidSocketData
 
 
 class TFMProtocol(asyncio.Protocol):
@@ -9,36 +6,42 @@ class TFMProtocol(asyncio.Protocol):
 		self.buffer = bytearray()
 		self.client = conn.client
 		self.connection = conn
+		self.buffer_length = 0
+		self.length_bytes = 0
+		self.length = 0
+		self.read_length = False
 
 	def connection_made(self, transport):
 		self.connection.open = True
 		self.client.dispatch('connection_made', self.connection)
 
 	def data_received(self, data):
+		self.buffer_length += len(data)
 		self.buffer.extend(data)
 
-		while len(self.buffer) > 3:
-			lensize = self.buffer[0]
-			if lensize == 1:
-				length = self.buffer[1]
-			elif lensize == 2:
-				length = struct.unpack('>H', self.buffer[1:3])[0]
-			elif lensize == 3:
-				length = int.from_bytes(self.buffer[1:4], 'big')
+		while self.buffer_length > 0:
+			while self.buffer_length > 0 and not self.read_length:
+				self.buffer_length -= 1
+				byte = self.buffer.pop(0)
+				self.length |= (byte & 127) << (self.length_bytes * 7)
+				self.length_bytes += 1
+
+				if byte & 128 == 128 and self.length_bytes < 5:
+					continue
+
+				self.read_length = True
+
+			if self.read_length and self.buffer_length >= self.length:
+				self.client.data_received(self.buffer[:self.length], self.connection)
+				del self.buffer[:self.length]
+				self.buffer_length -= self.length
+
+				self.length_bytes = 0
+				self.length = 0
+				self.read_length = False
+
 			else:
-				self.connection.abort()
-				self.connection_lost(InvalidSocketData(
-					f'The connection {self.connection.name} received a non-valid type of '
-					f'{lensize} bytes.'
-				))
-
-			start = lensize + 1
-			stop = start + length
-			if len(self.buffer) < stop:
 				break
-
-			self.client.data_received(self.buffer[start:stop], self.connection)
-			del self.buffer[:stop]
 
 	def connection_lost(self, exc):
 		self.connection.open = False
@@ -53,7 +56,7 @@ class TFMProtocol(asyncio.Protocol):
 					return
 
 			if self.client.auto_restart:
-				self.client.create_task(self.client.restart_soon())
+				self.client.loop.create_task(self.client.restart_soon())
 			else:
 				self.client.close()
 

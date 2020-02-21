@@ -284,7 +284,8 @@ class Client:
 			self.trade._close(succeed=True)
 
 		elif CCC == (44, 1): # Bulle switching
-			bulle_id = packet.read32()
+			bulle_cred_1 = packet.read32()
+			bulle_cred_2 = packet.read32()
 			bulle_ip = packet.readUTF()
 			ports = packet.readUTF().split('-')
 
@@ -293,7 +294,7 @@ class Client:
 
 			self.bulle = Connection('bulle', self, self.loop)
 			await self.bulle.connect(bulle_ip, ports[round(self.loop.time() * 1000) % len(ports)])
-			await self.bulle.send(Packet.new(*CCC).write32(bulle_id))
+			await self.bulle.send(Packet.new(*CCC).write32(bulle_cred_1).write32(bulle_cred_2))
 
 		elif CCC == (44, 22): # Fingerprint offset changed
 			connection.fingerprint = packet.read8()
