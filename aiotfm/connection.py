@@ -82,6 +82,9 @@ class Connection:
 		:param packet: :class:`aiotfm.Packet` the packet to send.
 		:param cipher: :class:`bool` whether or not the packet should be ciphered before sending it.
 		"""
+		if not self.open:
+			return
+
 		if cipher:
 			packet.xor_cipher(self.client.keys.msg, self.fingerprint)
 
