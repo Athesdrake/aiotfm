@@ -6,42 +6,30 @@ class TFMProtocol(asyncio.Protocol):
 		self.buffer = bytearray()
 		self.client = conn.client
 		self.connection = conn
-		self.buffer_length = 0
-		self.length_bytes = 0
 		self.length = 0
-		self.read_length = False
+
+	def data_received(self, data):
+		self.buffer.extend(data)
+
+		while len(self.buffer) > 0:
+			if self.length == 0:
+				for i in range(5):
+					byte = self.buffer.pop(0)
+					self.length |= (byte & 127) << (i * 7)
+
+					if not byte & 0x80:
+						break
+				else:
+					raise Exception("wtf")
+
+			if len(self.buffer) >= self.length:
+				self.client.data_received(bytes(self.buffer[:self.length]), self.connection)
+				del self.buffer[:self.length]
+				self.length = 0
 
 	def connection_made(self, transport):
 		self.connection.open = True
 		self.client.dispatch('connection_made', self.connection)
-
-	def data_received(self, data):
-		self.buffer_length += len(data)
-		self.buffer.extend(data)
-
-		while self.buffer_length > 0:
-			while self.buffer_length > 0 and not self.read_length:
-				self.buffer_length -= 1
-				byte = self.buffer.pop(0)
-				self.length |= (byte & 127) << (self.length_bytes * 7)
-				self.length_bytes += 1
-
-				if byte & 128 == 128 and self.length_bytes < 5:
-					continue
-
-				self.read_length = True
-
-			if self.read_length and self.buffer_length >= self.length:
-				self.client.data_received(self.buffer[:self.length], self.connection)
-				del self.buffer[:self.length]
-				self.buffer_length -= self.length
-
-				self.length_bytes = 0
-				self.length = 0
-				self.read_length = False
-
-			else:
-				break
 
 	def connection_lost(self, exc):
 		self.connection.open = False
