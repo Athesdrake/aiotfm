@@ -1,6 +1,6 @@
 import struct
 
-from aiotfm.errors import XXTEAInvalidPacket, XXTEAInvalidKeys
+from aiotfm.errors import XXTEAInvalidPacket, XXTEAInvalidKeys, PacketError
 
 
 class Packet:
@@ -18,14 +18,20 @@ class Packet:
 		The position inside the buffer.
 	"""
 	def __init__(self, buffer=None):
-		if buffer is None:
-			buffer = bytearray()
-		elif not isinstance(buffer, bytearray):
-			buffer = bytearray(buffer)
+		if isinstance(buffer, (bytes, memoryview)):
+			self.buffer = memoryview(buffer)
+			self.__read = True
+			self.__write = False
+		else:
+			if buffer is not None:
+				self.buffer = buffer
+			else:
+				self.buffer = bytearray()
 
-		self.buffer = buffer
+			self.__read = False
+			self.__write = True
+
 		self.pos = 0
-
 		self.exported = False
 		self.bytes = None
 		self._fp = 0
@@ -34,6 +40,8 @@ class Packet:
 		return '<Packet {!r}>'.format(bytes(self))
 
 	def __bytes__(self):
+		if self.__read:
+			return self.buffer.obj
 		return bytes(self.buffer)
 
 	@classmethod
@@ -46,15 +54,20 @@ class Packet:
 			return msg.write16(c)
 		return msg.write8(c).write8(cc)
 
-	def copy(self, pos=False):
+	def copy(self):
 		"""Returns a copy of the Packet"""
-		p = Packet(self.buffer.copy())
-		if pos:
-			p.pos = self.pos
+		if self.__read:
+			return Packet(self.buffer[self.pos:])
+
+		p = Packet()
+		p.buffer = self.buffer.copy()
 		return p
 
 	def readBytes(self, nbr=1):
 		"""Read raw bytes from the buffer."""
+		if not self.__read:
+			raise PacketError('This packet is in write-only mode.')
+
 		self.pos += nbr
 		return self.buffer[self.pos - nbr:self.pos]
 
@@ -64,6 +77,9 @@ class Packet:
 
 	def read8(self):
 		"""Read a single byte from the buffer."""
+		if not self.__read:
+			raise PacketError('This packet is in write-only mode.')
+
 		self.pos += 1
 		return self.buffer[self.pos - 1]
 
@@ -93,6 +109,8 @@ class Packet:
 
 	def writeBytes(self, content):
 		"""Write raw bytes to the buffer"""
+		if not self.__write:
+			raise PacketError('This packet is in read-only mode.')
 		if isinstance(content, Packet):
 			self.buffer.extend(content.buffer)
 		else:
@@ -175,17 +193,17 @@ class Packet:
 		if len(key) < 4:
 			raise XXTEAInvalidKeys(str(key))
 
-		ccc = self.read16()
+		header = self.buffer[:2]
 		length = len(self.buffer) - 2
 		if length % 4 > 0:
 			pad = 4 - length % 4
 			self.buffer.extend(bytes(pad))
 			length += pad
 
-		chunks = struct.unpack(f'>{length//4}I', self.readBytes(length))
+		chunks = struct.unpack(f'>{length//4}I', self.buffer[2:])
 		chunks = xxtea_encode(list(chunks), len(chunks), key)
 
-		packet = Packet.new(ccc).write16(len(chunks))
+		packet = Packet(header).write16(len(chunks))
 		packet.writeBytes(struct.pack(f'>{len(chunks)}I', *chunks))
 
 		self.buffer = packet.buffer

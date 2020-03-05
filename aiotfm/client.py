@@ -302,7 +302,7 @@ class Client:
 
 		elif CCC == (60, 3): # Community platform
 			TC = packet.read16()
-			self.dispatch('raw_cp', TC, packet.copy(True))
+			self.dispatch('raw_cp', TC, packet.copy())
 
 			if TC == 3: # Connected to the community platform
 				self.dispatch('ready')
