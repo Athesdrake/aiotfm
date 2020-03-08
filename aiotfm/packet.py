@@ -111,6 +111,7 @@ class Packet:
 		"""Write raw bytes to the buffer"""
 		if not self.__write:
 			raise PacketError('This packet is in read-only mode.')
+
 		if isinstance(content, Packet):
 			self.buffer.extend(content.buffer)
 		else:
@@ -123,21 +124,33 @@ class Packet:
 
 	def write8(self, value):
 		"""Write a single byte to the buffer"""
+		if not self.__write:
+			raise PacketError('This packet is in read-only mode.')
+
 		self.buffer.append(value & 0xff)
 		return self
 
 	def write16(self, value):
 		"""Write a short (two bytes) to the buffer"""
+		if not self.__write:
+			raise PacketError('This packet is in read-only mode.')
+
 		self.buffer.extend(struct.pack('>H', value & 0xffff))
 		return self
 
 	def write24(self, value):
 		"""Write three bytes to the buffer"""
+		if not self.__write:
+			raise PacketError('This packet is in read-only mode.')
+
 		self.buffer.extend((value & 0xffffff).to_bytes(3, 'big'))
 		return self
 
 	def write32(self, value):
 		"""Write an int (four bytes) to the buffer"""
+		if not self.__write:
+			raise PacketError('This packet is in read-only mode.')
+
 		self.buffer.extend(struct.pack('>I', value & 0xffffffff))
 		return self
 
