@@ -1,44 +1,54 @@
-# Profile Documentation
+# Player's Documentation
 
-## Profile
->**This represents a player's profile.**
+## Player
+**Represents a player in game.**
+
+| Attributes | Type | Can be None | Description |
+| :-: | :-: | :-: | :-- |
+| username | `str` | ✕ |  The player's username. |
+| uid | `int` | ✕ |  The player's id. -1 if unknown |
+| pid | `int` | ✕ |  The player's pid. -1 if unknown |
+| look | `str` | ✕ |  The player's look. '' if unknown |
+| gender | `int` | ✕ |  The player's gender. |
+| title | `int` | ✕ |  The player's title id. 0 if unknown |
+| title_stars | `int` | ✕ |  The player's title's stars. |
+| hasCheese | `bool` | ✕ |  True if the player has the cheese. |
+| isDead | `bool` | ✕ |  True if the player is dead. |
+| isShaman | `bool` | ✕ |  True if the player is shaman. |
+| isVampire | `bool` | ✕ |  True if the player is vampire. |
+| score | `int` | ✕ |  The player's score. |
+| mouseColor | `int` | ✕ |  The color of the player's fur. |
+| nameColor | `int` | ✕ |  The color of the player's name. |
+| shamanColor | `int` | ✕ |  The color of the player's shaman's feather. |
+| facingRight | `bool` | ✕ |  True if the player is facing right. |
+| movingLeft | `bool` | ✕ |  True if the player is moving to the left. |
+| movingRight | `bool` | ✕ |  True if the player is moving to the right. |
+| x | `int` | ✕ |  The player's x position. |
+| y | `int` | ✕ |  The player's y position. |
+| vx | `int` | ✕ |  The player's horizontal speed. |
+| vy | `int` | ✕ |  The player's vertical speed. |
+| ducking | `bool` | ✕ |  True if the player is ducking (crouching). |
+| jumping | `bool` | ✕ |  True if the player is jumping. |
+
+
+### Methods
+Player.**from\_packet**(_cls, packet_) <a id="Player.from_packet" href="#Player.from_packet">¶</a>
 >
->**Attributes:**
 >
->|Attribute|Type|Description
->|:-:|:-:|:--
->|**username**| `string` | The player's username.
->|**id** | `integer` | The player's id.
->|**registration_date**| `integer`| The registration timestamp of the player.
->|**privLevel**| `integer`| The privilege level of the player.
->|**gender**| `integer`| The player's gender.
->|**tribe**| `string` | The player's tribe. Can be `None`.
->|**soulmate**| `string`| Name of the player's soulmate. Can be `None`.
->|**title**| `integer` | Player's current title.
->|**titles**| `set` | The list of the unlocked titles.
->|**titles_stars**| `dict` | A dictionary where the number of stars the player's title has is stored.
->|**look**| `string` | The player's look.
->|**level** | `integer` | The player's shaman level.
->|**badges** | `dict` | All the badges unlocked by the player with their numbers.
->|**stats** | [`stats`](#stats) | The player's staistics.
->|**equippedOrb** | `integer` | The orb currently equipped by the player.
->|**orbs** | `set` | The list of orbs the player currently has.
->|**adventurePoints** | `integer` | Player's adventure points.
+>
+>__Parameters:__
+> * **packet** - [`Packet`](Packet.md) the packet.
 
 ---
 
+Player.**isGuest**(_self_) <a id="Player.isGuest" href="#Player.isGuest">¶</a>
+>
+>
+---
+
+## Profile
+**Represents a player's profile.**
+
 ## Stats
->**Represents the statistics of a player.**
->
->**Attributes:**
->
->|Attribute|Type|Description
->|:-:|:-:|:--
->|**normalModeSaves**|`integer`| Number of saves in normal mode.
->|**hardModeSaves** | `integer` |  Number of  saves in hard mode.
->|**divineModeSaves** | `integer`| Number of  saves in divine mode.
->|**shamanCheeses**| `integer`| Number of cheese gathered as a shaman.
->|**firsts** | `integer` | Number of cheese gathered first.
->|**gatheredCheeses**| `integer` | Total amount of gathered cheese.
->|**bootcamps**| `integer` | Number of bootcamp maps completed.
->|**modeStats**| `list` | A list of tuples that represents the statistics in a different mode. (id, progress, progressLimit, imageId)
+**Represents the statistics of a player.**
+

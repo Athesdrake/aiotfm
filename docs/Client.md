@@ -1,270 +1,399 @@
-# Client Documentation
+# Client's Documentation
 
 ## Client
->**Represents the client that connects to Transformice.**
->
->| Parameters | Type | Required | Description |
->| :-: | :-: | :-: | :-- |
->| `community` | `integer`| ✕ | The community the bot will connect to. Default is EN (0). 
->| `loop` | `eventLoop` | ✕ | The [`event loop`](https://docs.python.org/3/library/asyncio-eventloops.html) that will be used for asynchronous operations. If `None` is passed (which is default), the event loop that will be used will be ``asyncio.get_event_loop()``.
+**Represents a client that connects to Transformice.
+Two argument can be passed to the [`Client`](#client).**
+
+| Parameters | Type | Required | Description |
+| :-: | :-: | :-: | :-- |
+| community | `int` | ✕ |  Defines the community of the client. Defaults to 0 (EN community). |
+| auto_restart | `bool` | ✕ |  Whether the client should automatically restart on error. Defaults to False. |
+| loop | `event loop` | ✕ |  The [`event loop`](https://docs.python.org/3/library/asyncio-eventloops.html) to use for asynchronous operations. If ``None`` is passed (defaults), the event loop used will be ``asyncio.get_event_loop()``. |
+
+| Attributes | Type | Can be None | Description |
+| :-: | :-: | :-: | :-- |
+| username | `str` | ✔ |  The bot's username received from the server. Might be None if the bot didn't log in yet. |
+| room | [`Room`](Room.md) | ✔ |  The bot's room. Might be None if the bot didn't log in yet or couldn't join any room yet. |
+| trade | [`Trade`](Inventory.md) | ✔ |  The current trade that's going on (i.e: both traders accepted it). |
+| trades | `list` | ✕ |  All the trades that the bot participates. Most of them might be invitations only. |
+| inventory | [`Inventory`](Inventory.md) | ✔ |  The bot's inventory. Might be None if the bot didn't log in yet or it didn't receive anything. |
+| locale | [`Locale`](Locale.md) | ✕ |  The bot's locale (translations). |
 
 
-## Methods
-### _coroutine_ received_data(self, data, connection)
+### Methods
+Client.**data\_received**(_self, data, connection_) <a id="Client.data_received" href="#Client.data_received">¶</a>
 >
->**Dispatches the received data.**
+>Dispatches the received data.
 >
->| Parameters | Type | Description |
->| :-: | :-: | :-- |
->| **data** | `bytes` | The data recieved. 
->| **connection** | `aiotfm.connection.Connection` | The connection (name) that recieved the data. 
+>__Parameters:__
+> * **data** - `bytes` the received data.
+> * **connection** - [`Connection`](Connection.md) the connection that received
 
 ---
 
-### _coroutine_ handle_packet(self, connection:Connection, packet:Packet)
+_coroutine_ Client.**handle\_packet**(_self, connection, packet_) <a id="Client.handle_packet" href="#Client.handle_packet">¶</a>
 >
->**Handles the known packets and dispatches events.
->The unhandled packets in this method should only be handled by subclasses.**
+>Handles the known packets and dispatches events.
+>Subclasses should handle only the unhandled packets from this method.
 >
->| Parameters | Type | Required | Description |
->| :-: | :-: | :-: | :-
->| **connection** | `aiotfm.connection.Connection` | The connection that recieved the packet 
->| **packet** | [`Packet`](Packet.md) | The packet recieved
->
->**Returns**: `True` if the packet got handled, otherwise `False`.
->
->**Example:**
+>__Example__:
 >```Python
->class SubClient(aiotfm.Client):
+>class Bot(aiotfm.Client):
 >	async def handle_packet(self, conn, packet):
->		tmp = packet.copy()
->		handled = await super().handle_packet(conn, packet)
->		packet = tmp
+>		handled = await super().handle_packet(conn, packet.copy())
 >
 >		if not handled:
 >			# Handle here the unhandled packets.
 >			pass
 >```
+>
+>__Parameters:__
+> * **connection** - [`Connection`](Connection.md) the connection that received
+> * **packet** - [`Packet`](Packet.md) the packet.
 
 ---
 
-### _coroutine_ \_heartbeat_loop(self)
->**This sends a packet every ten seconds to stay connected to the game.**
+_coroutine_ Client.**handle\_old\_packet**(_self, connection, oldCCC, data_) <a id="Client.handle_old_packet" href="#Client.handle_old_packet">¶</a>
+>
+>Handles the known packets from the old protocol and dispatches events.
+>Subclasses should handle only the unhandled packets from this method.
+>
+>__Example__:
+>```Python
+>class Bot(aiotfm.Client):
+>	async def handle_old_packet(self, conn, oldCCC, data):
+>		handled = await super().handle_old_packet(conn, data.copy())
+>
+>		if not handled:
+>			# Handle here the unhandled packets.
+>			pass
+>```
+>
+>__Parameters:__
+> * **connection** - [`Connection`](Connection.md) the connection that received
+> * **oldCCC** - `tuple` the packet identifiers on the old protocol.
+> * **data** - `list` the packet data.
 
 ---
 
-### event(self, coro)
->**This is the decorator that registers an event.
->Learn more about events [here](Events.md).**
+_coroutine_ Client.**\_heartbeat\_loop**(_self_) <a id="Client._heartbeat_loop" href="#Client._heartbeat_loop">¶</a>
+>
+>
+---
+
+Client.**get\_channel**(_self, name_) <a id="Client.get_channel" href="#Client.get_channel">¶</a>
+>
+>
+>
+>__Parameters:__
+> * **name** - `str` the name of the channel.
 
 ---
 
-### wait_for(event, condition=None, timeout=None)
->**Waits for an event.**
+Client.**get\_trade**(_self, player_) <a id="Client.get_trade" href="#Client.get_trade">¶</a>
 >
->| Parameters | Type | Required | Description
->| :-: | :-: | :-: | :--
->| **event** | `string` | ✔ | The event name.
->| **condition** | `function` | ✕ | A predicate to check what to wait for. The arguments **must** meet the parameters of the event being waited for.
->| **timeout** | `int` | ✕ | The number of seconds to wait before `asyncio.TimeoutError` is raised.
 >
->**Returns**: `asyncio.Future` that the user must await
 >
->**Example:**
+>__Parameters:__
+> * **player** - [`Player`](Room.md) or `str` the player.
+
+---
+
+Client.**event**(_self, coro_) <a id="Client.event" href="#Client.event">¶</a>
+>
+>A decorator that registers an event.
+---
+
+Client.**wait\_for**(_self, event, condition, timeout, stopPropagation_) <a id="Client.wait_for" href="#Client.wait_for">¶</a>
+>
+>Wait for an event.
+>
+>__Example__:
 >```Python
 >@client.event
 >async def on_room_message(author, message):
->	if message=='id':
+>	if message == 'id':
 >		await client.sendCommand('profile '+author)
->		profile = await client.wait_for('on_profile', lambda p: p.username==author)
+>		profile = await client.wait_for('on_profile', lambda p: p.username == author)
 >		await client.sendRoomMessage('Your id: {}'.format(profile.id))
 >```
+>
+>__Parameters:__
+> * **event** - `str` the event name.
+> * **condition** - Optionnal[[`function`](#function)] A predicate to check what to wait for.
+> * **timeout** - Optionnal[`int`] the number of seconds before
 
 ---
 
-### _coroutine_ \_run_event(self, coro, event_name, \*args, \*\*kwargs)
->**Runs an event and handles any errors found.**
+_coroutine_ Client.**\_run\_event**(_self, coro, event_name, \*args, \*\*kwargs_) <a id="Client._run_event" href="#Client._run_event">¶</a>
 >
->| Parameters | Type | Required | Description
->| :-: | :-: | :-: | :-- 
->| **coro** | `function` | ✔ | A coroutine function
->| **event_name** | `string` | ✔ | The name of the event
->| **\*args** | `*args` | ✔ | Arguments to be passed in the coroutine
->|**\*\*kwagrs** | `**kwargs` | ✔ | Keyword arguments to passed in the coroutine
+>Runs an event and handle the error if any.
+>
+>:param coro: a coroutine function.
+>:param event_name: :class:`str` the event's name.
+>:param args: arguments to pass to the coro.
+>:param kwargs: keyword arguments to pass to the coro.
+---
+
+Client.**dispatch**(_self, event, \*args, \*\*kwargs_) <a id="Client.dispatch" href="#Client.dispatch">¶</a>
+>
+>Dispatches events
+>
+>:param event: :class:`str` event's name. (without 'on_')
+>:param args: arguments to pass to the coro.
+>:param kwargs: keyword arguments to pass to the coro.
+---
+
+_coroutine_ Client.**on\_error**(_self, event, err, \*args, \*\*kwargs_) <a id="Client.on_error" href="#Client.on_error">¶</a>
+>
+>
+---
+
+_coroutine_ Client.**on\_connection\_error**(_self, conn, error_) <a id="Client.on_connection_error" href="#Client.on_connection_error">¶</a>
+>
+>
+---
+
+_coroutine_ Client.**on\_login\_result**(_self, code, \*args_) <a id="Client.on_login_result" href="#Client.on_login_result">¶</a>
+>
+>
+---
+
+_coroutine_ Client.**connect**(_self_) <a id="Client.connect" href="#Client.connect">¶</a>
+>
+>
+---
+
+_coroutine_ Client.**sendHandshake**(_self_) <a id="Client.sendHandshake" href="#Client.sendHandshake">¶</a>
+>
+>
+---
+
+_coroutine_ Client.**start**(_self, api_tfmid, api_token, keys_) <a id="Client.start" href="#Client.start">¶</a>
+>
+>Starts the client.
+>
+>__Parameters:__
+> * **api_tfmid** - `int` or `str` your Transformice id.
+> * **api_token** - `str` your token to access the API.
 
 ---
 
-### dispatch(self, event, \*args, \*\*kwargs)
->**Dispatches events**
+_coroutine_ Client.**restart\_soon**(_self, \*args, delay=5.0, \*\*kwargs_) <a id="Client.restart_soon" href="#Client.restart_soon">¶</a>
 >
->| Parameters | Type | Required | Description
->| :-: | :-: | :-: | :-- 
->| **event** | `string` | ✔ |The name of the event without `on_`
->| **\*args** | `*args` | ✔ |Arguments to be passed in the coroutine
->|**\*\*kwargs** | `**kwargs` | ✔ | Keyword arguments to passed in the coroutine
+>Restarts the client in several seconds.
+>
+>__Parameters:__
+> * **delay** - `int` the delay before restarting. Default is 5 seconds.
+> * **args** - arguments to pass to the [`restart`](#restart) method.
+> * **kwargs** - keyword arguments to pass to the [`restart`](#restart) method.
 
 ---
 
-### _coroutine_ start(self, api_tfmid, api_token)
->**Connects the client to the game.**
+_coroutine_ Client.**restart**(_self, keys_) <a id="Client.restart" href="#Client.restart">¶</a>
 >
->| Parameters | Type | Required | Description
->| :-: | :-: | :-: | :-- 
->| **api_tfm_id** | `int` or `string` | ✔ | Your Transformice ID.
->| **api_token** | `string` | ✔ | Your API token.
+>Restarts the client.
+---
+
+_coroutine_ Client.**login**(_self, username, password, encrypted, room_) <a id="Client.login" href="#Client.login">¶</a>
+>
+>Log in the game.
+>
+>__Parameters:__
+> * **username** - `str` the client username.
+> * **password** - `str` the client password.
+> * **encrypted** - Optional[`bool`] whether the password is already encrypted or not.
+> * **room** - Optional[`str`] the room where the client will be logged in.
 
 ---
 
-### _coroutine_ login(self, username, password, encrypted=True, room='1')
->**Log in the game.**
+Client.**run**(_self, api_tfmid, api_token, username, password, \*\*kwargs_) <a id="Client.run" href="#Client.run">¶</a>
 >
->| Parameters | Type | Required | Description
->| :-: | :-: | :-: | :--
->| **username** | `string` | ✔ | The client username.
->| **password** | `string` | ✔ | The client password.
->| **encrypted** | `boolean` | ✕ | Whether the password is already encrypted or not.
->| **room** | `string` | ✕ | The room where the client will log on to.
+>A blocking call that do the event loop initialization for you.
+>
+>Equivalent to ::
+>	@bot.event
+>	async def on_login_ready(*a):
+>		await bot.login(username, password)
+---
+
+Client.**close**(_self_) <a id="Client.close" href="#Client.close">¶</a>
+>
+>
+---
+
+_coroutine_ Client.**sendCP**(_self, code, data_) <a id="Client.sendCP" href="#Client.sendCP">¶</a>
+>
+>Send a packet to the community platform.
+>
+>__Parameters:__
+> * **code** - `int` the community platform code.
+> * **data** - [`Packet`](#packet) or `bytes` the data.
 
 ---
 
-### run(self, api_tfmid, api_token, username, password, \*\*kwargs)
->**A blocking call that initializes the event loop for you.**
+_coroutine_ Client.**sendRoomMessage**(_self, message_) <a id="Client.sendRoomMessage" href="#Client.sendRoomMessage">¶</a>
 >
->**Doing this will also produce the same result:** 
->```Python
->@bot.event
->async def on_login_ready(*a):
->	await bot.login(username, password)
+>Send a message to the room.
 >
->loop = asyncio.get_event_loop()
->loop.create_task(bot.start(api_id, api_token))
->loop.run_forever()
->```
+>__Parameters:__
+> * **message** - `str` the content of the message.
 
 ---
 
-### _coroutine_ sendCP(self, code, data=b'')
->**Sends a packet to the community platform.**
+_coroutine_ Client.**sendTribeMessage**(_self, message_) <a id="Client.sendTribeMessage" href="#Client.sendTribeMessage">¶</a>
 >
->| Parameters | Type | Required | Description
->| :-: | :-: | :-: | :-- 
->| **code** | `integer` | ✔ | The community platform code
->| **data** | `Packet` or `bytes` | ✔ | The data to be sent
+>Send a message to the tribe.
+>
+>__Parameters:__
+> * **message** - `str` the content of the message.
 
 ---
 
-### _coroutine_ sendRoomMessage(self, message)
->**Send a message to the room.**
+_coroutine_ Client.**sendChannelMessage**(_self, channel, message_) <a id="Client.sendChannelMessage" href="#Client.sendChannelMessage">¶</a>
 >
->| Parameters | Type | Required | Description
->| :-: | :-: | :-: | :-- 
->| **message** | `string` | ✔ | The message content
+>Send a message to a public channel.
+>
+>__Parameters:__
+> * **channel** - `str` the channel's name.
+> * **message** - `str` the content of the message.
 
 ---
 
-### _coroutine_ sendTribeMessage(self, message)
->**Send a message in the tribe chat.**
+_coroutine_ Client.**whisper**(_self, username, message, overflow_) <a id="Client.whisper" href="#Client.whisper">¶</a>
 >
->| Parameters | Type | Required | Description
->| :-: | :-: | :-: | :-- 
->| **message** | `string` | ✔ | The message content
+>Whisper to a player.
+>
+>__Parameters:__
+> * **username** - `str` the player to whisper.
+> * **message** - `str` the content of the whisper.
+> * **overflow** - `bool` will send the complete message if True, splitted
 
 ---
 
-### _coroutine_ whisper(self, username, message)
->**Whispers a player.**
+_coroutine_ Client.**getTribe**(_self, disconnected_) <a id="Client.getTribe" href="#Client.getTribe">¶</a>
 >
->| Parameters | Type | Required | Description
->| :-: | :-: | :-: |:--
->| **username** | `string` | ✔ | The player who will recieve the whisper
->| **message** | `string` | ✔ | The message to be whispered
+>Gets the client's :class:`Tribe` and return it
+>
+>__Parameters:__
+> * **disconnected** - `bool` if True retrieves also the disconnected members.
 
 ---
 
-### _coroutine_ getTribe(self, disconnected=True)
->**Gets the client's `Tribe` and returns it**
+_coroutine_ Client.**playEmote**(_self, emote, flag_) <a id="Client.playEmote" href="#Client.playEmote">¶</a>
 >
->| Parameters | Type | Required | Description
->| :-: | :-: | :-: | :--
->| **disconnected** | `boolean` | ✔ | If it should return the list of offline members.
+>Play an emote.
 >
->**Returns**: `Tribe` or ``None``.
+>__Parameters:__
+> * **emote** - `int` the emote's id.
+> * **flag** - Optional[`str`] the flag for the emote id 10. Defaults to 'be'.
 
 ---
 
-### _coroutine_ playEmote(self, id, flag='be')
->**Plays an emote.**
+_coroutine_ Client.**sendSmiley**(_self, smiley_) <a id="Client.sendSmiley" href="#Client.sendSmiley">¶</a>
 >
->| Parameters | Type | Required | Description
->| :-: | :-: | :-: | :--
->| **id** | `integer` | ✔ | The emote id
->| **flag** | `string` | ✕ | The flag to be displayed.
+>Makes the client showing a smiley above it's head.
 >
->**NOTE: The emote id must be 10 in order to show a flag.**
+>__Parameters:__
+> * **smiley** - `int` the smiley's id. (from 0 to 9)
 
 ---
 
-### _coroutine_ sendSmiley(self, id)
->**Makes the client show an emoticon above it's head.**
+_coroutine_ Client.**loadLua**(_self, lua_code_) <a id="Client.loadLua" href="#Client.loadLua">¶</a>
 >
->| Parameters | Type | Description
->| :-: | :-: | :--
->| **id** | `integer` | The emoticon id `(1 - 10)`
-
----
-
-### _coroutine_ loadLua(self, lua_code)
->**Loads a lua code in the room.**
+>Load a lua code in the room.
 >
->| Parameters | Type | Description
->| :-: | :-: | :--
->| **lua_code** | `string` or `bytes` | The lua code to load.
+>__Parameters:__
+> * **lua_code** - `str` or `bytes` the lua code to send.
 
 ---
 
-### _coroutine_ sendCommand(self, command)
->**Sends a "/" command in the game.**
+_coroutine_ Client.**sendCommand**(_self, command_) <a id="Client.sendCommand" href="#Client.sendCommand">¶</a>
 >
->| Parameters | Type | Description
->| :-: | :-: | :--
->| **command** | `string` | The command to send
-
----
-
-### _coroutine_ enterTribe(self)
->**Joins the tribe house if the client is in a tribe.**
-
----
-
-### _coroutine_ enterTribeHouse(self)
->**Alias for `enterTribe` function**
-
----
-
-### _coroutine_ joinRoom(self, room_name)
->**Joins a room.
->The event 'on_joined_room' is dispatched when the client has successfully joined the room.**
+>Send a command to the game.
 >
->| Parameters | Type | Required | Description
->| :-: | :-: | :-: | :--
->| **room_name** | `string` | ✔ | The room name
->| **community** | `intger` | ✕ | The room community
->| **auto** | `boolean` | ✕ | Joins a random room
+>__Parameters:__
+> * **command** - `str` the command to send.
 
 ---
 
-### _coroutine_ enterInvTribeHouse(self, author)
->**Join the tribe house after receiving an /inv from a player.**
+_coroutine_ Client.**enterTribe**(_self_) <a id="Client.enterTribe" href="#Client.enterTribe">¶</a>
 >
->| Parameters | Type | Description
->| :-: | :-: | :--
->| **author** | `string` | The player who sent the invite
+>
+---
+
+_coroutine_ Client.**enterTribeHouse**(_self_) <a id="Client.enterTribeHouse" href="#Client.enterTribeHouse">¶</a>
+>
+>
+---
+
+_coroutine_ Client.**joinRoom**(_self, room_name, community, auto_) <a id="Client.joinRoom" href="#Client.joinRoom">¶</a>
+>
+>Join a room.
+>The event 'on_joined_room' is dispatched when the client has successfully joined the room.
+>
+>__Parameters:__
+> * **room_name** - `str` the room's name.
+> * **community** - Optional[`int`] the room's community.
+> * **auto** - Optional[`bool`] joins a random room (I think).
 
 ---
 
-### _coroutine_ recruit(self, player)
->**Sends a tribe invite to a player.**
+_coroutine_ Client.**joinChannel**(_self, name, permanent_) <a id="Client.joinChannel" href="#Client.joinChannel">¶</a>
 >
->| Parameters | Type | Required | Description
->| :-: | :-: | :-: | :--
->| **player** | `string` | ✔ | The player to be invited
+>Join a #channel.
+>The event 'on_channel_joined' is dispatched when the client has successfully joined
+>a channel.
+>
+>__Parameters:__
+> * **name** - `str` the channel's name
+> * **permanent** - Optional[`bool`] if True (default) the server will automatically
+
+---
+
+_coroutine_ Client.**leaveChannel**(_self, channel_) <a id="Client.leaveChannel" href="#Client.leaveChannel">¶</a>
+>
+>Leaves a #channel.
+>
+>__Parameters:__
+> * **channel** - [`Channel`](Channel.md) channel to leave.
+
+---
+
+_coroutine_ Client.**enterInvTribeHouse**(_self, author_) <a id="Client.enterInvTribeHouse" href="#Client.enterInvTribeHouse">¶</a>
+>
+>Join the tribe house of another player after receiving an /inv.
+>
+>__Parameters:__
+> * **author** - `str` the author's username who sent the invitation.
+
+---
+
+_coroutine_ Client.**recruit**(_self, player_) <a id="Client.recruit" href="#Client.recruit">¶</a>
+>
+>Send a recruit request to a player.
+>
+>__Parameters:__
+> * **player** - `str` the player's username you want to recruit.
+
+---
+
+_coroutine_ Client.**requestShopList**(_self_) <a id="Client.requestShopList" href="#Client.requestShopList">¶</a>
+>
+>
+---
+
+_coroutine_ Client.**startTrade**(_self, player_) <a id="Client.startTrade" href="#Client.startTrade">¶</a>
+>
+>Starts a trade with the given player.
+>
+>__Parameters:__
+> * **player** - [`Player`](Player.md) the player to trade with.
+
+---
+
+_coroutine_ Client.**requestInventory**(_self_) <a id="Client.requestInventory" href="#Client.requestInventory">¶</a>
+>
+>
+---
+
