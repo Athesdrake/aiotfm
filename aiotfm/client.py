@@ -386,7 +386,7 @@ class Client:
 
 			# :desc: Called when the client receives a packet from the community platform.
 			# :param TC: :class:`int` the packet's code.
-			# :param TC: :class:`aiotfm.packet.Packet` the packet.
+			# :param packet: :class:`aiotfm.packet.Packet` the packet.
 			self.dispatch('raw_cp', TC, packet.copy())
 
 			if TC == 3: # Connected to the community platform

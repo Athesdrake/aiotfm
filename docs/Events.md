@@ -177,11 +177,11 @@ Called when the trade got (un)locked.
 
 ---
 
-## on_raw_cp(_TC, TC_)
+## on_raw_cp(_TC, packet_)
 Called when the client receives a packet from the community platform.
 >__Parameters:__
 > * **TC** - `int` the packet's code.
-> * **TC** - [`Packet`](Packet.md#Packet) the packet.
+> * **packet** - [`Packet`](Packet.md#Packet) the packet.
 
 ---
 
