@@ -31,7 +31,7 @@ Shop.**cost**(_self, outfit_) <a id="Shop.cost" href="#Shop.cost">¶</a>
 >
 >
 >__Parameters:__
-> * **outfit** - [`Outfit`](Shop.md)
+> * **outfit** - [`Outfit`](Shop.md#Outfit)
 
 ---
 
@@ -40,7 +40,7 @@ Shop.**getItem**(_self, item_) <a id="Shop.getItem" href="#Shop.getItem">¶</a>
 >
 >
 >__Parameters:__
-> * **item** - [`Item`](Shop.md) the item you want to price of.
+> * **item** - [`Item`](Shop.md#Item) the item you want to price of.
 
 ---
 

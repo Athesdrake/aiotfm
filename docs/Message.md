@@ -12,7 +12,7 @@ Convert an instance to string to get the representation in game of the message.*
 
 ## Whisper
 **Represents a whisper from the chat.
-Inherit from [`Message`](Message.md).**
+Inherit from [`Message`](Message.md#Message).**
 
 | Attributes | Type | Can be None | Description |
 | :-: | :-: | :-: | :-- |

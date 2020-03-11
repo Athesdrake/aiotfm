@@ -27,7 +27,7 @@ Client.**data\_received**(_self, data, connection_) <a id="Client.data_received"
 >
 >__Parameters:__
 > * **data** - `bytes` the received data.
-> * **connection** - [`Connection`](Connection.md) the connection that received
+> * **connection** - [`Connection`](Connection.md#Connection) the connection that received
 
 ---
 
@@ -48,7 +48,7 @@ _coroutine_ Client.**handle\_packet**(_self, connection, packet_) <a id="Client.
 >```
 >
 >__Parameters:__
-> * **connection** - [`Connection`](Connection.md) the connection that received
+> * **connection** - [`Connection`](Connection.md#Connection) the connection that received
 > * **packet** - [`Packet`](Packet.md) the packet.
 
 ---
@@ -70,7 +70,7 @@ _coroutine_ Client.**handle\_old\_packet**(_self, connection, oldCCC, data_) <a 
 >```
 >
 >__Parameters:__
-> * **connection** - [`Connection`](Connection.md) the connection that received
+> * **connection** - [`Connection`](Connection.md#Connection) the connection that received
 > * **oldCCC** - `tuple` the packet identifiers on the old protocol.
 > * **data** - `list` the packet data.
 
@@ -95,7 +95,7 @@ Client.**get\_trade**(_self, player_) <a id="Client.get_trade" href="#Client.get
 >
 >
 >__Parameters:__
-> * **player** - [`Player`](Room.md) or `str` the player.
+> * **player** - [`Player`](Room.md#Player) or `str` the player.
 
 ---
 
@@ -388,7 +388,7 @@ _coroutine_ Client.**startTrade**(_self, player_) <a id="Client.startTrade" href
 >Starts a trade with the given player.
 >
 >__Parameters:__
-> * **player** - [`Player`](Player.md) the player to trade with.
+> * **player** - [`Player`](Player.md#Player) the player to trade with.
 
 ---
 

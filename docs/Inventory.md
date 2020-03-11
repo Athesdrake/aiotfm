@@ -50,7 +50,7 @@ _coroutine_ InventoryItem.**use**(_self_) <a id="InventoryItem.use" href="#Inven
 
 | Attributes | Type | Can be None | Description |
 | :-: | :-: | :-: | :-- |
-| items | `dict` | ✕ |  A dict containing all the items. The key is an `int` and the value is an [`InventoryItem`](Inventory.md). |
+| items | `dict` | ✕ |  A dict containing all the items. The key is an `int` and the value is an [`InventoryItem`](Inventory.md#InventoryItem). |
 | client | `Client` | ✕ |  The client that this inventory belongs to. |
 
 

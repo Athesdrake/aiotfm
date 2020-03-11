@@ -88,7 +88,7 @@ def format(string, links):
 			if len(anchor) > 0:
 				anchor = '#' + anchor
 
-			return f'[`{name}`]({link})'
+			return f'[`{name}`]({link}{anchor})'
 
 		link = link.lower().replace('.', '')
 		return f'[`{name}`](#{link})'
