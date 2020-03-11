@@ -1,8 +1,9 @@
 import ast
+import glob
 import re
-import weakref
 
 from ast import ClassDef, FunctionDef, AsyncFunctionDef
+from tokenize import generate_tokens, COMMENT
 
 
 link_regex = re.compile(r'^\.{2}\s*_([^:]+):\s*(https?://(?:\w+\.)+\w+(?:/[.\w-]*)*)')
@@ -12,6 +13,7 @@ params_doc_regex = re.compile(r':param (\w+): (.+)')
 type_regex_op = re.compile(r'(?:(Optional)\[)?(?::(class|meth):`)?([^`]+)(?(2)`)(?(1)\])')
 type_regex = re.compile(r':(class|meth):`([^`]+)`')
 codeblock_regex = re.compile(r'\n(\w+): ::((?:\n+\t[^\n]+)+)')
+event_regex = re.compile(r'^:([^:]+): (.+)$')
 
 class Type:
 	def __init__(self, name, type_, optional=False):
@@ -205,7 +207,97 @@ def generate(filename, name):
 				f.write('\n---\n\n')
 
 
+class EventDoc:
+	def __init__(self, name, node):
+		self.name = name
+		self.node = node
+		self.default = True
+		self.doc = []
+
+	@staticmethod
+	def dump(node):
+		dump = EventDoc.dump
+
+		if isinstance(node, ast.Name):
+			return node.id
+
+		if isinstance(node, ast.Constant):
+			return repr(node.value)
+
+		if isinstance(node, ast.Attribute):
+			return f'{dump(node.value)}.{node.attr}'
+
+		if isinstance(node, ast.Call):
+			args = [dump(arg) for arg in node.args]
+			args.extend(f'{kw.arg}={dump(kw.value)}' for kw in node.keywords)
+			return f'{dump(node.func)}({", ".join(args)})'
+
+		if isinstance(node, ast.Subscript):
+			return f'{dump(node.value)}[{dump(node.slice)}]'
+
+		if isinstance(node, ast.Index):
+			return dump(node.value)
+
+		if isinstance(node, ast.Starred):
+			return f'*{dump(node.value)}'
+
+		if isinstance(node, ast.BinOp):
+			return ' '.join(dump(getattr(node, field)) for field in node._fields)
+
+		if isinstance(node, ast.Sub):
+			return '-'
+
+		if isinstance(node, ast.Mult):
+			return '*'
+
+		raise f"Cannot dump {node.__class__.__name__}"
+
+	def generate_default(self):
+		args = [self.dump(arg) for arg in self.node.args[1:]]
+		sargs = ", ".join(args)
+		if len(sargs) > 0:
+			sargs = f'_{sargs}_'
+
+		self.default = True
+		self.doc = [f'## on_{self.name}({sargs})']
+
+		if len(args) > 0:
+			self.doc.append('>__Parameters:__')
+			self.doc.extend((f'> * **{arg}**' for arg in args))
+
+	def generate(self, doc):
+		self.default = False
+
+		desc, args = '', []
+		for line in doc:
+			name, text = event_regex.match(line).groups()
+
+			if name == 'desc':
+				desc = text
+			else:
+				args.append((name.split()[1].replace('*', '\\*'), text))
+
+		sargs = ', '.join(arg[0] for arg in args)
+		if len(sargs) > 0:
+			sargs = f'_{sargs}_'
+
+		self.doc = [
+			f'## on_{self.name}({sargs})',
+			desc
+		]
+
+		if len(args) > 0:
+			self.doc.append('>__Parameters:__')
+			self.doc.extend(f'> * **{name}** - {desc}' for name, desc in args)
+
+
 class Visitor(ast.NodeVisitor):
+	def __init__(self, code, comments):
+		self.lineno = 0
+		self.events = {}
+		self.comments = comments
+		self.doc = []
+
 	def generic_visit(self, node):
 		if not hasattr(node, 'parent'):
 			node.parent = None
@@ -215,44 +307,87 @@ class Visitor(ast.NodeVisitor):
 
 		super().generic_visit(node)
 
+	def visit_Call(self, node):
+		if not isinstance(node.func, ast.Attribute) or node.func.attr != 'dispatch':
+			return
+
+		doc = []
+		evt = node.args[0].value
+
+		if self.lineno > node.lineno:
+			self.lineno = node.parent.parent.lineno
+
+		for i in range(node.lineno - 1, max(self.lineno, node.parent.parent.lineno - 1), -1):
+			if i not in self.comments:
+				continue
+
+			doc.append(self.comments[i][1:].strip())
+
+			if ':desc:' in self.comments[i]:
+				break
+
+		while len(doc) and not doc[-1].startswith(':'):
+			doc.pop()
+
+		for i in range(len(doc) - 1, 0, -1):
+			if not doc[i].startswith(':'):
+				doc[i] = f'{doc.pop(i + 1)} {doc[i]}'
+
+		event_doc = EventDoc(evt, node)
+		self.lineno = node.lineno
+		if len(doc) > 0:
+			if evt in self.events and not self.events[evt].default:
+				raise f"duplicate documentation for on_{evt}."
+
+			event_doc.generate(doc[::-1])
+		elif evt not in self.events:
+			event_doc.generate_default()
+		else:
+			return
+
+		self.events[evt] = event_doc
+
 
 def generate_events():
-	with open('../aiotfm/client.py', 'r', encoding='utf-8') as f:
-		code: ast.Module = ast.parse(f.read(), '../aiotfm/client.py')
+	with open('Events.md', 'w', encoding='utf-8') as f:
+		f.write("# Events' Documentation\n\n")
 
-	with open('Event.md', 'w', encoding='utf-8') as f:
-		f.write("# Event's Documentation\n\n")
+		events = {}
+		for file in glob.iglob('../aiotfm/**', recursive=True):
+			if not file.endswith('.py'):
+				continue
 
-	klass = [node for node in code.body if isinstance(node, ClassDef) and node.name == 'Client'][0]
-	methods = [node for node in klass.body if isinstance(node, (FunctionDef, AsyncFunctionDef))]
+			with open(file, 'r', encoding='utf-8') as f2:
+				comments = {t.start[0]: t.string for t in generate_tokens(f2.readline) if t.type == COMMENT}
+				f2.seek(0)
+				code: ast.Module = ast.parse(f2.read(), '../aiotfm/client.py')
 
-	Visitor().visit(code)
+				visitor = Visitor(code, comments)
+				visitor.visit(code)
 
-	for method in methods:
-		for node in ast.walk(method):
-			if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
-				if isinstance(node.func.value, ast.Name) and node.func.attr == 'dispatch':
-					# print(ast.get_source_segment(code, node))
-					siblings = list(ast.iter_child_nodes(node.parent.parent))
-					index = siblings.index(node.parent)
-					previous = siblings[index - 1]
+				for evt, doc in visitor.events.items():
+					if evt in events:
+						if doc.default:
+							visitor.events[evt] = events[evt]
+						elif events[evt].default:
+							pass
+						else:
+							raise f"duplicate documentation for on_{evt}."
 
-					while isinstance(previous, ast.AST) and 'value' in previous._fields:
-						previous = previous.value
+				events.update(visitor.events)
 
-					print('dispatch', 'on_' + node.args[0].value, previous)
+		for event in events.values():
+			f.write(format('\n'.join(event.doc), {}))
+			f.write('\n\n---\n\n')
 
 
 if __name__ == '__main__':
-	# generate('../aiotfm/client.py', 'Client')
-	# generate('../aiotfm/player.py', 'Player')
-	# generate('../aiotfm/tribe.py', 'Tribe')
-	# generate('../aiotfm/message.py', 'Message')
-	# generate('../aiotfm/connection.py', 'Connection')
-	# generate('../aiotfm/inventory.py', 'Inventory')
-	# generate('../aiotfm/packet.py', 'Packet')
-	# generate('../aiotfm/room.py', 'Room')
-	# generate('../aiotfm/shop.py', 'Shop')
-	# generate('../aiotfm/enums.py', 'Enums')
-	# generate('../aiotfm/errors.py', 'Errors')
+	files = [
+		'Client', 'Player', 'Tribe', 'Message', 'Connection',
+		'Inventory', 'Packet', 'Room', 'Shop', 'Enums', 'Errors'
+	]
+
+	for file in files:
+		generate(f'../aiotfm/{file.lower()}.py', file)
+
 	generate_events()
