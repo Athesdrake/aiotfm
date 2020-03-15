@@ -78,25 +78,21 @@ _coroutine_ Client.**handle\_old\_packet**(_self, connection, oldCCC, data_) <a 
 
 _coroutine_ Client.**\_heartbeat\_loop**(_self_) <a id="Client._heartbeat_loop" href="#Client._heartbeat_loop">¶</a>
 >
->
+>Send a packet every fifteen seconds to stay connected to the game.
 ---
 
 Client.**get\_channel**(_self, name_) <a id="Client.get_channel" href="#Client.get_channel">¶</a>
 >
->
->
->__Parameters:__
-> * **name** - `str` the name of the channel.
-
+>Returns a channel from it's name or None if not found.
+>:param name: :class:`str` the name of the channel.
+>:return: :class:`aiotfm.messages.ChannelMessage` or None
 ---
 
 Client.**get\_trade**(_self, player_) <a id="Client.get_trade" href="#Client.get_trade">¶</a>
 >
->
->
->__Parameters:__
-> * **player** - [`Player`](Room.md#Player) or `str` the player.
-
+>Returns the pending/current trade with a player.
+>:param player: :class:`aiotfm.room.Player` or :class:`str` the player.
+>:return: :class:`aiotfm.trade.Trade` the trade with the player.
 ---
 
 Client.**event**(_self, coro_) <a id="Client.event" href="#Client.event">¶</a>
@@ -146,27 +142,27 @@ Client.**dispatch**(_self, event, \*args, \*\*kwargs_) <a id="Client.dispatch" h
 
 _coroutine_ Client.**on\_error**(_self, event, err, \*args, \*\*kwargs_) <a id="Client.on_error" href="#Client.on_error">¶</a>
 >
->
+>Default on_error event handler. Prints the traceback of the error.
 ---
 
 _coroutine_ Client.**on\_connection\_error**(_self, conn, error_) <a id="Client.on_connection_error" href="#Client.on_connection_error">¶</a>
 >
->
+>Default on_connection_error event handler. Prints the error.
 ---
 
 _coroutine_ Client.**on\_login\_result**(_self, code, \*args_) <a id="Client.on_login_result" href="#Client.on_login_result">¶</a>
 >
->
+>Default on_login_result handler. Raise an error and closes the connection.
 ---
 
 _coroutine_ Client.**connect**(_self_) <a id="Client.connect" href="#Client.connect">¶</a>
 >
->
+>Creates a connection with the main server.
 ---
 
 _coroutine_ Client.**sendHandshake**(_self_) <a id="Client.sendHandshake" href="#Client.sendHandshake">¶</a>
 >
->
+>Sends the handshake packet so the server recognizes this socket as a player.
 ---
 
 _coroutine_ Client.**start**(_self, api_tfmid, api_token, keys_) <a id="Client.start" href="#Client.start">¶</a>
@@ -219,7 +215,7 @@ Client.**run**(_self, api_tfmid, api_token, username, password, \*\*kwargs_) <a 
 
 Client.**close**(_self_) <a id="Client.close" href="#Client.close">¶</a>
 >
->
+>Closes the sockets.
 ---
 
 _coroutine_ Client.**sendCP**(_self, code, data_) <a id="Client.sendCP" href="#Client.sendCP">¶</a>
@@ -319,12 +315,12 @@ _coroutine_ Client.**sendCommand**(_self, command_) <a id="Client.sendCommand" h
 
 _coroutine_ Client.**enterTribe**(_self_) <a id="Client.enterTribe" href="#Client.enterTribe">¶</a>
 >
->
+>Enter the tribe house
 ---
 
 _coroutine_ Client.**enterTribeHouse**(_self_) <a id="Client.enterTribeHouse" href="#Client.enterTribeHouse">¶</a>
 >
->
+>Alias for :meth:`enterTribe`
 ---
 
 _coroutine_ Client.**joinRoom**(_self, room_name, community, auto_) <a id="Client.joinRoom" href="#Client.joinRoom">¶</a>
@@ -380,7 +376,7 @@ _coroutine_ Client.**recruit**(_self, player_) <a id="Client.recruit" href="#Cli
 
 _coroutine_ Client.**requestShopList**(_self_) <a id="Client.requestShopList" href="#Client.requestShopList">¶</a>
 >
->
+>Send a request to the server to get the shop list.
 ---
 
 _coroutine_ Client.**startTrade**(_self, player_) <a id="Client.startTrade" href="#Client.startTrade">¶</a>
@@ -394,6 +390,6 @@ _coroutine_ Client.**startTrade**(_self, player_) <a id="Client.startTrade" href
 
 _coroutine_ Client.**requestInventory**(_self_) <a id="Client.requestInventory" href="#Client.requestInventory">¶</a>
 >
->
+>Send a request to the server to get the bot's inventory.
 ---
 

@@ -3,6 +3,7 @@
 ## ChatCommunity
 **Enumerate the different chat's communities.**
 
+@*classmethod*
 ChatCommunity.**\_missing\_**(_cls, value_) <a id="ChatCommunity._missing_" href="#ChatCommunity._missing_">¶</a>
 >
 >
@@ -11,6 +12,7 @@ ChatCommunity.**\_missing\_**(_cls, value_) <a id="ChatCommunity._missing_" href
 ## Community
 **Enumerate the different game's communities.**
 
+@*classmethod*
 Community.**\_missing\_**(_cls, value_) <a id="Community._missing_" href="#Community._missing_">¶</a>
 >
 >

@@ -23,34 +23,30 @@
 ### Methods
 Shop.**to\_dict**(_self_) <a id="Shop.to_dict" href="#Shop.to_dict">¶</a>
 >
->
+>Export the shop into a serializable dict.
+>:return: :class:`dict`
 ---
 
 Shop.**cost**(_self, outfit_) <a id="Shop.cost" href="#Shop.cost">¶</a>
 >
->
->
->__Parameters:__
-> * **outfit** - [`Outfit`](Shop.md#Outfit)
-
+>Compute and return the total price of an outfit.
+>:param outfit: :class:`aiotfm.shop.Outfit`
+>:return: :class:`tuple`[:class:`int`]
+>	(Total in cheese, total in fraise, cheese supplement of items you can't buy with fraise)
 ---
 
 Shop.**getItem**(_self, item_) <a id="Shop.getItem" href="#Shop.getItem">¶</a>
 >
->
->
->__Parameters:__
-> * **item** - [`Item`](Shop.md#Item) the item you want to price of.
-
+>Return the shop item with the same id.
+>:param item: :class:`aiotfm.shop.Item` the item you want to price of.
+>:return: :class:`aiotfm.shop.ShopItem` the item with the prices.
 ---
 
 Shop.**category**(_self, id__) <a id="Shop.category" href="#Shop.category">¶</a>
 >
->
->
->__Parameters:__
-> * **id_** - `int` the category's id?
-
+>Return the items from a category.
+>:param id_: :class:`int` the category's id?
+>:return: :class:`set`[:class:`aiotfm.shop.Item`] the items.
 ---
 
 ## Item
@@ -71,23 +67,21 @@ Shop.**category**(_self, id__) <a id="Shop.category" href="#Shop.category">¶</a
 
 
 ### Methods
+@*classmethod*
 Item.**from\_packet**(_cls, packet_) <a id="Item.from_packet" href="#Item.from_packet">¶</a>
 >
->
->
->__Parameters:__
-> * **packet** - [`Packet`](Packet.md)
-
+>Reads an Item from a packet.
+>:param packet: :class:`aiotfm.Packet`
+>:return: :class:`aiotfm.shop.Item`
 ---
 
+@*classmethod*
 Item.**parse**(_cls, cat, string_) <a id="Item.parse" href="#Item.parse">¶</a>
 >
->
->
->__Parameters:__
-> * **cat** - `int` the item's category.
-> * **string** - `str` the item.
-
+>Parse an Item from a string.
+>:param cat: :class:`int` the item's category.
+>:param string: :class:`str` the item.
+>:return: :class:`aiotfm.shop.Item`
 ---
 
 ## ShopItem
@@ -121,16 +115,16 @@ Item.**parse**(_cls, cat, string_) <a id="Item.parse" href="#Item.parse">¶</a>
 ### Methods
 ShopItem.**to\_dict**(_self_) <a id="ShopItem.to_dict" href="#ShopItem.to_dict">¶</a>
 >
->
+>Export the item into a serializable dict.
+>:return: :class:`dict`
 ---
 
+@*classmethod*
 ShopItem.**from\_packet**(_cls, packet_) <a id="ShopItem.from_packet" href="#ShopItem.from_packet">¶</a>
 >
->
->
->__Parameters:__
-> * **packet** - [`Packet`](Packet.md)
-
+>Reads a ShopItem from a packet.
+>:param packet: :class:`aiotfm.Packet`
+>:return: :class:`aiotfm.shop.ShopItem`
 ---
 
 ## Outfit
@@ -150,77 +144,86 @@ ShopItem.**from\_packet**(_cls, packet_) <a id="ShopItem.from_packet" href="#Sho
 
 
 ### Methods
+@*classmethod*
 Outfit.**from\_fashion**(_cls, packet_) <a id="Outfit.from_fashion" href="#Outfit.from_fashion">¶</a>
 >
->
->
->__Parameters:__
-> * **packet** - [`Packet`](Packet.md)
-
+>Reads a fashion Outfit from a packet.
+>:param packet: :class:`aiotfm.Packet`
+>:return: :class:`aiotfm.shop.Outfit`
 ---
 
+@*classmethod*
 Outfit.**from\_packet**(_cls, packet, id__) <a id="Outfit.from_packet" href="#Outfit.from_packet">¶</a>
 >
->
->
->__Parameters:__
-> * **packet** - [`Packet`](Packet.md)
-
+>Reads an Outfit from a packet.
+>:param packet: :class:`aiotfm.Packet`
+>:return: :class:`aiotfm.shop.Outfit`
 ---
 
+@*property*
 Outfit.**fur**(_self_) <a id="Outfit.fur" href="#Outfit.fur">¶</a>
 >
->
+>The fur's id of the outfit.
 ---
 
+@*property*
 Outfit.**items**(_self_) <a id="Outfit.items" href="#Outfit.items">¶</a>
 >
->
+>The outfit's items.
 ---
 
+@*property*
 Outfit.**head**(_self_) <a id="Outfit.head" href="#Outfit.head">¶</a>
 >
->
+>The outfit's head item.
 ---
 
+@*property*
 Outfit.**eyes**(_self_) <a id="Outfit.eyes" href="#Outfit.eyes">¶</a>
 >
->
+>The outfit's eyes item.
 ---
 
+@*property*
 Outfit.**ears**(_self_) <a id="Outfit.ears" href="#Outfit.ears">¶</a>
 >
->
+>The outfit's ears item.
 ---
 
+@*property*
 Outfit.**mouth**(_self_) <a id="Outfit.mouth" href="#Outfit.mouth">¶</a>
 >
->
+>The outfit's mouth item.
 ---
 
+@*property*
 Outfit.**neck**(_self_) <a id="Outfit.neck" href="#Outfit.neck">¶</a>
 >
->
+>The outfit's neck item.
 ---
 
+@*property*
 Outfit.**hair**(_self_) <a id="Outfit.hair" href="#Outfit.hair">¶</a>
 >
->
+>The outfit's hair item.
 ---
 
+@*property*
 Outfit.**tail**(_self_) <a id="Outfit.tail" href="#Outfit.tail">¶</a>
 >
->
+>The outfit's tail item.
 ---
 
+@*property*
 Outfit.**lenses**(_self_) <a id="Outfit.lenses" href="#Outfit.lenses">¶</a>
 >
->
+>The outfit's lenses item.
 ---
 
+@*property*
 Outfit.**hands**(_self_) <a id="Outfit.hands" href="#Outfit.hands">¶</a>
 >
->
+>The outfit's hands item.
 ---
 
 ## ShamanObject
@@ -244,13 +247,12 @@ Outfit.**hands**(_self_) <a id="Outfit.hands" href="#Outfit.hands">¶</a>
 | cheese | `int` | ✕ |  The obect's pricein cheese. |
 | fraise | `int` | ✕ |  The obect's pricein fraise. |
 
+@*classmethod*
 ShamanObject.**from\_packet**(_cls, packet_) <a id="ShamanObject.from_packet" href="#ShamanObject.from_packet">¶</a>
 >
->
->
->__Parameters:__
-> * **packet** - [`Packet`](Packet.md)
-
+>Reads a ShamanObject from a packet.
+>:param packet: :class:`aiotfm.Packet`
+>:return: :class:`aiotfm.shop.ShamanObject`
 ---
 
 ## OwnedShamanObject
@@ -268,12 +270,11 @@ ShamanObject.**from\_packet**(_cls, packet_) <a id="ShamanObject.from_packet" hr
 | equiped | `bool` | ✕ |  True if the client has the object equiped. |
 | colors | `list` | ✕ |  The custom colors the object has. |
 
+@*classmethod*
 OwnedShamanObject.**from\_packet**(_cls, packet_) <a id="OwnedShamanObject.from_packet" href="#OwnedShamanObject.from_packet">¶</a>
 >
->
->
->__Parameters:__
-> * **packet** - [`Packet`](Packet.md)
-
+>Reads a OwnedShamanObject from a packet.
+>:param packet: :class:`aiotfm.Packet`
+>:return: :class:`aiotfm.shop.OwnedShamanObject`
 ---
 

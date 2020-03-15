@@ -30,7 +30,7 @@ Connection.**\_factory**(_self_) <a id="Connection._factory" href="#Connection._
 
 _coroutine_ Connection.**connect**(_self, host, port_) <a id="Connection.connect" href="#Connection.connect">¶</a>
 >
->
+>Connect the client to the host:port
 ---
 
 _coroutine_ Connection.**send**(_self, packet, cipher_) <a id="Connection.send" href="#Connection.send">¶</a>
@@ -45,11 +45,11 @@ _coroutine_ Connection.**send**(_self, packet, cipher_) <a id="Connection.send" 
 
 Connection.**close**(_self_) <a id="Connection.close" href="#Connection.close">¶</a>
 >
->
+>Closes the connection.
 ---
 
 Connection.**abort**(_self_) <a id="Connection.abort" href="#Connection.abort">¶</a>
 >
->
+>Abort the connection.
 ---
 

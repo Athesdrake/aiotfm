@@ -16,33 +16,35 @@
 
 
 ### Methods
+@*property*
 InventoryItem.**image\_url**(_self_) <a id="InventoryItem.image_url" href="#InventoryItem.image_url">¶</a>
 >
->
+>The image's url of the item.
 ---
 
+@*property*
 InventoryItem.**is\_currency**(_self_) <a id="InventoryItem.is_currency" href="#InventoryItem.is_currency">¶</a>
 >
->
+>Return True if the item is a currency.
 ---
 
+@*property*
 InventoryItem.**is\_equipped**(_self_) <a id="InventoryItem.is_equipped" href="#InventoryItem.is_equipped">¶</a>
 >
->
+>Return True if the item is equipped
 ---
 
+@*classmethod*
 InventoryItem.**from\_packet**(_cls, packet_) <a id="InventoryItem.from_packet" href="#InventoryItem.from_packet">¶</a>
 >
->
->
->__Parameters:__
-> * **packet** - [`Packet`](Packet.md) the packet.
-
+>Read an item from a packet.
+>:param packet: :class:`aiotfm.Packet` the packet.
+>:return: :class:`aiotfm.inventory.InventoryItem` the item.
 ---
 
 _coroutine_ InventoryItem.**use**(_self_) <a id="InventoryItem.use" href="#InventoryItem.use">¶</a>
 >
->
+>Uses this item.
 ---
 
 ## Inventory
@@ -55,23 +57,24 @@ _coroutine_ InventoryItem.**use**(_self_) <a id="InventoryItem.use" href="#Inven
 
 
 ### Methods
+@*classmethod*
 Inventory.**from\_packet**(_cls, packet_) <a id="Inventory.from_packet" href="#Inventory.from_packet">¶</a>
 >
->
->
->__Parameters:__
-> * **packet** - [`Packet`](Packet.md) the packet.
-
+>Read the inventory from a packet.
+>:param packet: :class:`aiotfm.Packet` the packet.
+>:return: :class:`aiotfm.inventory.Inventory` the inventory.
 ---
 
 Inventory.**get**(_self, item_id_) <a id="Inventory.get" href="#Inventory.get">¶</a>
 >
->
+>Gets an item from this :class:`aiotfm.inventory.Inventory`.
+>Shorthand for :class:`aiotfm.inventory.Inventory`.items.get
 ---
 
 Inventory.**sort**(_self_) <a id="Inventory.sort" href="#Inventory.sort">¶</a>
 >
->
+>Sort the inventory the same way the client does.
+>:return: :class:`list`
 ---
 
 ## TradeContainer
@@ -81,31 +84,24 @@ Inventory.**sort**(_self_) <a id="Inventory.sort" href="#Inventory.sort">¶</a>
 ### Methods
 TradeContainer.**get**(_self, item_id, default_) <a id="TradeContainer.get" href="#TradeContainer.get">¶</a>
 >
->
->
->__Parameters:__
-> * **item_id** - `int` the item's id.
-> * **default** - Optional[`int`] the default value if the item is not present.
-
+>Returns the quantity of an item inside the TradeContainer.
+>:param item_id: :class:`int` the item's id.
+>:param default: Optional[:class:`int`] the default value if the item is not present.
+>:return: :class:`int` the quantity of the item.
 ---
 
 TradeContainer.**getSlot**(_self, index_) <a id="TradeContainer.getSlot" href="#TradeContainer.getSlot">¶</a>
 >
->
->
->__Parameters:__
-> * **index** - `int` the index.
-
+>Returns the item inside a certain slot.
+>:param index: :class:`int` the index.
+>:return: :class:`aiotfm.inventory.InventoryItem` the item.
 ---
 
 TradeContainer.**add**(_self, item_id, quantity_) <a id="TradeContainer.add" href="#TradeContainer.add">¶</a>
 >
->
->
->__Parameters:__
-> * **item_id** - `int` the item's id.
-> * **quantity** - `int` the quantity to add. Can be negative.
-
+>Add a quantity of an item inside the container.
+>:param item_id: :class:`int` the item's id.
+>:param quantity: :class:`int` the quantity to add. Can be negative.
 ---
 
 ## Trade
@@ -122,29 +118,30 @@ TradeContainer.**add**(_self, item_id, quantity_) <a id="TradeContainer.add" hre
 
 
 ### Methods
+@*property*
 Trade.**closed**(_self_) <a id="Trade.closed" href="#Trade.closed">¶</a>
 >
->
+>Returns True if the trade is closed.
 ---
 
 Trade.**\_start**(_self_) <a id="Trade._start" href="#Trade._start">¶</a>
 >
->
+>Set the state of the trade as TRADING.
 ---
 
 Trade.**\_close**(_self, succeed_) <a id="Trade._close" href="#Trade._close">¶</a>
 >
->
+>Closes the trade.
 ---
 
 _coroutine_ Trade.**cancel**(_self_) <a id="Trade.cancel" href="#Trade.cancel">¶</a>
 >
->
+>Cancels the trade.
 ---
 
 _coroutine_ Trade.**accept**(_self_) <a id="Trade.accept" href="#Trade.accept">¶</a>
 >
->
+>Accepts the trade.
 ---
 
 _coroutine_ Trade.**addItem**(_self, item_id, quantity_) <a id="Trade.addItem" href="#Trade.addItem">¶</a>
@@ -169,11 +166,11 @@ _coroutine_ Trade.**removeItem**(_self, item_id, quantity_) <a id="Trade.removeI
 
 _coroutine_ Trade.**lock**(_self_) <a id="Trade.lock" href="#Trade.lock">¶</a>
 >
->
+>Locks (confirms) the trade.
 ---
 
 _coroutine_ Trade.**unlock**(_self_) <a id="Trade.unlock" href="#Trade.unlock">¶</a>
 >
->
+>Unlocks (cancels the confirmation) the trade.
 ---
 

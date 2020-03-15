@@ -24,11 +24,8 @@ Inherit from [`Message`](Message.md#Message).**
 
 _coroutine_ Whisper.**reply**(_self, msg_) <a id="Whisper.reply" href="#Whisper.reply">¶</a>
 >
->
->
->__Parameters:__
-> * **msg** - `str` the message.
-
+>Reply to the author of the message. Shortcut to :meth:`Client.whisper`.
+>:param msg: :class:`str` the message.
 ---
 
 ## Channel
@@ -51,7 +48,7 @@ _coroutine_ Channel.**send**(_self, message_) <a id="Channel.send" href="#Channe
 
 _coroutine_ Channel.**leave**(_self_) <a id="Channel.leave" href="#Channel.leave">¶</a>
 >
->
+>Leaves the channel.
 ---
 
 _coroutine_ Channel.**who**(_self_) <a id="Channel.who" href="#Channel.who">¶</a>

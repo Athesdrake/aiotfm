@@ -304,23 +304,26 @@ Notify when the client restarts.
 
 ---
 
-## on_connection_made(_self.connection_)
+## on_connection_made(_connection_)
+Called when a connection has been successfully made with the server.
 >__Parameters:__
-> * **self.connection**
+> * **connection** - [`Connection`](Connection.md#Connection) the connection that has been made.
 
 ---
 
-## on_connection_error(_self.connection, exc_)
+## on_connection_error(_connection, exception_)
+Called when a connection has been lost due to an error.
 >__Parameters:__
-> * **self.connection**
-> * **exc**
+> * **connection** - [`Connection`](Connection.md#Connection) the connection that has been lost.
+> * **exception** - `Exception` the error which occurred.
 
 ---
 
-## on_trade_close(_self, succeed_)
+## on_trade_close(_trade, succed_)
+Called when a trade is closed.
 >__Parameters:__
-> * **self**
-> * **succeed**
+> * **trade** - [`Trade`](Inventory.md#Trade) the trade object.
+> * **succed** - `bool` whether or not the trade is successful.
 
 ---
 
