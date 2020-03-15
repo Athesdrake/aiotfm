@@ -164,7 +164,6 @@ def generate(filename, name):
 				if params is not None:
 					f.write('| Parameters | Type | Required | Description |\n')
 					f.write('| :-: | :-: | :-: | :-- |\n')
-
 					for name, t, desc in parse_params(params):
 						f.write(f'| {name} | {t} | {"✕" if t.isOptional else "✔"} | {format(desc, links)} |\n')
 
@@ -190,10 +189,18 @@ def generate(filename, name):
 				href = f'{klass.name}.{method.name}'
 				args = signature(method).replace('*', '\\*')
 				coro = '_coroutine_ ' if isinstance(method, AsyncFunctionDef) else ''
+
+				for deco in method.decorator_list:
+					f.write(f'@*{deco.id}*\n')
 				f.write(f'{coro}{klass.name}.**{name}**(_{args}_) <a id="{href}" href="#{href}">¶</a>\n>\n>')
 
 				if doc is not None:
-					*desc, params = doc.replace(' ' * 8, '\t').split('\n\n')
+					parts = doc.replace(' ' * 8, '\t').split('\n\n')
+					if len(parts) > 1:
+						*desc, params = parts
+					else:
+						desc, params = parts, ''
+
 					params = parse_fdoc(params)
 					long_desc = '\n'.join(line for line in '\n\n'.join(desc).split('\n') if line != '|coro|')
 					f.write(deploy_codeblock(long_desc).replace('\n', '\n>'))
