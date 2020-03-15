@@ -32,7 +32,7 @@
 
 
 ### Methods
-@*classmethod*
+@*classmethod*<br>
 Player.**from\_packet**(_cls, packet_) <a id="Player.from_packet" href="#Player.from_packet">¶</a>
 >
 >Reads a Player from a packet.
@@ -40,7 +40,7 @@ Player.**from\_packet**(_cls, packet_) <a id="Player.from_packet" href="#Player.
 >:return: :class:`aiotfm.player.Player` the player.
 ---
 
-@*property*
+@*property*<br>
 Player.**isGuest**(_self_) <a id="Player.isGuest" href="#Player.isGuest">¶</a>
 >
 >Return True if the player is a guest (Souris)

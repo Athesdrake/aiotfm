@@ -30,13 +30,13 @@
 
 
 ### Methods
-@*property*
+@*property*<br>
 Member.**rank**(_self_) <a id="Member.rank" href="#Member.rank">¶</a>
 >
 >return the :class:`Rank` of the member.
 ---
 
-@*property*
+@*property*<br>
 Member.**online**(_self_) <a id="Member.online" href="#Member.online">¶</a>
 >
 >return True if the member is online.
@@ -53,73 +53,73 @@ Member.**online**(_self_) <a id="Member.online" href="#Member.online">¶</a>
 
 
 ### Methods
-@*property*
+@*property*<br>
 Rank.**isLeader**(_self_) <a id="Rank.isLeader" href="#Rank.isLeader">¶</a>
 >
 >True if it's the tribe's leader's rank.
 ---
 
-@*property*
+@*property*<br>
 Rank.**canChangeGreetingMessage**(_self_) <a id="Rank.canChangeGreetingMessage" href="#Rank.canChangeGreetingMessage">¶</a>
 >
 >True if it has the permission to change the greeting message.
 ---
 
-@*property*
+@*property*<br>
 Rank.**canEditRanks**(_self_) <a id="Rank.canEditRanks" href="#Rank.canEditRanks">¶</a>
 >
 >True if it has the permission to edit ranks.
 ---
 
-@*property*
+@*property*<br>
 Rank.**canChangeMembersRanks**(_self_) <a id="Rank.canChangeMembersRanks" href="#Rank.canChangeMembersRanks">¶</a>
 >
 >True if it has the permission to change members' rank.
 ---
 
-@*property*
+@*property*<br>
 Rank.**canInvite**(_self_) <a id="Rank.canInvite" href="#Rank.canInvite">¶</a>
 >
 >True if it has the permission to invite someone to the tribe.
 ---
 
-@*property*
+@*property*<br>
 Rank.**canExclude**(_self_) <a id="Rank.canExclude" href="#Rank.canExclude">¶</a>
 >
 >True if it has the permission to exclude someone of the tribe.
 ---
 
-@*property*
+@*property*<br>
 Rank.**canPlayMusic**(_self_) <a id="Rank.canPlayMusic" href="#Rank.canPlayMusic">¶</a>
 >
 >True if it has the permission to play music inside the tribe's house.
 ---
 
-@*property*
+@*property*<br>
 Rank.**canChangeTribeHouseMap**(_self_) <a id="Rank.canChangeTribeHouseMap" href="#Rank.canChangeTribeHouseMap">¶</a>
 >
 >True if it has the permission to change the tribe's house's map.
 ---
 
-@*property*
+@*property*<br>
 Rank.**canLoadMap**(_self_) <a id="Rank.canLoadMap" href="#Rank.canLoadMap">¶</a>
 >
 >True if it has the permission to load maps inside the tribe's house.
 ---
 
-@*property*
+@*property*<br>
 Rank.**canLoadLua**(_self_) <a id="Rank.canLoadLua" href="#Rank.canLoadLua">¶</a>
 >
 >True if it has the permission to load Lua inside the tribe's house.
 ---
 
-@*property*
+@*property*<br>
 Rank.**canManageForum**(_self_) <a id="Rank.canManageForum" href="#Rank.canManageForum">¶</a>
 >
 >True if it has the permission to mange the tribe's forum.
 ---
 
-@*classmethod*
+@*classmethod*<br>
 Rank.**from\_packet**(_cls, id_, packet_) <a id="Rank.from_packet" href="#Rank.from_packet">¶</a>
 >
 >Reads a Tribe from a packet.

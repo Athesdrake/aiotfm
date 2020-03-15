@@ -11,19 +11,19 @@
 
 
 ### Methods
-@*property*
+@*property*<br>
 Room.**community**(_self_) <a id="Room.community" href="#Room.community">¶</a>
 >
 >Returns the room's community.
 ---
 
-@*property*
+@*property*<br>
 Room.**is\_tribe**(_self_) <a id="Room.is_tribe" href="#Room.is_tribe">¶</a>
 >
 >Returns true if it's a tribe house.
 ---
 
-@*property*
+@*property*<br>
 Room.**display\_name**(_self_) <a id="Room.display_name" href="#Room.display_name">¶</a>
 >
 >Return the display name of the room.

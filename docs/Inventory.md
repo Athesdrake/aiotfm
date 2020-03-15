@@ -16,25 +16,25 @@
 
 
 ### Methods
-@*property*
+@*property*<br>
 InventoryItem.**image\_url**(_self_) <a id="InventoryItem.image_url" href="#InventoryItem.image_url">¶</a>
 >
 >The image's url of the item.
 ---
 
-@*property*
+@*property*<br>
 InventoryItem.**is\_currency**(_self_) <a id="InventoryItem.is_currency" href="#InventoryItem.is_currency">¶</a>
 >
 >Return True if the item is a currency.
 ---
 
-@*property*
+@*property*<br>
 InventoryItem.**is\_equipped**(_self_) <a id="InventoryItem.is_equipped" href="#InventoryItem.is_equipped">¶</a>
 >
 >Return True if the item is equipped
 ---
 
-@*classmethod*
+@*classmethod*<br>
 InventoryItem.**from\_packet**(_cls, packet_) <a id="InventoryItem.from_packet" href="#InventoryItem.from_packet">¶</a>
 >
 >Read an item from a packet.
@@ -57,7 +57,7 @@ _coroutine_ InventoryItem.**use**(_self_) <a id="InventoryItem.use" href="#Inven
 
 
 ### Methods
-@*classmethod*
+@*classmethod*<br>
 Inventory.**from\_packet**(_cls, packet_) <a id="Inventory.from_packet" href="#Inventory.from_packet">¶</a>
 >
 >Read the inventory from a packet.
@@ -118,7 +118,7 @@ TradeContainer.**add**(_self, item_id, quantity_) <a id="TradeContainer.add" hre
 
 
 ### Methods
-@*property*
+@*property*<br>
 Trade.**closed**(_self_) <a id="Trade.closed" href="#Trade.closed">¶</a>
 >
 >Returns True if the trade is closed.

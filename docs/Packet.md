@@ -14,7 +14,7 @@
 
 
 ### Methods
-@*classmethod*
+@*classmethod*<br>
 Packet.**new**(_cls, c, cc_) <a id="Packet.new" href="#Packet.new">¶</a>
 >
 >Create a new instance of Packet initialized by two bytes: c and cc.

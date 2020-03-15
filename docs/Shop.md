@@ -67,7 +67,7 @@ Shop.**category**(_self, id__) <a id="Shop.category" href="#Shop.category">¶</a
 
 
 ### Methods
-@*classmethod*
+@*classmethod*<br>
 Item.**from\_packet**(_cls, packet_) <a id="Item.from_packet" href="#Item.from_packet">¶</a>
 >
 >Reads an Item from a packet.
@@ -75,7 +75,7 @@ Item.**from\_packet**(_cls, packet_) <a id="Item.from_packet" href="#Item.from_p
 >:return: :class:`aiotfm.shop.Item`
 ---
 
-@*classmethod*
+@*classmethod*<br>
 Item.**parse**(_cls, cat, string_) <a id="Item.parse" href="#Item.parse">¶</a>
 >
 >Parse an Item from a string.
@@ -119,7 +119,7 @@ ShopItem.**to\_dict**(_self_) <a id="ShopItem.to_dict" href="#ShopItem.to_dict">
 >:return: :class:`dict`
 ---
 
-@*classmethod*
+@*classmethod*<br>
 ShopItem.**from\_packet**(_cls, packet_) <a id="ShopItem.from_packet" href="#ShopItem.from_packet">¶</a>
 >
 >Reads a ShopItem from a packet.
@@ -144,7 +144,7 @@ ShopItem.**from\_packet**(_cls, packet_) <a id="ShopItem.from_packet" href="#Sho
 
 
 ### Methods
-@*classmethod*
+@*classmethod*<br>
 Outfit.**from\_fashion**(_cls, packet_) <a id="Outfit.from_fashion" href="#Outfit.from_fashion">¶</a>
 >
 >Reads a fashion Outfit from a packet.
@@ -152,7 +152,7 @@ Outfit.**from\_fashion**(_cls, packet_) <a id="Outfit.from_fashion" href="#Outfi
 >:return: :class:`aiotfm.shop.Outfit`
 ---
 
-@*classmethod*
+@*classmethod*<br>
 Outfit.**from\_packet**(_cls, packet, id__) <a id="Outfit.from_packet" href="#Outfit.from_packet">¶</a>
 >
 >Reads an Outfit from a packet.
@@ -160,67 +160,67 @@ Outfit.**from\_packet**(_cls, packet, id__) <a id="Outfit.from_packet" href="#Ou
 >:return: :class:`aiotfm.shop.Outfit`
 ---
 
-@*property*
+@*property*<br>
 Outfit.**fur**(_self_) <a id="Outfit.fur" href="#Outfit.fur">¶</a>
 >
 >The fur's id of the outfit.
 ---
 
-@*property*
+@*property*<br>
 Outfit.**items**(_self_) <a id="Outfit.items" href="#Outfit.items">¶</a>
 >
 >The outfit's items.
 ---
 
-@*property*
+@*property*<br>
 Outfit.**head**(_self_) <a id="Outfit.head" href="#Outfit.head">¶</a>
 >
 >The outfit's head item.
 ---
 
-@*property*
+@*property*<br>
 Outfit.**eyes**(_self_) <a id="Outfit.eyes" href="#Outfit.eyes">¶</a>
 >
 >The outfit's eyes item.
 ---
 
-@*property*
+@*property*<br>
 Outfit.**ears**(_self_) <a id="Outfit.ears" href="#Outfit.ears">¶</a>
 >
 >The outfit's ears item.
 ---
 
-@*property*
+@*property*<br>
 Outfit.**mouth**(_self_) <a id="Outfit.mouth" href="#Outfit.mouth">¶</a>
 >
 >The outfit's mouth item.
 ---
 
-@*property*
+@*property*<br>
 Outfit.**neck**(_self_) <a id="Outfit.neck" href="#Outfit.neck">¶</a>
 >
 >The outfit's neck item.
 ---
 
-@*property*
+@*property*<br>
 Outfit.**hair**(_self_) <a id="Outfit.hair" href="#Outfit.hair">¶</a>
 >
 >The outfit's hair item.
 ---
 
-@*property*
+@*property*<br>
 Outfit.**tail**(_self_) <a id="Outfit.tail" href="#Outfit.tail">¶</a>
 >
 >The outfit's tail item.
 ---
 
-@*property*
+@*property*<br>
 Outfit.**lenses**(_self_) <a id="Outfit.lenses" href="#Outfit.lenses">¶</a>
 >
 >The outfit's lenses item.
 ---
 
-@*property*
+@*property*<br>
 Outfit.**hands**(_self_) <a id="Outfit.hands" href="#Outfit.hands">¶</a>
 >
 >The outfit's hands item.
@@ -247,7 +247,7 @@ Outfit.**hands**(_self_) <a id="Outfit.hands" href="#Outfit.hands">¶</a>
 | cheese | `int` | ✕ |  The obect's pricein cheese. |
 | fraise | `int` | ✕ |  The obect's pricein fraise. |
 
-@*classmethod*
+@*classmethod*<br>
 ShamanObject.**from\_packet**(_cls, packet_) <a id="ShamanObject.from_packet" href="#ShamanObject.from_packet">¶</a>
 >
 >Reads a ShamanObject from a packet.
@@ -270,7 +270,7 @@ ShamanObject.**from\_packet**(_cls, packet_) <a id="ShamanObject.from_packet" hr
 | equiped | `bool` | ✕ |  True if the client has the object equiped. |
 | colors | `list` | ✕ |  The custom colors the object has. |
 
-@*classmethod*
+@*classmethod*<br>
 OwnedShamanObject.**from\_packet**(_cls, packet_) <a id="OwnedShamanObject.from_packet" href="#OwnedShamanObject.from_packet">¶</a>
 >
 >Reads a OwnedShamanObject from a packet.

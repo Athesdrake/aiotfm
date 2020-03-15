@@ -191,7 +191,7 @@ def generate(filename, name):
 				coro = '_coroutine_ ' if isinstance(method, AsyncFunctionDef) else ''
 
 				for deco in method.decorator_list:
-					f.write(f'@*{deco.id}*\n')
+					f.write(f'@*{deco.id}*<br>\n')
 				f.write(f'{coro}{klass.name}.**{name}**(_{args}_) <a id="{href}" href="#{href}">¶</a>\n>\n>')
 
 				if doc is not None:
