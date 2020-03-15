@@ -84,20 +84,26 @@ _coroutine_ Client.**\_heartbeat\_loop**(_self_) <a id="Client._heartbeat_loop" 
 Client.**get\_channel**(_self, name_) <a id="Client.get_channel" href="#Client.get_channel">¶</a>
 >
 >Returns a channel from it's name or None if not found.
->:param name: :class:`str` the name of the channel.
->:return: :class:`aiotfm.messages.ChannelMessage` or None
+>
+>__Parameters:__
+> * **name** - `str` the name of the channel.
+
 ---
 
 Client.**get\_trade**(_self, player_) <a id="Client.get_trade" href="#Client.get_trade">¶</a>
 >
 >Returns the pending/current trade with a player.
->:param player: :class:`aiotfm.room.Player` or :class:`str` the player.
->:return: :class:`aiotfm.trade.Trade` the trade with the player.
+>
+>__Parameters:__
+> * **player** - [`Player`](Room.md#Player) or `str` the player.
+
 ---
 
 Client.**event**(_self, coro_) <a id="Client.event" href="#Client.event">¶</a>
 >
 >A decorator that registers an event.
+>
+>More about events [here](Events.md).
 ---
 
 Client.**wait\_for**(_self, event, condition, timeout, stopPropagation_) <a id="Client.wait_for" href="#Client.wait_for">¶</a>
@@ -125,19 +131,23 @@ _coroutine_ Client.**\_run\_event**(_self, coro, event_name, \*args, \*\*kwargs_
 >
 >Runs an event and handle the error if any.
 >
->:param coro: a coroutine function.
->:param event_name: :class:`str` the event's name.
->:param args: arguments to pass to the coro.
->:param kwargs: keyword arguments to pass to the coro.
+>__Parameters:__
+> * **coro** - a coroutine function.
+> * **event_name** - `str` the event's name.
+> * **args** - arguments to pass to the coro.
+> * **kwargs** - keyword arguments to pass to the coro.
+
 ---
 
 Client.**dispatch**(_self, event, \*args, \*\*kwargs_) <a id="Client.dispatch" href="#Client.dispatch">¶</a>
 >
 >Dispatches events
 >
->:param event: :class:`str` event's name. (without 'on_')
->:param args: arguments to pass to the coro.
->:param kwargs: keyword arguments to pass to the coro.
+>__Parameters:__
+> * **event** - `str` event's name. (without 'on_')
+> * **args** - arguments to pass to the coro.
+> * **kwargs** - keyword arguments to pass to the coro.
+
 ---
 
 _coroutine_ Client.**on\_error**(_self, event, err, \*args, \*\*kwargs_) <a id="Client.on_error" href="#Client.on_error">¶</a>
@@ -212,6 +222,10 @@ Client.**run**(_self, api_tfmid, api_token, username, password, \*\*kwargs_) <a 
 >@bot.event
 >async def on_login_ready(*a):
 >	await bot.login(username, password)
+>
+>loop = asyncio.get_event_loop()
+>loop.create_task(bot.start(api_id, api_token))
+>loop.run_forever()
 >```
 ---
 

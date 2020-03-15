@@ -195,15 +195,16 @@ def generate(filename, name):
 				f.write(f'{coro}{klass.name}.**{name}**(_{args}_) <a id="{href}" href="#{href}">¶</a>\n>\n>')
 
 				if doc is not None:
-					parts = doc.replace(' ' * 8, '\t').split('\n\n')
-					if len(parts) > 1:
-						*desc, params = parts
-					else:
-						desc, params = parts, ''
+					parts = doc.replace(' ' * 8, '\t').split('\n')
+					parts.append('')
 
-					params = parse_fdoc(params)
-					long_desc = '\n'.join(line for line in '\n\n'.join(desc).split('\n') if line != '|coro|')
-					f.write(deploy_codeblock(long_desc).replace('\n', '\n>'))
+					for i, part in enumerate(parts):
+						if part.strip().startswith(':'):
+							break
+
+					params = parse_fdoc('\n'.join(parts[i:]))
+					desc = '\n'.join(line for line in parts[:i] if line != '|coro|').strip('\n')
+					f.write(deploy_codeblock(desc).replace('\n', '\n>'))
 
 					if len(params) > 0:
 						f.write('\n>\n>__Parameters:__\n')

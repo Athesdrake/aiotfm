@@ -38,8 +38,10 @@ InventoryItem.**is\_equipped**(_self_) <a id="InventoryItem.is_equipped" href="#
 InventoryItem.**from\_packet**(_cls, packet_) <a id="InventoryItem.from_packet" href="#InventoryItem.from_packet">¶</a>
 >
 >Read an item from a packet.
->:param packet: :class:`aiotfm.Packet` the packet.
->:return: :class:`aiotfm.inventory.InventoryItem` the item.
+>
+>__Parameters:__
+> * **packet** - [`Packet`](Packet.md) the packet.
+
 ---
 
 _coroutine_ InventoryItem.**use**(_self_) <a id="InventoryItem.use" href="#InventoryItem.use">¶</a>
@@ -61,8 +63,10 @@ _coroutine_ InventoryItem.**use**(_self_) <a id="InventoryItem.use" href="#Inven
 Inventory.**from\_packet**(_cls, packet_) <a id="Inventory.from_packet" href="#Inventory.from_packet">¶</a>
 >
 >Read the inventory from a packet.
->:param packet: :class:`aiotfm.Packet` the packet.
->:return: :class:`aiotfm.inventory.Inventory` the inventory.
+>
+>__Parameters:__
+> * **packet** - [`Packet`](Packet.md) the packet.
+
 ---
 
 Inventory.**get**(_self, item_id_) <a id="Inventory.get" href="#Inventory.get">¶</a>
@@ -74,7 +78,6 @@ Inventory.**get**(_self, item_id_) <a id="Inventory.get" href="#Inventory.get">�
 Inventory.**sort**(_self_) <a id="Inventory.sort" href="#Inventory.sort">¶</a>
 >
 >Sort the inventory the same way the client does.
->:return: :class:`list`
 ---
 
 ## TradeContainer
@@ -85,23 +88,30 @@ Inventory.**sort**(_self_) <a id="Inventory.sort" href="#Inventory.sort">¶</a>
 TradeContainer.**get**(_self, item_id, default_) <a id="TradeContainer.get" href="#TradeContainer.get">¶</a>
 >
 >Returns the quantity of an item inside the TradeContainer.
->:param item_id: :class:`int` the item's id.
->:param default: Optional[:class:`int`] the default value if the item is not present.
->:return: :class:`int` the quantity of the item.
+>
+>__Parameters:__
+> * **item_id** - `int` the item's id.
+> * **default** - Optional[`int`] the default value if the item is not present.
+
 ---
 
 TradeContainer.**getSlot**(_self, index_) <a id="TradeContainer.getSlot" href="#TradeContainer.getSlot">¶</a>
 >
 >Returns the item inside a certain slot.
->:param index: :class:`int` the index.
->:return: :class:`aiotfm.inventory.InventoryItem` the item.
+>
+>__Parameters:__
+> * **index** - `int` the index.
+
 ---
 
 TradeContainer.**add**(_self, item_id, quantity_) <a id="TradeContainer.add" href="#TradeContainer.add">¶</a>
 >
 >Add a quantity of an item inside the container.
->:param item_id: :class:`int` the item's id.
->:param quantity: :class:`int` the quantity to add. Can be negative.
+>
+>__Parameters:__
+> * **item_id** - `int` the item's id.
+> * **quantity** - `int` the quantity to add. Can be negative.
+
 ---
 
 ## Trade

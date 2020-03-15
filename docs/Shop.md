@@ -24,29 +24,33 @@
 Shop.**to\_dict**(_self_) <a id="Shop.to_dict" href="#Shop.to_dict">¶</a>
 >
 >Export the shop into a serializable dict.
->:return: :class:`dict`
 ---
 
 Shop.**cost**(_self, outfit_) <a id="Shop.cost" href="#Shop.cost">¶</a>
 >
 >Compute and return the total price of an outfit.
->:param outfit: :class:`aiotfm.shop.Outfit`
->:return: :class:`tuple`[:class:`int`]
->	(Total in cheese, total in fraise, cheese supplement of items you can't buy with fraise)
+>
+>__Parameters:__
+> * **outfit** - [`Outfit`](Shop.md#Outfit)
+
 ---
 
 Shop.**getItem**(_self, item_) <a id="Shop.getItem" href="#Shop.getItem">¶</a>
 >
 >Return the shop item with the same id.
->:param item: :class:`aiotfm.shop.Item` the item you want to price of.
->:return: :class:`aiotfm.shop.ShopItem` the item with the prices.
+>
+>__Parameters:__
+> * **item** - [`Item`](Shop.md#Item) the item you want to price of.
+
 ---
 
 Shop.**category**(_self, id__) <a id="Shop.category" href="#Shop.category">¶</a>
 >
 >Return the items from a category.
->:param id_: :class:`int` the category's id?
->:return: :class:`set`[:class:`aiotfm.shop.Item`] the items.
+>
+>__Parameters:__
+> * **id_** - `int` the category's id?
+
 ---
 
 ## Item
@@ -71,17 +75,21 @@ Shop.**category**(_self, id__) <a id="Shop.category" href="#Shop.category">¶</a
 Item.**from\_packet**(_cls, packet_) <a id="Item.from_packet" href="#Item.from_packet">¶</a>
 >
 >Reads an Item from a packet.
->:param packet: :class:`aiotfm.Packet`
->:return: :class:`aiotfm.shop.Item`
+>
+>__Parameters:__
+> * **packet** - [`Packet`](Packet.md)
+
 ---
 
 @*classmethod*<br>
 Item.**parse**(_cls, cat, string_) <a id="Item.parse" href="#Item.parse">¶</a>
 >
 >Parse an Item from a string.
->:param cat: :class:`int` the item's category.
->:param string: :class:`str` the item.
->:return: :class:`aiotfm.shop.Item`
+>
+>__Parameters:__
+> * **cat** - `int` the item's category.
+> * **string** - `str` the item.
+
 ---
 
 ## ShopItem
@@ -116,15 +124,16 @@ Item.**parse**(_cls, cat, string_) <a id="Item.parse" href="#Item.parse">¶</a>
 ShopItem.**to\_dict**(_self_) <a id="ShopItem.to_dict" href="#ShopItem.to_dict">¶</a>
 >
 >Export the item into a serializable dict.
->:return: :class:`dict`
 ---
 
 @*classmethod*<br>
 ShopItem.**from\_packet**(_cls, packet_) <a id="ShopItem.from_packet" href="#ShopItem.from_packet">¶</a>
 >
 >Reads a ShopItem from a packet.
->:param packet: :class:`aiotfm.Packet`
->:return: :class:`aiotfm.shop.ShopItem`
+>
+>__Parameters:__
+> * **packet** - [`Packet`](Packet.md)
+
 ---
 
 ## Outfit
@@ -148,16 +157,20 @@ ShopItem.**from\_packet**(_cls, packet_) <a id="ShopItem.from_packet" href="#Sho
 Outfit.**from\_fashion**(_cls, packet_) <a id="Outfit.from_fashion" href="#Outfit.from_fashion">¶</a>
 >
 >Reads a fashion Outfit from a packet.
->:param packet: :class:`aiotfm.Packet`
->:return: :class:`aiotfm.shop.Outfit`
+>
+>__Parameters:__
+> * **packet** - [`Packet`](Packet.md)
+
 ---
 
 @*classmethod*<br>
 Outfit.**from\_packet**(_cls, packet, id__) <a id="Outfit.from_packet" href="#Outfit.from_packet">¶</a>
 >
 >Reads an Outfit from a packet.
->:param packet: :class:`aiotfm.Packet`
->:return: :class:`aiotfm.shop.Outfit`
+>
+>__Parameters:__
+> * **packet** - [`Packet`](Packet.md)
+
 ---
 
 @*property*<br>
@@ -251,8 +264,10 @@ Outfit.**hands**(_self_) <a id="Outfit.hands" href="#Outfit.hands">¶</a>
 ShamanObject.**from\_packet**(_cls, packet_) <a id="ShamanObject.from_packet" href="#ShamanObject.from_packet">¶</a>
 >
 >Reads a ShamanObject from a packet.
->:param packet: :class:`aiotfm.Packet`
->:return: :class:`aiotfm.shop.ShamanObject`
+>
+>__Parameters:__
+> * **packet** - [`Packet`](Packet.md)
+
 ---
 
 ## OwnedShamanObject
@@ -274,7 +289,9 @@ ShamanObject.**from\_packet**(_cls, packet_) <a id="ShamanObject.from_packet" hr
 OwnedShamanObject.**from\_packet**(_cls, packet_) <a id="OwnedShamanObject.from_packet" href="#OwnedShamanObject.from_packet">¶</a>
 >
 >Reads a OwnedShamanObject from a packet.
->:param packet: :class:`aiotfm.Packet`
->:return: :class:`aiotfm.shop.OwnedShamanObject`
+>
+>__Parameters:__
+> * **packet** - [`Packet`](Packet.md)
+
 ---
 

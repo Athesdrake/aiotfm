@@ -36,8 +36,10 @@
 Player.**from\_packet**(_cls, packet_) <a id="Player.from_packet" href="#Player.from_packet">¶</a>
 >
 >Reads a Player from a packet.
->:param packet: :class:`aiotfm.Packet` the packet.
->:return: :class:`aiotfm.player.Player` the player.
+>
+>__Parameters:__
+> * **packet** - [`Packet`](Packet.md) the packet.
+
 ---
 
 @*property*<br>

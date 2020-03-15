@@ -123,7 +123,10 @@ Rank.**canManageForum**(_self_) <a id="Rank.canManageForum" href="#Rank.canManag
 Rank.**from\_packet**(_cls, id_, packet_) <a id="Rank.from_packet" href="#Rank.from_packet">¶</a>
 >
 >Reads a Tribe from a packet.
->:param id: :class:`int` the tribe's id.
->:param packet: :class:`aiotfm.Packet`
+>
+>__Parameters:__
+> * **id** - `int` the tribe's id.
+> * **packet** - [`Packet`](Packet.md)
+
 ---
 
