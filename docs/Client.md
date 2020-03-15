@@ -50,6 +50,8 @@ _coroutine_ Client.**handle\_packet**(_self, connection, packet_) <a id="Client.
 >__Parameters:__
 > * **connection** - [`Connection`](Connection.md#Connection) the connection that received
 > * **packet** - [`Packet`](Packet.md) the packet.
+>
+>__Returns:__ True if the packet got handled, False otherwise.
 
 ---
 
@@ -73,6 +75,8 @@ _coroutine_ Client.**handle\_old\_packet**(_self, connection, oldCCC, data_) <a 
 > * **connection** - [`Connection`](Connection.md#Connection) the connection that received
 > * **oldCCC** - `tuple` the packet identifiers on the old protocol.
 > * **data** - `list` the packet data.
+>
+>__Returns:__ True if the packet got handled, False otherwise.
 
 ---
 
@@ -87,6 +91,8 @@ Client.**get\_channel**(_self, name_) <a id="Client.get_channel" href="#Client.g
 >
 >__Parameters:__
 > * **name** - `str` the name of the channel.
+>
+>__Returns:__ [`ChannelMessage`](Messages.md#ChannelMessage) or None
 
 ---
 
@@ -96,6 +102,8 @@ Client.**get\_trade**(_self, player_) <a id="Client.get_trade" href="#Client.get
 >
 >__Parameters:__
 > * **player** - [`Player`](Room.md#Player) or `str` the player.
+>
+>__Returns:__ [`Trade`](Trade.md#Trade) the trade with the player.
 
 ---
 
@@ -124,6 +132,8 @@ Client.**wait\_for**(_self, event, condition, timeout, stopPropagation_) <a id="
 > * **event** - `str` the event name.
 > * **condition** - Optionnal[[`function`](#function)] A predicate to check what to wait for.
 > * **timeout** - Optionnal[`int`] the number of seconds before
+>
+>__Returns:__ [`Future`](#asynciofuture) a future that you must await.
 
 ---
 
@@ -136,6 +146,8 @@ _coroutine_ Client.**\_run\_event**(_self, coro, event_name, \*args, \*\*kwargs_
 > * **event_name** - `str` the event's name.
 > * **args** - arguments to pass to the coro.
 > * **kwargs** - keyword arguments to pass to the coro.
+>
+>__Returns:__ `bool` whether the event ran successfully or not
 
 ---
 
@@ -147,6 +159,8 @@ Client.**dispatch**(_self, event, \*args, \*\*kwargs_) <a id="Client.dispatch" h
 > * **event** - `str` event's name. (without 'on_')
 > * **args** - arguments to pass to the coro.
 > * **kwargs** - keyword arguments to pass to the coro.
+>
+>__Returns:__ [`Task`](#task) the _run_event wrapper task
 
 ---
 
@@ -289,6 +303,8 @@ _coroutine_ Client.**getTribe**(_self, disconnected_) <a id="Client.getTribe" hr
 >
 >__Parameters:__
 > * **disconnected** - `bool` if True retrieves also the disconnected members.
+>
+>__Returns:__ [`Tribe`](#tribe) or ``None``.
 
 ---
 
@@ -401,6 +417,8 @@ _coroutine_ Client.**startTrade**(_self, player_) <a id="Client.startTrade" href
 >
 >__Parameters:__
 > * **player** - [`Player`](Player.md#Player) the player to trade with.
+>
+>__Returns:__ [`Trade`](Inventory.md#Trade) the resulting trade
 
 ---
 

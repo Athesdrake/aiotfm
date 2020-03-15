@@ -37,6 +37,8 @@ Room.**get\_players**(_self, predicate, max__) <a id="Room.get_players" href="#R
 >__Parameters:__
 > * **predicate** - A function that returns a boolean-like result to filter through
 > * **max_** - Optional[`int`] The maximum amount of players to return.
+>
+>__Returns:__ `Iterable` The filtered players.
 
 ---
 
@@ -46,6 +48,8 @@ Room.**get\_player**(_self, default, \*\*kwargs_) <a id="Room.get_player" href="
 >
 >__Parameters:__
 > * **kwargs** - Which identifier to use. Can be either name, username, id or pid.
+>
+>__Returns:__ [`Player`](Player.md#Player) The player or None
 
 ---
 

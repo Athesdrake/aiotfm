@@ -10,6 +10,7 @@ link_regex = re.compile(r'^\.{2}\s*_([^:]+):\s*(https?://(?:\w+\.)+\w+(?:/[.\w-]
 link_ref_regex = re.compile(r'`([^`]+)`_')
 params_regex = re.compile(r'\n([^:\n]+):\s*([^\n]+)((?:\n\s+(?:[^\n]+))+)')
 params_doc_regex = re.compile(r':param (\w+): (.+)')
+return_doc_regex = re.compile(r':return: (.+)')
 type_regex_op = re.compile(r'(?:(Optional)\[)?(?::(class|meth):`)?([^`]+)(?(2)`)(?(1)\])')
 type_regex = re.compile(r':(class|meth):`([^`]+)`')
 codeblock_regex = re.compile(r'\n([\w ]+): ::((?:\n+\t[^\n]+)+)')
@@ -70,7 +71,10 @@ def parse_fdoc(doc):
 	for param in params:
 		param[1] = format(re.sub(r'\s+', ' ', param[1].strip('\n')), {})
 
-	return params
+	match = return_doc_regex.search(doc)
+	returns = match.group(1) if match is not None else None
+
+	return params, returns
 
 
 def format(string, links):
@@ -202,7 +206,7 @@ def generate(filename, name):
 						if part.strip().startswith(':'):
 							break
 
-					params = parse_fdoc('\n'.join(parts[i:]))
+					params, returns = parse_fdoc('\n'.join(parts[i:]))
 					desc = '\n'.join(line for line in parts[:i] if line != '|coro|').strip('\n')
 					f.write(deploy_codeblock(desc).replace('\n', '\n>'))
 
@@ -211,6 +215,10 @@ def generate(filename, name):
 
 						for name, desc in params:
 							f.write(f'> * **{name}** - {desc}\n')
+
+						if returns is not None:
+							returns = format(returns, {})
+							f.write(f'>\n>__Returns:__ {returns}\n')
 
 				f.write('\n---\n\n')
 

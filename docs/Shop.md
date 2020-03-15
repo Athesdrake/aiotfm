@@ -32,6 +32,8 @@ Shop.**cost**(_self, outfit_) <a id="Shop.cost" href="#Shop.cost">¶</a>
 >
 >__Parameters:__
 > * **outfit** - [`Outfit`](Shop.md#Outfit)
+>
+>__Returns:__ `tuple`[`int`]
 
 ---
 
@@ -41,6 +43,8 @@ Shop.**getItem**(_self, item_) <a id="Shop.getItem" href="#Shop.getItem">¶</a>
 >
 >__Parameters:__
 > * **item** - [`Item`](Shop.md#Item) the item you want to price of.
+>
+>__Returns:__ [`ShopItem`](Shop.md#ShopItem) the item with the prices.
 
 ---
 
@@ -50,6 +54,8 @@ Shop.**category**(_self, id__) <a id="Shop.category" href="#Shop.category">¶</a
 >
 >__Parameters:__
 > * **id_** - `int` the category's id?
+>
+>__Returns:__ `set`[[`Item`](Shop.md#Item)] the items.
 
 ---
 
@@ -78,6 +84,8 @@ Item.**from\_packet**(_cls, packet_) <a id="Item.from_packet" href="#Item.from_p
 >
 >__Parameters:__
 > * **packet** - [`Packet`](Packet.md)
+>
+>__Returns:__ [`Item`](Shop.md#Item)
 
 ---
 
@@ -89,6 +97,8 @@ Item.**parse**(_cls, cat, string_) <a id="Item.parse" href="#Item.parse">¶</a>
 >__Parameters:__
 > * **cat** - `int` the item's category.
 > * **string** - `str` the item.
+>
+>__Returns:__ [`Item`](Shop.md#Item)
 
 ---
 
@@ -133,6 +143,8 @@ ShopItem.**from\_packet**(_cls, packet_) <a id="ShopItem.from_packet" href="#Sho
 >
 >__Parameters:__
 > * **packet** - [`Packet`](Packet.md)
+>
+>__Returns:__ [`ShopItem`](Shop.md#ShopItem)
 
 ---
 
@@ -160,6 +172,8 @@ Outfit.**from\_fashion**(_cls, packet_) <a id="Outfit.from_fashion" href="#Outfi
 >
 >__Parameters:__
 > * **packet** - [`Packet`](Packet.md)
+>
+>__Returns:__ [`Outfit`](Shop.md#Outfit)
 
 ---
 
@@ -170,6 +184,8 @@ Outfit.**from\_packet**(_cls, packet, id__) <a id="Outfit.from_packet" href="#Ou
 >
 >__Parameters:__
 > * **packet** - [`Packet`](Packet.md)
+>
+>__Returns:__ [`Outfit`](Shop.md#Outfit)
 
 ---
 
@@ -267,6 +283,8 @@ ShamanObject.**from\_packet**(_cls, packet_) <a id="ShamanObject.from_packet" hr
 >
 >__Parameters:__
 > * **packet** - [`Packet`](Packet.md)
+>
+>__Returns:__ [`ShamanObject`](Shop.md#ShamanObject)
 
 ---
 
@@ -292,6 +310,8 @@ OwnedShamanObject.**from\_packet**(_cls, packet_) <a id="OwnedShamanObject.from_
 >
 >__Parameters:__
 > * **packet** - [`Packet`](Packet.md)
+>
+>__Returns:__ [`OwnedShamanObject`](Shop.md#OwnedShamanObject)
 
 ---
 

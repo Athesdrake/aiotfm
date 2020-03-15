@@ -41,6 +41,8 @@ InventoryItem.**from\_packet**(_cls, packet_) <a id="InventoryItem.from_packet" 
 >
 >__Parameters:__
 > * **packet** - [`Packet`](Packet.md) the packet.
+>
+>__Returns:__ [`InventoryItem`](Inventory.md#InventoryItem) the item.
 
 ---
 
@@ -66,6 +68,8 @@ Inventory.**from\_packet**(_cls, packet_) <a id="Inventory.from_packet" href="#I
 >
 >__Parameters:__
 > * **packet** - [`Packet`](Packet.md) the packet.
+>
+>__Returns:__ [`Inventory`](Inventory.md#Inventory) the inventory.
 
 ---
 
@@ -92,6 +96,8 @@ TradeContainer.**get**(_self, item_id, default_) <a id="TradeContainer.get" href
 >__Parameters:__
 > * **item_id** - `int` the item's id.
 > * **default** - Optional[`int`] the default value if the item is not present.
+>
+>__Returns:__ `int` the quantity of the item.
 
 ---
 
@@ -101,6 +107,8 @@ TradeContainer.**getSlot**(_self, index_) <a id="TradeContainer.getSlot" href="#
 >
 >__Parameters:__
 > * **index** - `int` the index.
+>
+>__Returns:__ [`InventoryItem`](Inventory.md#InventoryItem) the item.
 
 ---
 
