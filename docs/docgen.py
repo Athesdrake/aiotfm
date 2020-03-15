@@ -12,7 +12,7 @@ params_regex = re.compile(r'\n([^:\n]+):\s*([^\n]+)((?:\n\s+(?:[^\n]+))+)')
 params_doc_regex = re.compile(r':param (\w+): (.+)')
 type_regex_op = re.compile(r'(?:(Optional)\[)?(?::(class|meth):`)?([^`]+)(?(2)`)(?(1)\])')
 type_regex = re.compile(r':(class|meth):`([^`]+)`')
-codeblock_regex = re.compile(r'\n(\w+): ::((?:\n+\t[^\n]+)+)')
+codeblock_regex = re.compile(r'\n([\w ]+): ::((?:\n+\t[^\n]+)+)')
 event_regex = re.compile(r'^:([^:]+): (.+)$')
 
 class Type:

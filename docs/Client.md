@@ -207,10 +207,12 @@ Client.**run**(_self, api_tfmid, api_token, username, password, \*\*kwargs_) <a 
 >
 >A blocking call that do the event loop initialization for you.
 >
->Equivalent to ::
->	@bot.event
->	async def on_login_ready(*a):
->		await bot.login(username, password)
+>__Equivalent to__:
+>```Python
+>@bot.event
+>async def on_login_ready(*a):
+>	await bot.login(username, password)
+>```
 ---
 
 Client.**close**(_self_) <a id="Client.close" href="#Client.close">¶</a>

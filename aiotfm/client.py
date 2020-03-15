@@ -857,7 +857,7 @@ class Client:
 	def run(self, api_tfmid, api_token, username, password, **kwargs):
 		"""A blocking call that do the event loop initialization for you.
 
-		Equivalent to ::
+		Equivalent to: ::
 			@bot.event
 			async def on_login_ready(*a):
 				await bot.login(username, password)
