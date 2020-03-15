@@ -281,6 +281,9 @@ class Trade:
 		if self.client.trade == self:
 			self.client.trade = None
 
+		# :desc: Called when a trade is closed.
+		# :param trade: :class:`aiotfm.inventory.Trade` the trade object.
+		# :param succed: :class:`bool` whether or not the trade is successful.
 		self.client.trades.pop(self.pid, None)
 		self.client.dispatch('trade_close', self, succeed)
 
