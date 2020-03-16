@@ -44,6 +44,10 @@ class Packet:
 			return self.buffer.obj
 		return bytes(self.buffer)
 
+	def __del__(self):
+		if isinstance(self.buffer, memoryview):
+			self.buffer.release()
+
 	@classmethod
 	def new(cls, c, cc=None):
 		"""Create a new instance of Packet initialized by two bytes: c and cc."""
