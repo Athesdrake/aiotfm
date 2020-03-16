@@ -1,7 +1,7 @@
 # Events' Documentation
 
 ## on_raw_socket(_connection, packet_)
-Called when a socket receives a packet. Does not interfere with [`handle_packet`](#handle_packet).
+Called when a socket receives a packet. Does not interfere with [`handle_packet`](#Client.handle_packet).
 >__Parameters:__
 > * **connection** - [`Connection`](Connection.md#Connection) the connection that received the packet.
 > * **packet** - [`Packet`](Packet.md) a copy of the packet.
@@ -9,7 +9,7 @@ Called when a socket receives a packet. Does not interfere with [`handle_packet`
 ---
 
 ## on_old_packet(_connection, oldCCC, data_)
-Called when an old packet is received. Does not interfere with [`handle_old_packet`](#handle_old_packet).
+Called when an old packet is received. Does not interfere with [`handle_old_packet`](#Client.handle_old_packet).
 >__Parameters:__
 > * **connection** - [`Connection`](Connection.md#Connection) the connection that received the packet.
 > * **oldCCC** - `tuple` the packet identifiers on the old protocol.

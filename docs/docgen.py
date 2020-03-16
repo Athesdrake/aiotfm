@@ -16,6 +16,7 @@ type_regex = re.compile(r':(class|meth):`([^`]+)`')
 codeblock_regex = re.compile(r'\n([\w ]+): ::((?:\n+\t[^\n]+)+)')
 event_regex = re.compile(r'^:([^:]+): (.+)$')
 
+
 class Type:
 	def __init__(self, name, type_, optional=False):
 		self.name = name
@@ -86,6 +87,13 @@ def format(string, links):
 		link = name.replace(' ', '-')
 		name = name.split('.')[-1]
 		parts = link.split('.')
+
+		if type_ == 'meth':
+			print(link)
+			if parts[0] == 'aiotfm':
+				anchor = '.'.join(parts[1:])
+				return f'[`{name}`](#{parts[1].title()}.md#{anchor})'
+			return f'[`{name}`](#{link})'
 
 		if len(parts) > 1 and parts[0] == 'aiotfm':
 			parts[1] = parts[1].title()
@@ -215,13 +223,13 @@ def generate(filename, doc_name):
 
 					params, returns = parse_fdoc('\n'.join(parts[i:]))
 					desc = '\n'.join(line for line in parts[:i] if line != '|coro|').strip('\n')
-					f.write(deploy_codeblock(desc).replace('\n', '\n>'))
+					f.write(deploy_codeblock(format(desc, {})).replace('\n', '\n>'))
 
 					if len(params) > 0:
 						f.write('\n>\n>__Parameters:__\n')
 
 						for name, desc in params:
-							f.write(f'> * **{name}** - {desc}\n')
+							f.write(f'> * **{name}** - {format(desc, {})}\n')
 
 						if returns is not None:
 							returns = format(returns, {})

@@ -33,7 +33,7 @@
 @*property*<br>
 Member.**rank**(_self_) <a id="Member.rank" href="#Member.rank">¶</a>
 >
->return the :class:`Rank` of the member.
+>return the [`Rank`](#rank) of the member.
 ---
 
 @*property*<br>

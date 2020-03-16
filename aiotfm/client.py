@@ -88,7 +88,8 @@ class Client:
 		:param connection: :class:`aiotfm.connection.Connection` the connection that received
 			the data.
 		"""
-		# :desc: Called when a socket receives a packet. Does not interfere with :meth:`handle_packet`.
+		# :desc: Called when a socket receives a packet. Does not interfere
+		# with :meth:`Client.handle_packet`.
 		# :param connection: :class:`aiotfm.connection.Connection` the connection that received
 		# the packet.
 		# :param packet: :class:`aiotfm.Packet` a copy of the packet.
@@ -124,7 +125,7 @@ class Client:
 			oldCCC = tuple(oldCCC[:2])
 
 			# :desc: Called when an old packet is received. Does not interfere
-			# with :meth:`handle_old_packet`.
+			# with :meth:`Client.handle_old_packet`.
 			# :param connection: :class:`aiotfm.connection.Connection` the connection that received
 			# the packet.
 			# :param oldCCC: :class:`tuple` the packet identifiers on the old protocol.
@@ -602,7 +603,7 @@ class Client:
 
 	def get_trade(self, player):
 		"""Returns the pending/current trade with a player.
-		:param player: :class:`aiotfm.room.Player` or :class:`str` the player.
+		:param player: :class:`aiotfm.player.Player` or :class:`str` the player.
 		:return: :class:`aiotfm.trade.Trade` the trade with the player.
 		"""
 		if not isinstance(player, (str, Player)):
@@ -643,11 +644,12 @@ class Client:
 					await client.sendRoomMessage('Your id: {}'.format(profile.id))
 
 		:param event: :class:`str` the event name.
-		:param condition: Optionnal[:class:`function`] A predicate to check what to wait for.
+		:param condition: Optionnal[`function`] A predicate to check what to wait for.
 			The arguments must meet the parameters of the event being waited for.
 		:param timeout: Optionnal[:class:`int`] the number of seconds before
 			throwing asyncio.TimeoutError
-		:return: :class:`asyncio.Future` a future that you must await.
+		:return: [`asyncio.Future`](https://docs.python.org/3/library/asyncio-future.html#asyncio.Future)
+			a future that you must await.
 		"""
 		event = event.lower()
 		future = self.loop.create_future()
@@ -701,7 +703,8 @@ class Client:
 		:param args: arguments to pass to the coro.
 		:param kwargs: keyword arguments to pass to the coro.
 
-		:return: :class:`Task` the _run_event wrapper task
+		:return: [`Task`](https://docs.python.org/3/library/asyncio-task.html#asyncio.Task)
+			the _run_event wrapper task
 		"""
 		method = 'on_' + event
 
@@ -811,8 +814,8 @@ class Client:
 		"""Restarts the client in several seconds.
 
 		:param delay: :class:`int` the delay before restarting. Default is 5 seconds.
-		:param args: arguments to pass to the :meth:`restart` method.
-		:param kwargs: keyword arguments to pass to the :meth:`restart` method."""
+		:param args: arguments to pass to the :meth:`Client.restart` method.
+		:param kwargs: keyword arguments to pass to the :meth:`Client.restart` method."""
 		await asyncio.sleep(delay)
 		await self.restart(*args, **kwargs)
 
@@ -1046,7 +1049,7 @@ class Client:
 
 	async def enterTribeHouse(self):
 		"""|coro|
-		Alias for :meth:`enterTribe`
+		Alias for :meth:`Client.enterTribe`
 		"""
 		await self.enterTribe()
 

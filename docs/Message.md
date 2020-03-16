@@ -24,7 +24,7 @@ Inherit from [`Message`](Message.md#Message).**
 
 _coroutine_ Whisper.**reply**(_self, msg_) <a id="Whisper.reply" href="#Whisper.reply">¶</a>
 >
->Reply to the author of the message. Shortcut to :meth:`Client.whisper`.
+>Reply to the author of the message. Shortcut to [`whisper`](#Client.whisper).
 >
 >__Parameters:__
 > * **msg** - `str` the message.

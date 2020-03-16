@@ -75,8 +75,8 @@ Inventory.**from\_packet**(_cls, packet_) <a id="Inventory.from_packet" href="#I
 
 Inventory.**get**(_self, item_id_) <a id="Inventory.get" href="#Inventory.get">¶</a>
 >
->Gets an item from this :class:`aiotfm.inventory.Inventory`.
->Shorthand for :class:`aiotfm.inventory.Inventory`.items.get
+>Gets an item from this [`Inventory`](Inventory.md#Inventory).
+>Shorthand for [`Inventory`](Inventory.md#Inventory).items.get
 ---
 
 Inventory.**sort**(_self_) <a id="Inventory.sort" href="#Inventory.sort">¶</a>

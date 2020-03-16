@@ -101,7 +101,7 @@ Client.**get\_trade**(_self, player_) <a id="Client.get_trade" href="#Client.get
 >Returns the pending/current trade with a player.
 >
 >__Parameters:__
-> * **player** - [`Player`](Room.md#Player) or `str` the player.
+> * **player** - [`Player`](Player.md#Player) or `str` the player.
 >
 >__Returns:__ [`Trade`](Trade.md#Trade) the trade with the player.
 
@@ -130,10 +130,10 @@ Client.**wait\_for**(_self, event, condition, timeout, stopPropagation_) <a id="
 >
 >__Parameters:__
 > * **event** - `str` the event name.
-> * **condition** - Optionnal[[`function`](#function)] A predicate to check what to wait for.
+> * **condition** - Optionnal[`function`] A predicate to check what to wait for.
 > * **timeout** - Optionnal[`int`] the number of seconds before
 >
->__Returns:__ [`Future`](#asynciofuture) a future that you must await.
+>__Returns:__ [`asyncio.Future`](https://docs.python.org/3/library/asyncio-future.html#asyncio.Future)
 
 ---
 
@@ -160,7 +160,7 @@ Client.**dispatch**(_self, event, \*args, \*\*kwargs_) <a id="Client.dispatch" h
 > * **args** - arguments to pass to the coro.
 > * **kwargs** - keyword arguments to pass to the coro.
 >
->__Returns:__ [`Task`](#task) the _run_event wrapper task
+>__Returns:__ [`Task`](https://docs.python.org/3/library/asyncio-task.html#asyncio.Task)
 
 ---
 
@@ -205,8 +205,8 @@ _coroutine_ Client.**restart\_soon**(_self, \*args, delay=5.0, \*\*kwargs_) <a i
 >
 >__Parameters:__
 > * **delay** - `int` the delay before restarting. Default is 5 seconds.
-> * **args** - arguments to pass to the [`restart`](#restart) method.
-> * **kwargs** - keyword arguments to pass to the [`restart`](#restart) method.
+> * **args** - arguments to pass to the [`restart`](#Client.restart) method.
+> * **kwargs** - keyword arguments to pass to the [`restart`](#Client.restart) method.
 
 ---
 
@@ -299,7 +299,7 @@ _coroutine_ Client.**whisper**(_self, username, message, overflow_) <a id="Clien
 
 _coroutine_ Client.**getTribe**(_self, disconnected_) <a id="Client.getTribe" href="#Client.getTribe">¶</a>
 >
->Gets the client's :class:`Tribe` and return it
+>Gets the client's [`Tribe`](#tribe) and return it
 >
 >__Parameters:__
 > * **disconnected** - `bool` if True retrieves also the disconnected members.
@@ -352,7 +352,7 @@ _coroutine_ Client.**enterTribe**(_self_) <a id="Client.enterTribe" href="#Clien
 
 _coroutine_ Client.**enterTribeHouse**(_self_) <a id="Client.enterTribeHouse" href="#Client.enterTribeHouse">¶</a>
 >
->Alias for :meth:`enterTribe`
+>Alias for [`enterTribe`](#Client.enterTribe)
 ---
 
 _coroutine_ Client.**joinRoom**(_self, room_name, community, auto_) <a id="Client.joinRoom" href="#Client.joinRoom">¶</a>
