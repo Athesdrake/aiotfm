@@ -11,7 +11,7 @@ class TFMProtocol(asyncio.Protocol):
 	def data_received(self, data):
 		self.buffer.extend(data)
 
-		while len(self.buffer) > 0:
+		while len(self.buffer) > self.length:
 			if self.length == 0:
 				for i in range(5):
 					byte = self.buffer.pop(0)
