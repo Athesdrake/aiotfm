@@ -89,7 +89,6 @@ def format(string, links):
 		parts = link.split('.')
 
 		if type_ == 'meth':
-			print(link)
 			if parts[0] == 'aiotfm':
 				anchor = '.'.join(parts[1:])
 				return f'[`{name}`](#{parts[1].title()}.md#{anchor})'
@@ -104,7 +103,6 @@ def format(string, links):
 
 			return f'[`{name}`]({link}{anchor})'
 
-		link = link.lower().replace('.', '')
 		return f'[`{name}`](#{link})'
 
 	def repl_links(m):

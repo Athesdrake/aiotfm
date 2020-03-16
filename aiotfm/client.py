@@ -604,7 +604,7 @@ class Client:
 	def get_trade(self, player):
 		"""Returns the pending/current trade with a player.
 		:param player: :class:`aiotfm.player.Player` or :class:`str` the player.
-		:return: :class:`aiotfm.trade.Trade` the trade with the player.
+		:return: :class:`aiotfm.inventory.Trade` the trade with the player.
 		"""
 		if not isinstance(player, (str, Player)):
 			raise TypeError(f"Expected Player or str types got {type(player)}")
@@ -904,7 +904,7 @@ class Client:
 		Send a packet to the community platform.
 
 		:param code: :class:`int` the community platform code.
-		:param data: :class:`Packet` or :class:`bytes` the data.
+		:param data: :class:`aiotfm.Packet` or :class:`bytes` the data.
 		"""
 		self.cp_fingerprint = fp = (self.cp_fingerprint + 1) % 0XFFFFFFFF
 
@@ -970,10 +970,10 @@ class Client:
 
 	async def getTribe(self, disconnected=True):
 		"""|coro|
-		Gets the client's :class:`Tribe` and return it
+		Gets the client's :class:`aiotfm.Tribe` and return it
 
 		:param disconnected: :class:`bool` if True retrieves also the disconnected members.
-		:return: :class:`Tribe` or ``None``.
+		:return: :class:`aiotfm.Tribe` or ``None``.
 		"""
 		sid = self.cp_fingerprint + 1
 		await self.sendCP(108, Packet().writeBool(disconnected))
@@ -1082,7 +1082,7 @@ class Client:
 		"""|coro|
 		Leaves a #channel.
 
-		:param channel: :class:`aiotfm.Channel` channel to leave.
+		:param channel: :class:`aiotfm.message.Channel` channel to leave.
 		"""
 		if isinstance(channel, Channel):
 			name = channel.name

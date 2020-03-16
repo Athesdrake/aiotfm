@@ -60,7 +60,7 @@ _coroutine_ Channel.**who**(_self_) <a id="Channel.who" href="#Channel.who">¶</
 ---
 
 ## ChannelMessage
-**Represents a message from a [`Channel`](#channel).**
+**Represents a message from a [`Channel`](#Channel).**
 
 | Attributes | Type | Can be None | Description |
 | :-: | :-: | :-: | :-- |

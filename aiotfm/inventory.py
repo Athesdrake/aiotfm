@@ -220,7 +220,7 @@ class Trade:
 		The container of the items you will receive if the trade succeed.
 	exports: :class:`aiotfm.inventory.TradeContainer`
 		The container of the items you will give if the trade succeed.
-	state: :class:`aiotfm.utils.TradeState`
+	state: :class:`aiotfm.enums.TradeState`
 		The current state of the trade.
 			ON_INVITE: an invitation has been received from/sent to the other party.
 			ACCEPTING: the client accepted and is waiting for the other party to be ready.

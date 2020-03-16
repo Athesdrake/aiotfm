@@ -10,7 +10,7 @@ class Message:
 	----------
 	author: `aiotfm.Player`
 		The message's author.
-	community: `aiotfm.enum.ChatCommunity`
+	community: `aiotfm.enums.ChatCommunity`
 		The author's community. Note: the community isn't the author's language!
 	content: `str`
 		The actual content of the message.
@@ -122,7 +122,7 @@ class ChannelMessage(Message):
 		The channel where the message is from.
 	author: `aiotfm.Player`
 		The message's author.
-	community: `aiotfm.enum.ChatCommunity`
+	community: `aiotfm.enums.ChatCommunity`
 		The author's community. Note: the community isn't the author's language!
 	content: `str`
 		The actual content of the message."""

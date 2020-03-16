@@ -9,8 +9,8 @@ class Packet:
 	Parameters
 	----------
 	buffer: Optional[:class:`bytes`]
-		The packet's buffer. The ``Packet`` will be read-only if given.
-		If ``None`` is provided instead the ``Packet`` will be in write-only mode.
+		The packet's buffer. The :class:`Packet` will be read-only if given.
+		If ``None`` is provided instead the :class:`Packet` will be in write-only mode.
 
 	Attributes
 	----------

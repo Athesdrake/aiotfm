@@ -132,7 +132,7 @@ TradeContainer.**add**(_self, item_id, quantity_) <a id="TradeContainer.add" hre
 | locked | `List[` | ✕ |  A list of two `bool` describing the locked state of each party. |
 | imports | [`TradeContainer`](Inventory.md) | ✕ |  The container of the items you will receive if the trade succeed. |
 | exports | [`TradeContainer`](Inventory.md) | ✕ |  The container of the items you will give if the trade succeed. |
-| state | [`TradeState`](Utils.md) | ✕ |  The current state of the trade. ON_INVITE: an invitation has been received from/sent to the other party. ACCEPTING: the client accepted and is waiting for the other party to be ready. TRADING: the only state of the trade where you are able to add items. CANCELLED: the trade has been cancelled by one of the parties. SUCCESS: the trade finished successfully. |
+| state | [`TradeState`](Enums.md) | ✕ |  The current state of the trade. ON_INVITE: an invitation has been received from/sent to the other party. ACCEPTING: the client accepted and is waiting for the other party to be ready. TRADING: the only state of the trade where you are able to add items. CANCELLED: the trade has been cancelled by one of the parties. SUCCESS: the trade finished successfully. |
 
 
 ### Methods

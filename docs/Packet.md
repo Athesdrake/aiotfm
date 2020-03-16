@@ -5,7 +5,7 @@
 
 | Parameters | Type | Required | Description |
 | :-: | :-: | :-: | :-- |
-| buffer | `bytes` | ✕ |  The packet's buffer. The ``Packet`` will be read-only if given. If ``None`` is provided instead the ``Packet`` will be in write-only mode. |
+| buffer | `bytes` | ✕ |  The packet's buffer. The [`Packet`](#Packet) will be read-only if given. If ``None`` is provided instead the [`Packet`](#Packet) will be in write-only mode. |
 
 | Attributes | Type | Can be None | Description |
 | :-: | :-: | :-: | :-- |

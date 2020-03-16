@@ -2,7 +2,7 @@
 
 ## Client
 **Represents a client that connects to Transformice.
-Two argument can be passed to the [`Client`](#client).**
+Two argument can be passed to the [`Client`](#Client).**
 
 | Parameters | Type | Required | Description |
 | :-: | :-: | :-: | :-- |
@@ -103,7 +103,7 @@ Client.**get\_trade**(_self, player_) <a id="Client.get_trade" href="#Client.get
 >__Parameters:__
 > * **player** - [`Player`](Player.md#Player) or `str` the player.
 >
->__Returns:__ [`Trade`](Trade.md#Trade) the trade with the player.
+>__Returns:__ [`Trade`](Inventory.md#Trade) the trade with the player.
 
 ---
 
@@ -254,7 +254,7 @@ _coroutine_ Client.**sendCP**(_self, code, data_) <a id="Client.sendCP" href="#C
 >
 >__Parameters:__
 > * **code** - `int` the community platform code.
-> * **data** - [`Packet`](#packet) or `bytes` the data.
+> * **data** - [`Packet`](Packet.md) or `bytes` the data.
 
 ---
 
@@ -299,12 +299,12 @@ _coroutine_ Client.**whisper**(_self, username, message, overflow_) <a id="Clien
 
 _coroutine_ Client.**getTribe**(_self, disconnected_) <a id="Client.getTribe" href="#Client.getTribe">¶</a>
 >
->Gets the client's [`Tribe`](#tribe) and return it
+>Gets the client's [`Tribe`](Tribe.md) and return it
 >
 >__Parameters:__
 > * **disconnected** - `bool` if True retrieves also the disconnected members.
 >
->__Returns:__ [`Tribe`](#tribe) or ``None``.
+>__Returns:__ [`Tribe`](Tribe.md) or ``None``.
 
 ---
 
@@ -384,7 +384,7 @@ _coroutine_ Client.**leaveChannel**(_self, channel_) <a id="Client.leaveChannel"
 >Leaves a #channel.
 >
 >__Parameters:__
-> * **channel** - [`Channel`](Channel.md) channel to leave.
+> * **channel** - [`Channel`](Message.md#Channel) channel to leave.
 
 ---
 

@@ -10,7 +10,7 @@ class Room:
 		The room's name. (i.e: en-1, *bad girls and so on)
 	private: `bool`
 		Whether the room is public or private.
-	players: `list[aiotfm.player.Player]`
+	players: `list[:class:`aiotfm.player.Player`]`
 		The list containing all the players of the room.
 	"""
 	def __init__(self, name, private=True):

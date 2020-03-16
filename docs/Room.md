@@ -7,7 +7,7 @@
 | :-: | :-: | :-: | :-- |
 | name | `str` | ✕ |  The room's name. (i.e: en-1, *bad girls and so on) |
 | private | `bool` | ✕ |  Whether the room is public or private. |
-| players | `Player]` | ✕ |  The list containing all the players of the room. |
+| players | `list[:class:` | ✕ |  The list containing all the players of the room. |
 
 
 ### Methods
