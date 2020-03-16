@@ -32,9 +32,6 @@ class Packet:
 			self.__write = True
 
 		self.pos = 0
-		self.exported = False
-		self.bytes = None
-		self._fp = 0
 
 	def __repr__(self):
 		return '<Packet {!r}>'.format(bytes(self))
@@ -174,24 +171,17 @@ class Packet:
 
 	def export(self, fp=0):
 		"""Generates the header then converts the whole packet to bytes and returns it."""
-		if self.exported and self._fp == fp:
-			return self.bytes
-
 		m = Packet()
 		size = len(self.buffer)
 		size_type = size >> 7
 		while size_type != 0:
-			m.write8(size & 127 | 128)
+			m.write8(size & 0x7f | 0x80)
 			size = size_type
 			size_type >>= 7
-		m.write8(size & 127)
+		m.write8(size & 0x7f)
 		m.write8(fp)
 
-		self.bytes = bytes(m.buffer + self.buffer)
-		self.exported = True
-		self._fp = fp
-
-		return self.bytes
+		return bytes(m.buffer + self.buffer)
 
 	def xor_cipher(self, key, fp):
 		"""Cipher the packet with the XOR algorithm."""

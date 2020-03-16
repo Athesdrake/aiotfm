@@ -10,7 +10,7 @@ class Keys:
 		self.auth = keys.pop('auth_key', 0)
 		self.connection = keys.pop('connection_key', '')
 		self.identification = keys.pop('identification_keys', [])
-		self.msg = keys.pop('msg_keys', [])
+		self.msg = [k & 0xff for k in keys.pop('msg_keys', [])]
 		self.packet = keys.pop('packet_keys', [])
 		self.version = keys.pop('version', 0)
 		self.kwargs = keys
