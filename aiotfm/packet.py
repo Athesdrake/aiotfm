@@ -34,9 +34,6 @@ class Packet:
 			self.__write = True
 
 		self.pos = 0
-		self.exported = False
-		self.bytes = None
-		self._fp = 0
 
 	def __repr__(self):
 		return '<Packet {!r}>'.format(bytes(self))
@@ -45,6 +42,10 @@ class Packet:
 		if self.__read:
 			return self.buffer.obj
 		return bytes(self.buffer)
+
+	def __del__(self):
+		if isinstance(self.buffer, memoryview):
+			self.buffer.release()
 
 	@classmethod
 	def new(cls, c, cc=None):
@@ -172,33 +173,22 @@ class Packet:
 
 	def export(self, fp=0):
 		"""Generates the header then converts the whole packet to bytes and returns it."""
-		if self.exported and self._fp == fp:
-			return self.bytes
-
 		m = Packet()
 		size = len(self.buffer)
 		size_type = size >> 7
 		while size_type != 0:
-			m.write8(size & 127 | 128)
+			m.write8(size & 0x7f | 0x80)
 			size = size_type
 			size_type >>= 7
-		m.write8(size & 127)
+		m.write8(size & 0x7f)
 		m.write8(fp)
 
-		self.bytes = bytes(m.buffer + self.buffer)
-		self.exported = True
-		self._fp = fp
-
-		return self.bytes
+		return bytes(m.buffer + self.buffer)
 
 	def xor_cipher(self, key, fp):
 		"""Cipher the packet with the XOR algorithm."""
-		fp += 1
-		ccc = self.readBytes(2)
-		tmp = bytearray(
-			(byte ^ key[(fp + i) % 20]) & 0xff for i, byte in enumerate(self.buffer[2:])
-		)
-		self.buffer = ccc + tmp
+		data = memoryview(self.buffer)[2:]
+		self.buffer[2:] = (byte ^ key[i % 20] for i, byte in enumerate(data, fp + 1))
 		return self
 
 	def cipher(self, key):
