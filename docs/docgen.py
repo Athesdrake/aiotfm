@@ -134,14 +134,17 @@ def signature(func):
 	return ', '.join(args)
 
 
-def generate(filename, name):
+def generate(filename, doc_name):
+	tree = []
+
 	with open(filename, 'r', encoding='utf-8') as f:
 		code: ast.Module = ast.parse(f.read(), filename)
 
-	with open(f'{name}.md', 'w', encoding='utf-8') as f:
-		f.write(f"# {name}'s Documentation\n\n")
+	with open(f'{doc_name}.md', 'w', encoding='utf-8') as f:
+		f.write(f"# {doc_name}'s Documentation\n\n")
 
 		for klass in (node for node in code.body if isinstance(node, ClassDef)):
+			tree.append(klass.name)
 			f.write(f"## {klass.name}\n")
 
 			doc = ast.get_docstring(klass)
@@ -194,8 +197,12 @@ def generate(filename, name):
 				args = signature(method).replace('*', '\\*')
 				coro = '_coroutine_ ' if isinstance(method, AsyncFunctionDef) else ''
 
-				for deco in method.decorator_list:
-					f.write(f'@*{deco.id}*<br>\n')
+				decorators = [node.id for node in method.decorator_list]
+				if 'property' not in decorators:
+					tree.append('.'.join((klass.name, method.name)))
+
+				for deco in decorators:
+					f.write(f'@*{deco}*<br>\n')
 				f.write(f'{coro}{klass.name}.**{name}**(_{args}_) <a id="{href}" href="#{href}">¶</a>\n>\n>')
 
 				if doc is not None:
@@ -221,6 +228,8 @@ def generate(filename, name):
 							f.write(f'>\n>__Returns:__ {returns}\n')
 
 				f.write('\n---\n\n')
+
+	return tree
 
 
 class EventDoc:
@@ -397,13 +406,28 @@ def generate_events():
 			f.write('\n\n---\n\n')
 
 
+def generate_readme(files):
+	with open('README.md', 'w', encoding='utf-8') as f:
+		f.write('# Documentation\nYou can find here all documentation on `aiotfm`.\n\n')
+		f.write("## API Reference\n")
+
+		for file, tree in files.items():
+			f.write(f'* [{file}.md]({file}.md)\n')
+			for name in tree:
+				display_name = name.replace('_', '\\_')
+				tab = '  ' * name.count('.')
+
+				f.write(f' {tab} * [{display_name}]({file}.md#{name})\n')
+
 if __name__ == '__main__':
 	files = [
 		'Client', 'Player', 'Tribe', 'Message', 'Connection',
 		'Inventory', 'Packet', 'Room', 'Shop', 'Enums', 'Errors'
 	]
+	tree = {}
 
 	for file in files:
-		generate(f'../aiotfm/{file.lower()}.py', file)
+		tree[file] = generate(f'../aiotfm/{file.lower()}.py', file)
 
+	generate_readme(tree)
 	generate_events()
