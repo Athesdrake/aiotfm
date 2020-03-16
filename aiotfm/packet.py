@@ -185,12 +185,8 @@ class Packet:
 
 	def xor_cipher(self, key, fp):
 		"""Cipher the packet with the XOR algorithm."""
-		fp += 1
-		ccc = self.readBytes(2)
-		tmp = bytearray(
-			(byte ^ key[(fp + i) % 20]) & 0xff for i, byte in enumerate(self.buffer[2:])
-		)
-		self.buffer = ccc + tmp
+		data = memoryview(self.buffer)[2:]
+		self.buffer[2:] = (byte ^ key[i % 20] for i, byte in enumerate(data, fp + 1))
 		return self
 
 	def cipher(self, key):
