@@ -143,25 +143,42 @@ class Player:
 class Profile:
 	"""Represents a player's profile.
 
-	## Attributes
-
-	username `str` the player's username.
-	uid `int` the player's id.
-	registration_date `int` the registration timestamp of the player.
-	privLevel `int` the privilege level of the player.
-	gender `int` player's gender.
-	tribe `str` player's tribe. Can be `None`.
-	soulmate `str` player's soulmate. Can be `None`.
-	title `int` the title above the player's head.
-	titles `set` the list of the unlocked titles.
-	titles_stars `dict` a dictionary where are stored the number of stars a title has.
-	look `str` the player's look.
-	level `int` the player's shaman level.
-	badges `dict` all badges unlocked by the player and their number.
-	stats [`Stats`](#stats) the player's stats.
-	equippedOrb `int` the equipped orb of the player.
-	orbs `set` the list of unlocked orbs.
-	adventurePoints `int` number of adventure points the player has.
+	Attributes
+	----------
+	username: `str`
+		The player's username.
+	uid: `int`
+		The player's id.
+	registration_date: `int`
+		The registration timestamp of the player.
+	privLevel: `int`
+		The privilege level of the player.
+	gender: `int`
+		Player's gender.
+	tribe: `str`
+		Player's tribe. Can be `None`.
+	soulmate: `str`
+		Player's soulmate. Can be `None`.
+	title: `int`
+		The title above the player's head.
+	titles: `set`
+		The list of the unlocked titles.
+	titles_stars: `dict`
+		A dictionary where are stored the number of stars a title has.
+	look: `str`
+		The player's look.
+	level: `int`
+		The player's shaman level.
+	badges: `dict`
+		All badges unlocked by the player and their number.
+	stats: `Stats`
+		The player's stats.
+	equippedOrb: `int`
+		The equipped orb of the player.
+	orbs: `set`
+		The list of unlocked orbs.
+	adventurePoints: `int`
+		Number of adventure points the player has.
 	"""
 	def __init__(self, packet: Packet):
 		self.username = packet.readUTF()
@@ -207,16 +224,24 @@ class Profile:
 class Stats:
 	"""Represents the statistics of a player.
 
-	## Attributes
-
-	normalModeSaves `int` number of shaman saves in normal mode.
-	hardModeSaves `int`  number of shaman saves in hard mode.
-	divineModeSaves `int` number of shaman saves in divine mode.
-	shamanCheese `int` number of cheese personally gathered.
-	firsts `int` number of cheese gathered first.
-	gatheredCheese `int` total number of gathered cheese.
-	bootcamps `int` number of bootcamp.
-	modeStats `list` a list of tuples that represents the stats in different mode.
+	Attributes
+	----------
+	normalModeSaves: `int`
+		Number of shaman saves in normal mode.
+	hardModeSaves: `int`
+		Number of shaman saves in hard mode.
+	divineModeSaves: `int`
+		Number of shaman saves in divine mode.
+	shamanCheese: `int`
+		Number of cheese personally gathered.
+	firsts: `int`
+		Number of cheese gathered first.
+	gatheredCheese: `int`
+		Total number of gathered cheese.
+	bootcamps: `int`
+		Number of bootcamp.
+	modeStats: `list`
+		A list of tuples that represents the stats in different mode.
 		(id, progress, progressLimit, imageId)
 	"""
 	def __init__(self, stats, modeStats):

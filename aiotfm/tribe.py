@@ -5,14 +5,20 @@ from aiotfm.enums import Permissions
 class Tribe:
 	"""Represents a tribe.
 
-	## Attributes
-
-	id :class:`int` the tribe's id.
-	name :class:`str` the tribe's name.
-	welcomeMessage :class:`str` the tribe's welcome message.
-	mapcode :class:`int` the tribehouse's mapcode.
-	members :class:`list` the members' list of the tribe.
-	ranks :class:`list` the ranks' list of the tribe.
+	Attributes
+	----------
+	id: :class:`int`
+		The tribe's id.
+	name: :class:`str`
+		The tribe's name.
+	welcomeMessage: :class:`str`
+		The tribe's welcome message.
+	mapcode: :class:`int`
+		The tribehouse's mapcode.
+	members: :class:`list`
+		The members' list of the tribe.
+	ranks: :class:`list`
+		The ranks' list of the tribe.
 	"""
 	def __init__(self, packet):
 		self.id = packet.read32()
@@ -32,18 +38,28 @@ class Tribe:
 class Member:
 	"""Represents a tribe's member.
 
-	## Attributes
-
-	tribe :class:`Tribe` the member's tribe.
-	id :class:`int` the player's id of the member.
-	name :class:`str` the username of the member.
-	gender :class:`int` the member's gender.
-	lastConnection :class`Date` the last connection of the member.
-	rank_id :class:`int` the rank's id of the member.
-	game_id :class:`int` the game's id the player is playing.
-	room :class:`str` the room where the player is.
-	rank :class:`Rank` the member's rank.
-	online :class:`bool` return True if the member is online.
+	Attributes
+	----------
+	tribe: :class:`Tribe`
+		The member's tribe.
+	id: :class:`int`
+		The player's id of the member.
+	name: :class:`str`
+		The username of the member.
+	gender: :class:`int`
+		The member's gender.
+	lastConnection: :class`Date`
+		The last connection of the member.
+	rank_id: :class:`int`
+		The rank's id of the member.
+	game_id: :class:`int`
+		The game's id the player is playing.
+	room: :class:`str`
+		The room where the player is.
+	rank: :class:`Rank`
+		The member's rank.
+	online: :class:`bool`
+		True if the member is online.
 	"""
 	def __init__(self, tribe, packet):
 		self.tribe = tribe
@@ -70,25 +86,14 @@ class Member:
 class Rank:
 	"""Represents a tribe's rank.
 
-	## Attributes
-
-	id :class:`int` the rank's id.
-	name :class:`str` the rank's name.
-	perm :class:`int` the rank's permissions.
-
-	## Permissions
-
-	isLeader :class:`bool`
-	canChangeGreetingMessage :class:`bool`
-	canEditRanks :class:`bool`
-	canChangeMembersRanks :class:`bool`
-	canInvite :class:`bool`
-	canExclude :class:`bool`
-	canPlayMusic :class:`bool`
-	canChangeTribeHouseMap :class:`bool`
-	canLoadMap :class:`bool`
-	canLoadLua :class:`bool`
-	canManageForum :class:`bool`
+	Attributes
+	----------
+	id: :class:`int`
+		The rank's id.
+	name: :class:`str`
+		The rank's name.
+	perm: :class:`int`
+		The rank's permissions.
 	"""
 	def __init__(self, id_, name, perm):
 		self.id = id_

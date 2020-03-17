@@ -1,64 +1,132 @@
-# Tribe Documentation
+# Tribe's Documentation
 
-## Tribe 
->**This section represents the tribe.** 
->
->**Attributes:**
->
->| Attribute | Type | Description 
->| :-: | :-: | :--
->| **id** | `integer` | The tribe's id
->| **name** | `string`| The tribe name.
->| **welcomeMessage** | `string` | the tribe's greeting message.
->| **mapcode** | `integer` | the tribehouse's mapcode.
->| **members** | `list` | The list of the [members](#member) in the tribe.
->| **ranks** | `list` | The list of the [ranks](#rank) in the tribe.
+## Tribe
+**Represents a tribe.**
 
----
+| Attributes | Type | Can be None | Description |
+| :-: | :-: | :-: | :-- |
+| id | `int` | ✕ |  The tribe's id. |
+| name | `str` | ✕ |  The tribe's name. |
+| welcomeMessage | `str` | ✕ |  The tribe's welcome message. |
+| mapcode | `int` | ✕ |  The tribehouse's mapcode. |
+| members | `list` | ✕ |  The members' list of the tribe. |
+| ranks | `list` | ✕ |  The ranks' list of the tribe. |
 
 ## Member
->**This section represents the tribe member(s).**
->
->**Attributes:**
->
->| Attribute | Type | Description 
->| :-: | :-: | :--
->| **tribe** | [`Tribe`](#tribe) | The member's tribe.
->| **id** | `integer` | The player's unique id.
->| **name** | `string` | Player name.
->| **gender** | `integer` | Player's gender.
->| **lastConnection** | `Date` | The date the player was last seen.
->| **rank_id** | `integer` | The id of the member's rank.
->| **game_id** | `integer` | The game id the player is (currently) playing (if online).
->| **room** | `string` | The room where the player currently is (if online).
->| **rank** | [`Rank`](#rank) | The member's rank.
->| **online** | `boolean`| Returns `True` if the player is currently online.
+**Represents a tribe's member.**
 
+| Attributes | Type | Can be None | Description |
+| :-: | :-: | :-: | :-- |
+| tribe | [`Tribe`](#tribe) | ✕ |  The member's tribe. |
+| id | `int` | ✕ |  The player's id of the member. |
+| name | `str` | ✕ |  The username of the member. |
+| gender | `int` | ✕ |  The member's gender. |
+| lastConnection | `:class` | ✕ |  The last connection of the member. |
+| rank_id | `int` | ✕ |  The rank's id of the member. |
+| game_id | `int` | ✕ |  The game's id the player is playing. |
+| room | `str` | ✕ |  The room where the player is. |
+| rank | [`Rank`](#rank) | ✕ |  The member's rank. |
+| online | `bool` | ✕ |  True if the member is online. |
+
+
+### Methods
+@*property*<br>
+Member.**rank**(_self_) <a id="Member.rank" href="#Member.rank">¶</a>
+>
+>return the [`Rank`](#Rank) of the member.
+---
+
+@*property*<br>
+Member.**online**(_self_) <a id="Member.online" href="#Member.online">¶</a>
+>
+>return True if the member is online.
 ---
 
 ## Rank
->**This section represents the ranks in the [tribe](#tribe).**
+**Represents a tribe's rank.**
+
+| Attributes | Type | Can be None | Description |
+| :-: | :-: | :-: | :-- |
+| id | `int` | ✕ |  The rank's id. |
+| name | `str` | ✕ |  The rank's name. |
+| perm | `int` | ✕ |  The rank's permissions. |
+
+
+### Methods
+@*property*<br>
+Rank.**isLeader**(_self_) <a id="Rank.isLeader" href="#Rank.isLeader">¶</a>
 >
-> **Attributes:**
+>True if it's the tribe's leader's rank.
+---
+
+@*property*<br>
+Rank.**canChangeGreetingMessage**(_self_) <a id="Rank.canChangeGreetingMessage" href="#Rank.canChangeGreetingMessage">¶</a>
 >
->| Attribute | Type | Description 
->| :-: | :-: | :--
->| **id** | `integer` | The rank id.
->| **name** | `string` | The rank name.
->| **perm** | `int` | The rank permissions.
+>True if it has the permission to change the greeting message.
+---
+
+@*property*<br>
+Rank.**canEditRanks**(_self_) <a id="Rank.canEditRanks" href="#Rank.canEditRanks">¶</a>
 >
->**Permissions:**
+>True if it has the permission to edit ranks.
+---
+
+@*property*<br>
+Rank.**canChangeMembersRanks**(_self_) <a id="Rank.canChangeMembersRanks" href="#Rank.canChangeMembersRanks">¶</a>
 >
->|Permission|Type
->|:-:|:-:
->|**isLeader** | `boolean`
->|**canChangeGreetingMessage** | `boolean`
->|**canEditRanks** | `boolean`
->|**canChangeMembersRanks** | `boolean`
->|**canInvite** | `boolean`
->|**canExclude** | `boolean`
->|**canPlayMusic** | `boolean`
->|**canChangeTribeHouseMap** | `boolean`
->|**canLoadMap** | `boolean`
->|**canLoadLua** | `boolean`
->**canManageForum**| `boolean`
+>True if it has the permission to change members' rank.
+---
+
+@*property*<br>
+Rank.**canInvite**(_self_) <a id="Rank.canInvite" href="#Rank.canInvite">¶</a>
+>
+>True if it has the permission to invite someone to the tribe.
+---
+
+@*property*<br>
+Rank.**canExclude**(_self_) <a id="Rank.canExclude" href="#Rank.canExclude">¶</a>
+>
+>True if it has the permission to exclude someone of the tribe.
+---
+
+@*property*<br>
+Rank.**canPlayMusic**(_self_) <a id="Rank.canPlayMusic" href="#Rank.canPlayMusic">¶</a>
+>
+>True if it has the permission to play music inside the tribe's house.
+---
+
+@*property*<br>
+Rank.**canChangeTribeHouseMap**(_self_) <a id="Rank.canChangeTribeHouseMap" href="#Rank.canChangeTribeHouseMap">¶</a>
+>
+>True if it has the permission to change the tribe's house's map.
+---
+
+@*property*<br>
+Rank.**canLoadMap**(_self_) <a id="Rank.canLoadMap" href="#Rank.canLoadMap">¶</a>
+>
+>True if it has the permission to load maps inside the tribe's house.
+---
+
+@*property*<br>
+Rank.**canLoadLua**(_self_) <a id="Rank.canLoadLua" href="#Rank.canLoadLua">¶</a>
+>
+>True if it has the permission to load Lua inside the tribe's house.
+---
+
+@*property*<br>
+Rank.**canManageForum**(_self_) <a id="Rank.canManageForum" href="#Rank.canManageForum">¶</a>
+>
+>True if it has the permission to mange the tribe's forum.
+---
+
+@*classmethod*<br>
+Rank.**from\_packet**(_cls, id_, packet_) <a id="Rank.from_packet" href="#Rank.from_packet">¶</a>
+>
+>Reads a Tribe from a packet.
+>
+>__Parameters:__
+> * **id** - `int` the tribe's id.
+> * **packet** - [`Packet`](Packet.md)
+
+---
+
