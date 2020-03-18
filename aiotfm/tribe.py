@@ -34,6 +34,15 @@ class Tribe:
 		for i in range(packet.read16()):
 			self.ranks.append(Rank.from_packet(i, packet))
 
+	def get_member(self, name):
+		"""Returns a member from it's name or None if not found.
+		:param name: :class:`str` or :class:`aiotfm.player.Player` the name of the member.
+		:return: :class:`aiotfm.tribe.Member` or None
+		"""
+		for m in self.members:
+			if name == m.name:
+				return m
+
 
 class Member:
 	"""Represents a tribe's member.
