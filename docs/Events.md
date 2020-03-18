@@ -24,6 +24,13 @@ Called when the client has joined a room.
 
 ---
 
+## on_room_password(_room_)
+Called when a password is required to enter a room
+>__Parameters:__
+> * **room** - [`Room`](Room.md#Room) the room the server is asking for a password.
+
+---
+
 ## on_room_message(_message_)
 Called when the client receives a message from the room.
 >__Parameters:__

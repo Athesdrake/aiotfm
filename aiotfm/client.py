@@ -140,6 +140,12 @@ class Client:
 			# :param room: :class:`aiotfm.room.Room` the room the client has entered.
 			self.dispatch('joined_room', room)
 
+		elif CCC == (5, 39): # Password required for the room
+
+			# :desc: Called when a password is required to enter a room
+			# :param room: :class:`aiotfm.room.Room` the room the server is asking for a password.
+			self.dispatch('room_password', Room(private=True, name=packet.readUTF()))
+
 		elif CCC == (6, 6): # Room message
 			player_id = packet.read32()
 			username = packet.readUTF()
@@ -1053,17 +1059,23 @@ class Client:
 		"""
 		await self.enterTribe()
 
-	async def joinRoom(self, room_name, community=None, auto=False):
+	async def joinRoom(self, room_name, password=None, community=None, auto=False):
 		"""|coro|
 		Join a room.
 		The event 'on_joined_room' is dispatched when the client has successfully joined the room.
 
+		:param password: :class:`str` if given the client will ignore `community` and `auto` parameters
+			and will connect to the room with the given password.
 		:param room_name: :class:`str` the room's name.
 		:param community: Optional[:class:`int`] the room's community.
 		:param auto: Optional[:class:`bool`] joins a random room (I think).
 		"""
-		packet = Packet.new(5, 38).write8(Community(community or self.community).value)
-		packet.writeString(room_name).writeBool(auto)
+		if password is not None:
+			packet = Packet.new(5, 39).writeString(password).writeString(room_name)
+		else:
+			packet = Packet.new(5, 38).write8(Community(community or self.community).value)
+			packet.writeString(room_name).writeBool(auto)
+
 		await self.main.send(packet)
 
 	async def joinChannel(self, name, permanent=True):

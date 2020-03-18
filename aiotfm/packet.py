@@ -20,7 +20,7 @@ class Packet:
 		The position inside the buffer.
 	"""
 	def __init__(self, buffer=None):
-		if isinstance(buffer, (bytes, memoryview)):
+		if isinstance(buffer, (bytes, bytearray, memoryview)):
 			self.buffer = memoryview(buffer)
 			self.__read = True
 			self.__write = False

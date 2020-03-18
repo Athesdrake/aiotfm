@@ -355,12 +355,13 @@ _coroutine_ Client.**enterTribeHouse**(_self_) <a id="Client.enterTribeHouse" hr
 >Alias for [`enterTribe`](#Client.enterTribe)
 ---
 
-_coroutine_ Client.**joinRoom**(_self, room_name, community, auto_) <a id="Client.joinRoom" href="#Client.joinRoom">¶</a>
+_coroutine_ Client.**joinRoom**(_self, room_name, password, community, auto_) <a id="Client.joinRoom" href="#Client.joinRoom">¶</a>
 >
 >Join a room.
 >The event 'on_joined_room' is dispatched when the client has successfully joined the room.
 >
 >__Parameters:__
+> * **password** - `str` if given the client will ignore `community` and `auto` parameters
 > * **room_name** - `str` the room's name.
 > * **community** - Optional[`int`] the room's community.
 > * **auto** - Optional[`bool`] joins a random room (I think).
