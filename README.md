@@ -6,6 +6,8 @@ aiotfm is based on [TransFromage](https://github.com/Tocutoeltuco/transfromage) 
 
 If you prefer Lua over Python then checkout the [Lua version](https://github.com/Lautenschlager-id/Transfromage) made by [@Lautenschlager-id](https://github.com/Lautenschlager-id)
 
+Join the **_[Fifty Shades of Lua](https://discord.gg/qmdryEB)_** [discord](https://discordapp.com/) server to discuss about this API and to receive special support.
+
 ## Keys Endpoint
 
 This API depends on an [endpoint](https://api.tocu.tk/get_transformice_keys.php) that gives you access to the Transformice encryption keys.
