@@ -134,17 +134,17 @@ class Client:
 			return await self.handle_old_packet(connection, oldCCC, data)
 
 		if CCC == (5, 21): # Joined room
-			self.room = room = Room(private=not packet.readBool(), name=packet.readUTF())
+			self.room = Room(packet.readUTF(), official=packet.readBool())
 
 			# :desc: Called when the client has joined a room.
 			# :param room: :class:`aiotfm.room.Room` the room the client has entered.
-			self.dispatch('joined_room', room)
+			self.dispatch('joined_room', self.room)
 
 		elif CCC == (5, 39): # Password required for the room
 
 			# :desc: Called when a password is required to enter a room
 			# :param room: :class:`aiotfm.room.Room` the room the server is asking for a password.
-			self.dispatch('room_password', Room(private=True, name=packet.readUTF()))
+			self.dispatch('room_password', Room(packet.readUTF()))
 
 		elif CCC == (6, 6): # Room message
 			player_id = packet.read32()
