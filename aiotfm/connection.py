@@ -23,7 +23,7 @@ class TFMProtocol(asyncio.Protocol):
 					raise Exception("wtf")
 
 			if len(self.buffer) >= self.length:
-				self.client.data_received(bytes(self.buffer[:self.length]), self.connection)
+				self.client.data_received(self.buffer[:self.length], self.connection)
 				del self.buffer[:self.length]
 				self.length = 0
 

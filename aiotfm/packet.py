@@ -1,6 +1,6 @@
 import struct
 
-from aiotfm.errors import XXTEAInvalidPacket, XXTEAInvalidKeys, PacketError
+from aiotfm.errors import XXTEAInvalidPacket, XXTEAInvalidKeys
 
 
 class Packet:
@@ -20,57 +20,41 @@ class Packet:
 		The position inside the buffer.
 	"""
 	def __init__(self, buffer=None):
-		if isinstance(buffer, (bytes, memoryview)):
-			self.buffer = memoryview(buffer)
-			self.__read = True
-			self.__write = False
-		else:
-			if buffer is not None:
-				self.buffer = buffer
-			else:
-				self.buffer = bytearray()
+		if buffer is None:
+			buffer = bytearray()
+		elif not isinstance(buffer, bytearray):
+			buffer = bytearray(buffer)
 
-			self.__read = False
-			self.__write = True
-
+		self.buffer = buffer
 		self.pos = 0
 
 	def __repr__(self):
 		return '<Packet {!r}>'.format(bytes(self))
 
 	def __bytes__(self):
-		if self.__read:
-			return self.buffer.obj
 		return bytes(self.buffer)
-
-	def __del__(self):
-		if isinstance(self.buffer, memoryview):
-			self.buffer.release()
 
 	@classmethod
 	def new(cls, c, cc=None):
 		"""Create a new instance of Packet initialized by two bytes: c and cc."""
-		msg = cls()
 		if isinstance(c, (tuple, list)):
 			c, cc = c
-		if cc is None:
-			return msg.write16(c)
-		return msg.write8(c).write8(cc)
+		elif cc is None:
+			return cls().write16(c)
 
-	def copy(self):
+		return cls().write8(c).write8(cc)
+
+	def copy(self, copy_pos=False):
 		"""Returns a copy of the Packet"""
-		if self.__read:
-			return Packet(self.buffer[self.pos:])
-
 		p = Packet()
+		if copy_pos:
+			p.pos = self.pos
+
 		p.buffer = self.buffer.copy()
 		return p
 
 	def readBytes(self, nbr=1):
 		"""Read raw bytes from the buffer."""
-		if not self.__read:
-			raise PacketError('This packet is in write-only mode.')
-
 		self.pos += nbr
 		return self.buffer[self.pos - nbr:self.pos]
 
@@ -80,9 +64,6 @@ class Packet:
 
 	def read8(self):
 		"""Read a single byte from the buffer."""
-		if not self.__read:
-			raise PacketError('This packet is in write-only mode.')
-
 		self.pos += 1
 		return self.buffer[self.pos - 1]
 
@@ -112,9 +93,6 @@ class Packet:
 
 	def writeBytes(self, content):
 		"""Write raw bytes to the buffer"""
-		if not self.__write:
-			raise PacketError('This packet is in read-only mode.')
-
 		if isinstance(content, Packet):
 			self.buffer.extend(content.buffer)
 		else:
@@ -127,33 +105,21 @@ class Packet:
 
 	def write8(self, value):
 		"""Write a single byte to the buffer"""
-		if not self.__write:
-			raise PacketError('This packet is in read-only mode.')
-
 		self.buffer.append(value & 0xff)
 		return self
 
 	def write16(self, value):
 		"""Write a short (two bytes) to the buffer"""
-		if not self.__write:
-			raise PacketError('This packet is in read-only mode.')
-
 		self.buffer.extend(struct.pack('>H', value & 0xffff))
 		return self
 
 	def write24(self, value):
 		"""Write three bytes to the buffer"""
-		if not self.__write:
-			raise PacketError('This packet is in read-only mode.')
-
 		self.buffer.extend((value & 0xffffff).to_bytes(3, 'big'))
 		return self
 
 	def write32(self, value):
 		"""Write an int (four bytes) to the buffer"""
-		if not self.__write:
-			raise PacketError('This packet is in read-only mode.')
-
 		self.buffer.extend(struct.pack('>I', value & 0xffffffff))
 		return self
 
@@ -187,8 +153,7 @@ class Packet:
 
 	def xor_cipher(self, key, fp):
 		"""Cipher the packet with the XOR algorithm."""
-		data = memoryview(self.buffer)[2:]
-		self.buffer[2:] = (byte ^ key[i % 20] for i, byte in enumerate(data, fp + 1))
+		self.buffer[2:] = (byte ^ key[i % 20] for i, byte in enumerate(self.buffer, fp + 1))
 		return self
 
 	def cipher(self, key):
