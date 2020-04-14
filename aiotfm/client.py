@@ -134,7 +134,7 @@ class Client:
 			return await self.handle_old_packet(connection, oldCCC, data)
 
 		if CCC == (5, 21): # Joined room
-			self.room = Room(packet.readUTF(), official=packet.readBool())
+			self.room = Room(official=packet.readBool(), name=packet.readUTF())
 
 			# :desc: Called when the client has joined a room.
 			# :param room: :class:`aiotfm.room.Room` the room the client has entered.
