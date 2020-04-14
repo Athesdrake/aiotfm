@@ -8,18 +8,18 @@ class Room:
 	----------
 	name: `str`
 		The room's name. (i.e: en-1, *bad girls and so on)
-	offical: `bool`
-		Whether the room is an offical room or not. If official, it's name will be displayed in yellow.
+	official: `bool`
+		Whether the room is an official room or not. If official, it's name will be displayed in yellow.
 	players: `list[:class:`aiotfm.player.Player`]`
 		The list containing all the players of the room.
 	"""
-	def __init__(self, name, offical=False):
+	def __init__(self, name, official=False):
 		self.name = name
-		self.offical = offical
+		self.official = official
 		self.players = {}
 
 	def __repr__(self):
-		return "<Room name={} offical={}>".format(self.name, self.offical)
+		return "<Room name={} official={}>".format(self.name, self.official)
 
 	@property
 	def community(self):
