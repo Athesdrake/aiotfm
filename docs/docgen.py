@@ -37,7 +37,7 @@ class Type:
 			if len(anchor) > 0:
 				anchor = '#' + anchor
 
-			return f'[`{name}`]({link})'
+			return f'[`{name}`]({link}{anchor})'
 
 		link = link.lower().replace('.', '')
 		return f'[`{name}`](#{link})'
@@ -91,7 +91,7 @@ def format(string, links):
 		if type_ == 'meth':
 			if parts[0] == 'aiotfm':
 				anchor = '.'.join(parts[1:])
-				return f'[`{name}`](#{parts[1].title()}.md#{anchor})'
+				return f'[`{name}`]({parts[1].title()}.md#{anchor})'
 			return f'[`{name}`](#{link})'
 
 		if len(parts) > 1 and parts[0] == 'aiotfm':
@@ -424,6 +424,7 @@ def generate_readme(files):
 				tab = '  ' * name.count('.')
 
 				f.write(f' {tab} * [{display_name}]({file}.md#{name})\n')
+
 
 if __name__ == '__main__':
 	files = [
