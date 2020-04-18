@@ -35,6 +35,7 @@
 | pt | *`31`* |
 
 ---
+
 ## Community
 **Enumerate the different game's communities.**
 
@@ -71,6 +72,7 @@
 | pt | *`31`* |
 
 ---
+
 ## TradeState
 **Enumerate the different states a trade can have.**
 
@@ -83,6 +85,7 @@
 | SUCCESS | *`4`* |
 
 ---
+
 ## TradeError
 **Enumerate the different error codes the server could send.**
 
@@ -98,6 +101,7 @@
 | INTERNAL | *`7`* |
 
 ---
+
 ## Permissions
 **Enumerate the different tribe's rank's permissions.**
 
@@ -116,3 +120,4 @@
 | CAN_MANAGE_FORUM | *`1024`* |
 
 ---
+

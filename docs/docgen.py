@@ -420,12 +420,27 @@ def generate_events():
 			f.write('\n\n---\n\n')
 
 
-def generate_readme(files):
+def generate_readme(files, weights):
+	class Sorter:
+		__slots__ = ('name', 'weight')
+
+		def __init__(self, obj):
+			self.name = obj[0]
+			self.weight = weights[obj[0]] if obj[0] in weights else 0
+
+		def __lt__(a, b):
+			if a.weight == b.weight:
+				return a.name < b.name
+			return a.weight > b.weight
+
+	files = sorted(files.items(), key=Sorter)
+
 	with open('README.md', 'w', encoding='utf-8') as f:
 		f.write('# Documentation\nYou can find here all documentation on `aiotfm`.\n\n')
 		f.write("## API Reference\n")
 
-		for file, tree in files.items():
+		for file, tree in files:
+			tree.sort()
 			f.write(f'* [{file}.md]({file}.md)\n')
 			for name in tree:
 				display_name = name.replace('_', '\\_')
@@ -478,12 +493,21 @@ if __name__ == '__main__':
 		'Client', 'Player', 'Tribe', 'Message', 'Connection',
 		'Inventory', 'Packet', 'Room', 'Shop', 'Errors'
 	]
+	weights = {
+		'Client': 1,
+		'Events': 1,
+		'Message': 1,
+		'Player': 1,
+		'Connection': -1,
+		'Errors': -1
+	}
 	tree = {}
 
 	for file in files:
 		tree[file] = generate(f'../aiotfm/{file.lower()}.py', file)
 
 	tree['Enums'] = generate_enums()
+	tree['Events'] = []
 
-	generate_readme(tree)
+	generate_readme(tree, weights)
 	generate_events()
