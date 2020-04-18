@@ -2,7 +2,7 @@ import ast
 import glob
 import re
 
-from ast import ClassDef, FunctionDef, AsyncFunctionDef
+from ast import ClassDef, FunctionDef, AsyncFunctionDef, Assign
 from tokenize import generate_tokens, COMMENT
 
 
@@ -275,13 +275,21 @@ class EventDoc:
 		if isinstance(node, ast.BinOp):
 			return ' '.join(dump(getattr(node, field)) for field in node._fields)
 
-		if isinstance(node, ast.Sub):
+		if isinstance(node, (ast.Sub, ast.USub)):
 			return '-'
 
 		if isinstance(node, ast.Mult):
 			return '*'
 
-		raise f"Cannot dump {node.__class__.__name__}"
+		if isinstance(node, ast.Assign):
+			lvalue = ", ".join(t.id for t in node.targets)
+			rvalue = dump(node.value)
+			return f'{lvalue} = {rvalue}'
+
+		if isinstance(node, ast.UnaryOp):
+			return f'{dump(node.op)}{dump(node.operand)}'
+
+		raise Exception(f"Cannot dump {node.__class__.__name__}")
 
 	def generate_default(self):
 		args = [self.dump(arg) for arg in self.node.args[1:]]
@@ -426,15 +434,56 @@ def generate_readme(files):
 				f.write(f' {tab} * [{display_name}]({file}.md#{name})\n')
 
 
+def generate_enums():
+	tree = []
+
+	with open('../aiotfm/enums.py', 'r', encoding='utf-8') as f:
+		code: ast.Module = ast.parse(f.read(), '../enums.py')
+
+	with open(f'Enums.md', 'w', encoding='utf-8') as f:
+		f.write(f"# Enums' Documentation\n\n")
+
+		for klass in (node for node in code.body if isinstance(node, ClassDef)):
+			tree.append(klass.name)
+			f.write(f"## {klass.name}\n")
+
+			doc = ast.get_docstring(klass)
+			if doc is not None:
+				desc, *args = doc.split('\n\n')
+
+				links = {}
+				for line in '\n'.join(args).split('\n'):
+					match = link_regex.search(line)
+					if match is not None:
+						links[match.group(1)] = match.group(2)
+
+				f.write('**' + format(desc, links) + '**\n\n')
+
+			f.write('| Item | Value |\n')
+			f.write('|:---- |:-----:|\n')
+			for node in klass.body:
+				if not isinstance(node, Assign):
+					continue
+
+				name, value = EventDoc.dump(node.targets[0]), EventDoc.dump(node.value)
+				f.write(f'| {name} | *`{value}`* |\n')
+
+			f.write('\n---\n\n')
+
+	return tree
+
+
 if __name__ == '__main__':
 	files = [
 		'Client', 'Player', 'Tribe', 'Message', 'Connection',
-		'Inventory', 'Packet', 'Room', 'Shop', 'Enums', 'Errors'
+		'Inventory', 'Packet', 'Room', 'Shop', 'Errors'
 	]
 	tree = {}
 
 	for file in files:
 		tree[file] = generate(f'../aiotfm/{file.lower()}.py', file)
+
+	tree['Enums'] = generate_enums()
 
 	generate_readme(tree)
 	generate_events()
