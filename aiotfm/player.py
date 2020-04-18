@@ -89,7 +89,7 @@ class Player:
 	def from_packet(cls, packet: Packet):
 		"""Reads a Player from a packet.
 		:param packet: :class:`aiotfm.Packet` the packet.
-		:return: :class:`aiotfm.player.Player` the player.
+		:return: :class:`aiotfm.Player` the player.
 		"""
 		name = packet.readUTF()
 		pid = packet.read32()

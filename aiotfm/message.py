@@ -8,9 +8,9 @@ class Message:
 
 	Attributes
 	----------
-	author: `aiotfm.Player`
+	author: :class:`aiotfm.Player`
 		The message's author.
-	community: `aiotfm.enums.ChatCommunity`
+	community: :class:`aiotfm.enums.ChatCommunity`
 		The author's community. Note: the community isn't the author's language!
 	content: `str`
 		The actual content of the message.
@@ -33,15 +33,15 @@ class Message:
 
 class Whisper(Message):
 	"""Represents a whisper from the chat.
-	Inherit from :class:`aiotfm.message.Message`.
+	Inherit from :class:`Message`.
 
 	Attributes
 	----------
-	author: `aiotfm.Player`
+	author: :class:`aiotfm.Player`
 		The message's author.
-	receiver: `aiotfm.Player`
+	receiver: :class:`aiotfm.Player`
 		The message's addressee.
-	community: `aiotfm.enum.ChatCommunity`
+	community: :class:`aiotfm.enums.ChatCommunity`
 		The author's community. Note: the community isn't the author's language!
 	content: `str`
 		The actual content of the message.
@@ -62,7 +62,7 @@ class Whisper(Message):
 
 	async def reply(self, msg):
 		"""|coro|
-		Reply to the author of the message. Shortcut to :meth:`Client.whisper`.
+		Reply to the author of the message. Shortcut to :meth:`aiotfm.Client.whisper`.
 		:param msg: :class:`str` the message."""
 		await self._client.whisper(self.author, msg)
 
@@ -103,8 +103,8 @@ class Channel:
 		"""|coro|
 		Sends the command /who to the channel and returns the list of players.
 
-		:throws: `asyncio.TimeoutError`
-		:return: List[`aiotfm.Player`]"""
+		:throws: :class:`asyncio.TimeoutError`
+		:return: List[:class:`aiotfm.Player`]"""
 		def check(idseq, players):
 			return idseq == idSequence
 
@@ -120,9 +120,9 @@ class ChannelMessage(Message):
 	----------
 	channel: `Channel`
 		The channel where the message is from.
-	author: `aiotfm.Player`
+	author: :class:`aiotfm.Player`
 		The message's author.
-	community: `aiotfm.enums.ChatCommunity`
+	community: :class:`aiotfm.enums.ChatCommunity`
 		The author's community. Note: the community isn't the author's language!
 	content: `str`
 		The actual content of the message."""

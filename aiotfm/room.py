@@ -10,7 +10,7 @@ class Room:
 		The room's name. (i.e: en-1, *bad girls and so on)
 	official: `bool`
 		Whether the room is an official room or not. If official, it's name will be displayed in yellow.
-	players: `list[:class:`aiotfm.player.Player`]`
+	players: `list[:class:`aiotfm.Player`]`
 		The list containing all the players of the room.
 	"""
 	def __init__(self, name, official=False):
@@ -56,7 +56,7 @@ class Room:
 		"""Gets one player in the room with an identifier.
 
 		:param kwargs: Which identifier to use. Can be either name, username, id or pid.
-		:return: :class:`aiotfm.player.Player` The player or None"""
+		:return: :class:`aiotfm.Player` The player or None"""
 		length = len(kwargs.keys())
 
 		if length == 0:

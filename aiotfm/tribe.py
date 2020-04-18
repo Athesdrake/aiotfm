@@ -36,7 +36,7 @@ class Tribe:
 
 	def get_member(self, name):
 		"""Returns a member from it's name or None if not found.
-		:param name: :class:`str` or :class:`aiotfm.player.Player` the name of the member.
+		:param name: :class:`str` or :class:`aiotfm.Player` the name of the member.
 		:return: :class:`aiotfm.tribe.Member` or None
 		"""
 		for m in self.members:

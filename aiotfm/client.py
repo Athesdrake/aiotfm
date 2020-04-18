@@ -85,12 +85,12 @@ class Client:
 		Dispatches the received data.
 
 		:param data: :class:`bytes` the received data.
-		:param connection: :class:`aiotfm.connection.Connection` the connection that received
+		:param connection: :class:`aiotfm.Connection` the connection that received
 			the data.
 		"""
 		# :desc: Called when a socket receives a packet. Does not interfere
 		# with :meth:`Client.handle_packet`.
-		# :param connection: :class:`aiotfm.connection.Connection` the connection that received
+		# :param connection: :class:`aiotfm.Connection` the connection that received
 		# the packet.
 		# :param packet: :class:`aiotfm.Packet` a copy of the packet.
 		self.dispatch('raw_socket', connection, Packet(data))
@@ -113,7 +113,7 @@ class Client:
 						# Handle here the unhandled packets.
 						pass
 
-		:param connection: :class:`aiotfm.connection.Connection` the connection that received
+		:param connection: :class:`aiotfm.Connection` the connection that received
 			the packet.
 		:param packet: :class:`aiotfm.Packet` the packet.
 		:return: True if the packet got handled, False otherwise.
@@ -126,7 +126,7 @@ class Client:
 
 			# :desc: Called when an old packet is received. Does not interfere
 			# with :meth:`Client.handle_old_packet`.
-			# :param connection: :class:`aiotfm.connection.Connection` the connection that received
+			# :param connection: :class:`aiotfm.Connection` the connection that received
 			# the packet.
 			# :param oldCCC: :class:`tuple` the packet identifiers on the old protocol.
 			# :param data: :class:`list` the packet data.
@@ -176,7 +176,7 @@ class Client:
 			emoji = packet.read8()
 
 			# :desc: Called a player is showing an emoji above its head.
-			# :param player: :class:`aiotfm.player.Player` the player.
+			# :param player: :class:`aiotfm.Player` the player.
 			# :param emoji: :class:`int` the emoji's id.
 			self.dispatch('emoji', player, emoji)
 
@@ -347,7 +347,7 @@ class Client:
 			self.trade.locked = [False, False]
 
 			# :desc: Called when an item has been added/removed from the current trade.
-			# :param trader: :class:`aiotfm.player.Player` the player that triggered the event.
+			# :param trader: :class:`aiotfm.Player` the player that triggered the event.
 			# :param id: :class:`int` the item's id.
 			# :param quantity: :class:`int` the quantity added/removed. Can be negative.
 			# :param item: :class:`aiotfm.inventory.InventoryItem` the item after the change.
@@ -364,7 +364,7 @@ class Client:
 				who = self.trade.trader if index == 0 else self
 
 			# :desc: Called when the trade got (un)locked.
-			# :param who: :class:`aiotfm.player.Player` the player that triggered the event.
+			# :param who: :class:`aiotfm.Player` the player that triggered the event.
 			# :param locked: :class:`bool` either the trade got locked or unlocked.
 			self.dispatch('trade_lock', who, locked)
 
@@ -393,7 +393,7 @@ class Client:
 
 			# :desc: Called when the client receives a packet from the community platform.
 			# :param TC: :class:`int` the packet's code.
-			# :param packet: :class:`aiotfm.packet.Packet` the packet.
+			# :param packet: :class:`aiotfm.Packet` the packet.
 			self.dispatch('raw_cp', TC, packet.copy(copy_pos=True))
 
 			if TC == 3: # Connected to the community platform
@@ -421,7 +421,7 @@ class Client:
 
 				# :desc: Called when the client receives the result of the /who command in a channel.
 				# :param idSequence: :class:`int` the reference to the packet that performed the request.
-				# :param players: List[:class:`aiotfm.player.Player`] the list of players inside the channel.
+				# :param players: List[:class:`aiotfm.Player`] the list of players inside the channel.
 				self.dispatch('channel_who', idSequence, players)
 
 			elif TC == 62: # Joined a channel
@@ -516,8 +516,8 @@ class Client:
 				self.room.players[player.pid] = player
 
 			# :desc: Called when the client receives an update of all player in the room.
-			# :param before: Dict[:class:`aiotfm.player.Player`] the list of player before the update.
-			# :param players: Dict[:class:`aiotfm.player.Player`] the list of player updated.
+			# :param before: Dict[:class:`aiotfm.Player`] the list of player before the update.
+			# :param players: Dict[:class:`aiotfm.Player`] the list of player updated.
 			self.dispatch('bulk_player_update', before, self.room.players)
 
 		elif CCC == (144, 2): # Add a player
@@ -527,12 +527,12 @@ class Client:
 			self.room.players[after.pid] = after
 			if before is None:
 				# :desc: Called when a player joined the room.
-				# :param player: :class:`aiotfm.player.Player` the player.
+				# :param player: :class:`aiotfm.Player` the player.
 				self.dispatch('player_join', after)
 			else:
 				# :desc: Called when a player's data on the room has been updated.
-				# :param before: :class:`aiotfm.player.Player` the player before the update.
-				# :param player: :class:`aiotfm.player.Player` the player updated.
+				# :param before: :class:`aiotfm.Player` the player before the update.
+				# :param player: :class:`aiotfm.Player` the player updated.
 				self.dispatch('player_update', before, after)
 
 		else:
@@ -556,7 +556,7 @@ class Client:
 						# Handle here the unhandled packets.
 						pass
 
-		:param connection: :class:`aiotfm.connection.Connection` the connection that received
+		:param connection: :class:`aiotfm.Connection` the connection that received
 			the packet.
 		:param oldCCC: :class:`tuple` the packet identifiers on the old protocol.
 		:param data: :class:`list` the packet data.
@@ -567,7 +567,7 @@ class Client:
 
 			if player is not None:
 				# :desc: Called when a player leaves the room.
-				# :param player: :class:`aiotfm.player.Player` the player.
+				# :param player: :class:`aiotfm.Player` the player.
 				self.dispatch('player_remove', player)
 
 		else:
@@ -598,7 +598,7 @@ class Client:
 	def get_channel(self, name):
 		"""Returns a channel from it's name or None if not found.
 		:param name: :class:`str` the name of the channel.
-		:return: :class:`aiotfm.messages.ChannelMessage` or None
+		:return: :class:`aiotfm.message.ChannelMessage` or None
 		"""
 		if name is None:
 			return None
@@ -609,7 +609,7 @@ class Client:
 
 	def get_trade(self, player):
 		"""Returns the pending/current trade with a player.
-		:param player: :class:`aiotfm.player.Player` or :class:`str` the player.
+		:param player: :class:`aiotfm.Player` or :class:`str` the player.
 		:return: :class:`aiotfm.inventory.Trade` the trade with the player.
 		"""
 		if not isinstance(player, (str, Player)):
@@ -1128,7 +1128,7 @@ class Client:
 		"""|coro|
 		Starts a trade with the given player.
 
-		:param player: :class:`aiotfm.player.Player` the player to trade with.
+		:param player: :class:`aiotfm.Player` the player to trade with.
 		:return: :class:`aiotfm.inventory.Trade` the resulting trade"""
 		if isinstance(player, Player) and player.pid == -1:
 			player = player.username

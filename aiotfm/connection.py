@@ -29,7 +29,7 @@ class TFMProtocol(asyncio.Protocol):
 
 	def connection_made(self, transport):
 		# :desc: Called when a connection has been successfully made with the server.
-		# :param connection: :class:`aiotfm.connection.Connection` the connection that has been made.
+		# :param connection: :class:`Connection` the connection that has been made.
 		self.connection.open = True
 		self.client.dispatch('connection_made', self.connection)
 
@@ -38,7 +38,7 @@ class TFMProtocol(asyncio.Protocol):
 
 		if exc is not None:
 			# :desc: Called when a connection has been lost due to an error.
-			# :param connection: :class:`aiotfm.connection.Connection` the connection that has been lost.
+			# :param connection: :class:`Connection` the connection that has been lost.
 			# :param exception: :class:`Exception` the error which occurred.
 			future = self.client.dispatch('connection_error', self.connection, exc)
 			if future is not None:
