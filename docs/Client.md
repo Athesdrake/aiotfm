@@ -13,11 +13,11 @@ Two argument can be passed to the [`Client`](#Client).**
 | Attributes | Type | Can be None | Description |
 | :-: | :-: | :-: | :-- |
 | username | `str` | ✔ |  The bot's username received from the server. Might be None if the bot didn't log in yet. |
-| room | [`Room`](Room.md) | ✔ |  The bot's room. Might be None if the bot didn't log in yet or couldn't join any room yet. |
-| trade | [`Trade`](Inventory.md) | ✔ |  The current trade that's going on (i.e: both traders accepted it). |
+| room | [`Room`](Room.md#Room) | ✔ |  The bot's room. Might be None if the bot didn't log in yet or couldn't join any room yet. |
+| trade | [`Trade`](Inventory.md#Trade) | ✔ |  The current trade that's going on (i.e: both traders accepted it). |
 | trades | `list` | ✕ |  All the trades that the bot participates. Most of them might be invitations only. |
-| inventory | [`Inventory`](Inventory.md) | ✔ |  The bot's inventory. Might be None if the bot didn't log in yet or it didn't receive anything. |
-| locale | [`Locale`](Locale.md) | ✕ |  The bot's locale (translations). |
+| inventory | [`Inventory`](Inventory.md#Inventory) | ✔ |  The bot's inventory. Might be None if the bot didn't log in yet or it didn't receive anything. |
+| locale | [`Locale`](Locale.md#Locale) | ✕ |  The bot's locale (translations). |
 
 
 ### Methods
@@ -27,7 +27,7 @@ Client.**data\_received**(_self, data, connection_) <a id="Client.data_received"
 >
 >__Parameters:__
 > * **data** - `bytes` the received data.
-> * **connection** - [`Connection`](Connection.md#Connection) the connection that received
+> * **connection** - [`Connection`](Connection.md) the connection that received
 
 ---
 
@@ -48,7 +48,7 @@ _coroutine_ Client.**handle\_packet**(_self, connection, packet_) <a id="Client.
 >```
 >
 >__Parameters:__
-> * **connection** - [`Connection`](Connection.md#Connection) the connection that received
+> * **connection** - [`Connection`](Connection.md) the connection that received
 > * **packet** - [`Packet`](Packet.md) the packet.
 >
 >__Returns:__ True if the packet got handled, False otherwise.
@@ -72,7 +72,7 @@ _coroutine_ Client.**handle\_old\_packet**(_self, connection, oldCCC, data_) <a 
 >```
 >
 >__Parameters:__
-> * **connection** - [`Connection`](Connection.md#Connection) the connection that received
+> * **connection** - [`Connection`](Connection.md) the connection that received
 > * **oldCCC** - `tuple` the packet identifiers on the old protocol.
 > * **data** - `list` the packet data.
 >
@@ -92,7 +92,7 @@ Client.**get\_channel**(_self, name_) <a id="Client.get_channel" href="#Client.g
 >__Parameters:__
 > * **name** - `str` the name of the channel.
 >
->__Returns:__ [`ChannelMessage`](Messages.md#ChannelMessage) or None
+>__Returns:__ [`ChannelMessage`](Message.md#ChannelMessage) or None
 
 ---
 
@@ -101,7 +101,7 @@ Client.**get\_trade**(_self, player_) <a id="Client.get_trade" href="#Client.get
 >Returns the pending/current trade with a player.
 >
 >__Parameters:__
-> * **player** - [`Player`](Player.md#Player) or `str` the player.
+> * **player** - [`Player`](Player.md) or `str` the player.
 >
 >__Returns:__ [`Trade`](Inventory.md#Trade) the trade with the player.
 
@@ -417,7 +417,7 @@ _coroutine_ Client.**startTrade**(_self, player_) <a id="Client.startTrade" href
 >Starts a trade with the given player.
 >
 >__Parameters:__
-> * **player** - [`Player`](Player.md#Player) the player to trade with.
+> * **player** - [`Player`](Player.md) the player to trade with.
 >
 >__Returns:__ [`Trade`](Inventory.md#Trade) the resulting trade
 

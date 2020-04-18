@@ -40,7 +40,7 @@ Player.**from\_packet**(_cls, packet_) <a id="Player.from_packet" href="#Player.
 >__Parameters:__
 > * **packet** - [`Packet`](Packet.md) the packet.
 >
->__Returns:__ [`Player`](Player.md#Player) the player.
+>__Returns:__ [`Player`](Player.md) the player.
 
 ---
 

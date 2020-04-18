@@ -12,6 +12,17 @@
 | members | `list` | ✕ |  The members' list of the tribe. |
 | ranks | `list` | ✕ |  The ranks' list of the tribe. |
 
+Tribe.**get\_member**(_self, name_) <a id="Tribe.get_member" href="#Tribe.get_member">¶</a>
+>
+>Returns a member from it's name or None if not found.
+>
+>__Parameters:__
+> * **name** - `str` or [`Player`](Player.md) the name of the member.
+>
+>__Returns:__ [`Member`](Tribe.md#Member) or None
+
+---
+
 ## Member
 **Represents a tribe's member.**
 

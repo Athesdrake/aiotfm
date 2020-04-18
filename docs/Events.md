@@ -3,7 +3,7 @@
 ## on_raw_socket(_connection, packet_)
 Called when a socket receives a packet. Does not interfere with [`handle_packet`](#Client.handle_packet).
 >__Parameters:__
-> * **connection** - [`Connection`](Connection.md#Connection) the connection that received the packet.
+> * **connection** - [`Connection`](Connection.md) the connection that received the packet.
 > * **packet** - [`Packet`](Packet.md) a copy of the packet.
 
 ---
@@ -11,7 +11,7 @@ Called when a socket receives a packet. Does not interfere with [`handle_packet`
 ## on_old_packet(_connection, oldCCC, data_)
 Called when an old packet is received. Does not interfere with [`handle_old_packet`](#Client.handle_old_packet).
 >__Parameters:__
-> * **connection** - [`Connection`](Connection.md#Connection) the connection that received the packet.
+> * **connection** - [`Connection`](Connection.md) the connection that received the packet.
 > * **oldCCC** - `tuple` the packet identifiers on the old protocol.
 > * **data** - `list` the packet data.
 
@@ -49,7 +49,7 @@ Called when the client receives a message from the server that needs to be trans
 ## on_emoji(_player, emoji_)
 Called a player is showing an emoji above its head.
 >__Parameters:__
-> * **player** - [`Player`](Player.md#Player) the player.
+> * **player** - [`Player`](Player.md) the player.
 > * **emoji** - `int` the emoji's id.
 
 ---
@@ -169,7 +169,7 @@ Called when a trade starts. You can access the trade object with `Client.trade`.
 ## on_trade_item_change(_trader, id, quantity, item_)
 Called when an item has been added/removed from the current trade.
 >__Parameters:__
-> * **trader** - [`Player`](Player.md#Player) the player that triggered the event.
+> * **trader** - [`Player`](Player.md) the player that triggered the event.
 > * **id** - `int` the item's id.
 > * **quantity** - `int` the quantity added/removed. Can be negative.
 > * **item** - [`InventoryItem`](Inventory.md#InventoryItem) the item after the change.
@@ -179,7 +179,7 @@ Called when an item has been added/removed from the current trade.
 ## on_trade_lock(_who, locked_)
 Called when the trade got (un)locked.
 >__Parameters:__
-> * **who** - [`Player`](Player.md#Player) the player that triggered the event.
+> * **who** - [`Player`](Player.md) the player that triggered the event.
 > * **locked** - `bool` either the trade got locked or unlocked.
 
 ---
@@ -188,7 +188,7 @@ Called when the trade got (un)locked.
 Called when the client receives a packet from the community platform.
 >__Parameters:__
 > * **TC** - `int` the packet's code.
-> * **packet** - [`Packet`](Packet.md#Packet) the packet.
+> * **packet** - [`Packet`](Packet.md) the packet.
 
 ---
 
@@ -215,7 +215,7 @@ Called when the client receives the result of leaving a channel.
 Called when the client receives the result of the /who command in a channel.
 >__Parameters:__
 > * **idSequence** - `int` the reference to the packet that performed the request.
-> * **players** - List[[`Player`](Player.md#Player)] the list of players inside the channel.
+> * **players** - List[[`Player`](Player.md)] the list of players inside the channel.
 
 ---
 
@@ -272,30 +272,30 @@ Called when a tribe member disconnected.
 ## on_bulk_player_update(_before, players_)
 Called when the client receives an update of all player in the room.
 >__Parameters:__
-> * **before** - Dict[[`Player`](Player.md#Player)] the list of player before the update.
-> * **players** - Dict[[`Player`](Player.md#Player)] the list of player updated.
+> * **before** - Dict[[`Player`](Player.md)] the list of player before the update.
+> * **players** - Dict[[`Player`](Player.md)] the list of player updated.
 
 ---
 
 ## on_player_join(_player_)
 Called when a player joined the room.
 >__Parameters:__
-> * **player** - [`Player`](Player.md#Player) the player.
+> * **player** - [`Player`](Player.md) the player.
 
 ---
 
 ## on_player_update(_before, player_)
 Called when a player's data on the room has been updated.
 >__Parameters:__
-> * **before** - [`Player`](Player.md#Player) the player before the update.
-> * **player** - [`Player`](Player.md#Player) the player updated.
+> * **before** - [`Player`](Player.md) the player before the update.
+> * **player** - [`Player`](Player.md) the player updated.
 
 ---
 
 ## on_player_remove(_player_)
 Called when a player leaves the room.
 >__Parameters:__
-> * **player** - [`Player`](Player.md#Player) the player.
+> * **player** - [`Player`](Player.md) the player.
 
 ---
 
@@ -314,14 +314,14 @@ Notify when the client restarts.
 ## on_connection_made(_connection_)
 Called when a connection has been successfully made with the server.
 >__Parameters:__
-> * **connection** - [`Connection`](Connection.md#Connection) the connection that has been made.
+> * **connection** - [`Connection`](#Connection) the connection that has been made.
 
 ---
 
 ## on_connection_error(_connection, exception_)
 Called when a connection has been lost due to an error.
 >__Parameters:__
-> * **connection** - [`Connection`](Connection.md#Connection) the connection that has been lost.
+> * **connection** - [`Connection`](#Connection) the connection that has been lost.
 > * **exception** - `Exception` the error which occurred.
 
 ---

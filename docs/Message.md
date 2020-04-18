@@ -6,25 +6,25 @@ Convert an instance to string to get the representation in game of the message.*
 
 | Attributes | Type | Can be None | Description |
 | :-: | :-: | :-: | :-- |
-| author | `Player` | ✕ |  The message's author. |
-| community | `ChatCommunity` | ✕ |  The author's community. Note: the community isn't the author's language! |
+| author | [`Player`](Player.md) | ✕ |  The message's author. |
+| community | [`ChatCommunity`](Enums.md#ChatCommunity) | ✕ |  The author's community. Note: the community isn't the author's language! |
 | content | `str` | ✕ |  The actual content of the message. |
 
 ## Whisper
 **Represents a whisper from the chat.
-Inherit from [`Message`](Message.md#Message).**
+Inherit from [`Message`](#Message).**
 
 | Attributes | Type | Can be None | Description |
 | :-: | :-: | :-: | :-- |
-| author | `Player` | ✕ |  The message's author. |
-| receiver | `Player` | ✕ |  The message's addressee. |
-| community | `ChatCommunity` | ✕ |  The author's community. Note: the community isn't the author's language! |
+| author | [`Player`](Player.md) | ✕ |  The message's author. |
+| receiver | [`Player`](Player.md) | ✕ |  The message's addressee. |
+| community | [`ChatCommunity`](Enums.md#ChatCommunity) | ✕ |  The author's community. Note: the community isn't the author's language! |
 | content | `str` | ✕ |  The actual content of the message. |
 | sent | `bool` | ✕ |  True if the author is the client. |
 
 _coroutine_ Whisper.**reply**(_self, msg_) <a id="Whisper.reply" href="#Whisper.reply">¶</a>
 >
->Reply to the author of the message. Shortcut to [`whisper`](#Client.whisper).
+>Reply to the author of the message. Shortcut to [`whisper`](Client.md#Client.whisper).
 >
 >__Parameters:__
 > * **msg** - `str` the message.
@@ -65,8 +65,8 @@ _coroutine_ Channel.**who**(_self_) <a id="Channel.who" href="#Channel.who">¶</
 | Attributes | Type | Can be None | Description |
 | :-: | :-: | :-: | :-- |
 | channel | `Channel` | ✕ |  The channel where the message is from. |
-| author | `Player` | ✕ |  The message's author. |
-| community | `ChatCommunity` | ✕ |  The author's community. Note: the community isn't the author's language! |
+| author | [`Player`](Player.md) | ✕ |  The message's author. |
+| community | [`ChatCommunity`](Enums.md#ChatCommunity) | ✕ |  The author's community. Note: the community isn't the author's language! |
 | content | `str` | ✕ |  The actual content of the message. |
 
 _coroutine_ ChannelMessage.**reply**(_self, message_) <a id="ChannelMessage.reply" href="#ChannelMessage.reply">¶</a>

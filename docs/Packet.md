@@ -20,7 +20,7 @@ Packet.**new**(_cls, c, cc_) <a id="Packet.new" href="#Packet.new">¶</a>
 >Create a new instance of Packet initialized by two bytes: c and cc.
 ---
 
-Packet.**copy**(_self_) <a id="Packet.copy" href="#Packet.copy">¶</a>
+Packet.**copy**(_self, copy_pos_) <a id="Packet.copy" href="#Packet.copy">¶</a>
 >
 >Returns a copy of the Packet
 ---

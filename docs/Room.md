@@ -6,7 +6,7 @@
 | Attributes | Type | Can be None | Description |
 | :-: | :-: | :-: | :-- |
 | name | `str` | ✕ |  The room's name. (i.e: en-1, *bad girls and so on) |
-| private | `bool` | ✕ |  Whether the room is public or private. |
+| official | `bool` | ✕ |  Whether the room is an official room or not. If official, it's name will be displayed in yellow. |
 | players | `list[:class:` | ✕ |  The list containing all the players of the room. |
 
 
@@ -49,7 +49,7 @@ Room.**get\_player**(_self, default, \*\*kwargs_) <a id="Room.get_player" href="
 >__Parameters:__
 > * **kwargs** - Which identifier to use. Can be either name, username, id or pid.
 >
->__Returns:__ [`Player`](Player.md#Player) The player or None
+>__Returns:__ [`Player`](Player.md) The player or None
 
 ---
 
