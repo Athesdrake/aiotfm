@@ -180,6 +180,19 @@ class Client:
 			# :param emoji: :class:`int` the emoji's id.
 			self.dispatch('emoji', player, emoji)
 
+		elif CCC == (8, 6): # Player won
+			packet.read8()
+			player = self.room.get_player(pid=packet.read32())
+			player.score = packet.read16()
+			order = packet.read8()
+			player_time = packet.read16() / 100
+
+			# :desc: Called a player get the cheese to the hole.
+			# :param player: :class:`aiotfm.Player` the player.
+			# :param order: :class:`int` the order of the player in the hole.
+			# :param player_time: :class:`float` player's time in the hole in seconds.
+			self.dispatch('player_won', player, order, player_time)
+
 		elif CCC == (8, 16): # Profile
 			# :desc: Called when the client receives the result of a /profile command.
 			# :param profile: :class:`aiotfm.player.Profile` the profile.
@@ -562,7 +575,15 @@ class Client:
 		:param data: :class:`list` the packet data.
 		:return: True if the packet got handled, False otherwise.
 		"""
-		if oldCCC == (8, 7): # Remove a player
+		if oldCCC == (8, 5): # Player died
+			player = self.room.get_player(pid=data[0])
+			player.score = int(data[2])
+
+			# :desc: Called when a player dies.
+			# :param player: :class:`aiotfm.Player` the player.
+			self.dispatch('player_died', player)
+
+		elif oldCCC == (8, 7): # Remove a player
 			player = self.room.players.pop(int(data[0]), None)
 
 			if player is not None:
