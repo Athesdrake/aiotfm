@@ -153,7 +153,7 @@ class Packet:
 
 	def xor_cipher(self, key, fp):
 		"""Cipher the packet with the XOR algorithm."""
-		self.buffer[2:] = (byte ^ key[i % 20] for i, byte in enumerate(self.buffer, fp + 1))
+		self.buffer[2:] = (byte ^ key[i % 20] for i, byte in enumerate(self.buffer[2:], fp + 1))
 		return self
 
 	def cipher(self, key):
