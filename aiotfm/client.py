@@ -239,7 +239,6 @@ class Client:
 
 		elif CCC == (26, 3): # Handshake OK
 			online_players = packet.read32()
-			connection.fingerprint = packet.read8()
 			community = Community[packet.readUTF()]
 			country = packet.readUTF()
 			self.authkey = packet.read32()
