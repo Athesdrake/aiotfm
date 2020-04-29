@@ -577,11 +577,12 @@ class Client:
 		"""
 		if oldCCC == (8, 5): # Player died
 			player = self.room.get_player(pid=data[0])
-			player.score = int(data[2])
+			if player is not None:
+				player.score = int(data[2])
 
-			# :desc: Called when a player dies.
-			# :param player: :class:`aiotfm.Player` the player.
-			self.dispatch('player_died', player)
+				# :desc: Called when a player dies.
+				# :param player: :class:`aiotfm.Player` the player.
+				self.dispatch('player_died', player)
 
 		elif oldCCC == (8, 7): # Remove a player
 			player = self.room.players.pop(int(data[0]), None)
