@@ -1041,7 +1041,7 @@ class Client:
 		if smiley < 0 or smiley > 9:
 			raise AiotfmException('Invalid smiley id')
 
-		packet = Packet.new(8, 5).write8(smiley).write32(0)
+		packet = Packet.new(8, 5).write8(smiley)
 
 		await self.bulle.send(packet)
 
