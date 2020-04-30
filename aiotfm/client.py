@@ -171,11 +171,22 @@ class Client:
 			# :param *args: a list of string used as replacement inside the message.
 			self.dispatch('server_message', self.locale[t_key], *t_args)
 
+		elif CCC == (8, 1): # Play emote
+			player = self.room.get_player(pid=packet.read32())
+			emote = packet.read8()
+			flag = packet.readUTF() if emote == 10 else ''
+
+			# :desc: Called when a player plays an emote.
+			# :param player: :class:`aiotfm.Player` the player.
+			# :param emote: :class:`int` the emote's id.
+			# :param flag: :class:`str` the flag's id.
+			self.dispatch('emote', player, emote, flag)
+
 		elif CCC == (8, 5): # Show emoji
 			player = self.room.get_player(pid=packet.read32())
 			emoji = packet.read8()
 
-			# :desc: Called a player is showing an emoji above its head.
+			# :desc: Called when a player is showing an emoji above its head.
 			# :param player: :class:`aiotfm.Player` the player.
 			# :param emoji: :class:`int` the emoji's id.
 			self.dispatch('emoji', player, emoji)
@@ -187,7 +198,7 @@ class Client:
 			order = packet.read8()
 			player_time = packet.read16() / 100
 
-			# :desc: Called a player get the cheese to the hole.
+			# :desc: Called when a player get the cheese to the hole.
 			# :param player: :class:`aiotfm.Player` the player.
 			# :param order: :class:`int` the order of the player in the hole.
 			# :param player_time: :class:`float` player's time in the hole in seconds.

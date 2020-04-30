@@ -46,11 +46,29 @@ Called when the client receives a message from the server that needs to be trans
 
 ---
 
+## on_emote(_player, emote, flag_)
+Called when a player plays an emote.
+>__Parameters:__
+> * **player** - [`Player`](Player.md) the player.
+> * **emote** - `int` the emote's id.
+> * **flag** - `str` the flag's id.
+
+---
+
 ## on_emoji(_player, emoji_)
-Called a player is showing an emoji above its head.
+Called when a player is showing an emoji above its head.
 >__Parameters:__
 > * **player** - [`Player`](Player.md) the player.
 > * **emoji** - `int` the emoji's id.
+
+---
+
+## on_player_won(_player, order, player_time_)
+Called when a player get the cheese to the hole.
+>__Parameters:__
+> * **player** - [`Player`](Player.md) the player.
+> * **order** - `int` the order of the player in the hole.
+> * **player_time** - `float` player's time in the hole in seconds.
 
 ---
 
@@ -289,6 +307,13 @@ Called when a player's data on the room has been updated.
 >__Parameters:__
 > * **before** - [`Player`](Player.md) the player before the update.
 > * **player** - [`Player`](Player.md) the player updated.
+
+---
+
+## on_player_died(_player_)
+Called when a player dies.
+>__Parameters:__
+> * **player** - [`Player`](Player.md) the player.
 
 ---
 
