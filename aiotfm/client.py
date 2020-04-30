@@ -865,7 +865,7 @@ class Client:
 		await self.sendHandshake()
 		await self.locale.load()
 
-	async def login(self, username, password, encrypted=True, room='1'):
+	async def login(self, username, password, encrypted=True, room='*aiotfm'):
 		"""|coro|
 		Log in the game.
 
