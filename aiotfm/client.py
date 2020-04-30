@@ -386,7 +386,8 @@ class Client:
 
 		elif CCC == (44, 1): # Bulle switching
 			timestamp = packet.read32()
-			player_id = packet.read32()
+			uid = packet.read32()
+			pid = packet.read32()
 			bulle_ip = packet.readUTF()
 			ports = packet.readUTF().split('-')
 
@@ -395,7 +396,7 @@ class Client:
 
 			self.bulle = Connection('bulle', self, self.loop)
 			await self.bulle.connect(bulle_ip, random.choice(ports))
-			await self.bulle.send(Packet.new(*CCC).write32(timestamp).write32(player_id))
+			await self.bulle.send(Packet.new(44, 1).write32(timestamp).write32(uid).write32(pid))
 
 		elif CCC == (44, 22): # Fingerprint offset changed
 			connection.fingerprint = packet.read8()
