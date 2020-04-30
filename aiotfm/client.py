@@ -1026,7 +1026,7 @@ class Client:
 		:param emote: :class:`int` the emote's id.
 		:param flag: Optional[:class:`str`] the flag for the emote id 10. Defaults to 'be'.
 		"""
-		packet = Packet.new(8, 1).write8(id).write32(0)
+		packet = Packet.new(8, 1).write8(emote).write32(0)
 		if emote == 10:
 			packet.writeString(flag)
 
