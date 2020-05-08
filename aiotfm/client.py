@@ -874,6 +874,10 @@ class Client:
 
 		self.close()
 
+		# If we don't recreate the connection, we won't be able to connect.
+		self.main = Connection('main', self, self.loop)
+		self.bulle = None
+
 		if keys is not None:
 			self.keys = keys
 		else:
