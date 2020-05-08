@@ -40,18 +40,12 @@ class TFMProtocol(asyncio.Protocol):
 			# :desc: Called when a connection has been lost due to an error.
 			# :param connection: :class:`Connection` the connection that has been lost.
 			# :param exception: :class:`Exception` the error which occurred.
-			future = self.client.dispatch('connection_error', self.connection, exc)
-			if future is not None:
-				# This future is a wrapper for _run_event, which returns True if the event
-				# ran successfully, False otherwise.
-				# If it returns False, it already handled the auto_restart.
-				if not asyncio.ensure_future(future):
-					return
+			self.client.dispatch('connection_error', self.connection, exc)
 
-			if self.client.auto_restart:
-				self.client.loop.create_task(self.client.restart_soon())
-			else:
-				self.client.close()
+		if self.client.auto_restart:
+			self.client.loop.create_task(self.client.restart_soon())
+		else:
+			self.client.close()
 
 
 class Connection:
