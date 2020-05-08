@@ -77,6 +77,7 @@ class Client:
 		self.auto_restart = auto_restart
 		self.api_tfmid = None
 		self.api_token = None
+		self._restarting = False
 
 		self._channels = []
 
@@ -855,8 +856,13 @@ class Client:
 		:param delay: :class:`int` the delay before restarting. Default is 5 seconds.
 		:param args: arguments to pass to the :meth:`Client.restart` method.
 		:param kwargs: keyword arguments to pass to the :meth:`Client.restart` method."""
+		if self._restarting:
+			return
+
+		self._restarting = True
 		await asyncio.sleep(delay)
 		await self.restart(*args, **kwargs)
+		self._restarting = False
 
 	async def restart(self, keys=None):
 		"""Restarts the client.
