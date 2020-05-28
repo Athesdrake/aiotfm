@@ -53,7 +53,7 @@ class Client:
 	"""
 	LOG_UNHANDLED_PACKETS = False
 
-	def __init__(self, community=Community.en, auto_restart=False, loop=None):
+	def __init__(self, community=Community.en, auto_restart=True, loop=None):
 		self.loop = loop or asyncio.get_event_loop()
 
 		self.main = Connection('main', self, self.loop)
@@ -559,6 +559,17 @@ class Client:
 				# :param before: :class:`aiotfm.Player` the player before the update.
 				# :param player: :class:`aiotfm.Player` the player updated.
 				self.dispatch('player_update', before, after)
+
+		elif CCC == (29, 20): # Receive TextArea
+			id = packet.read32()
+			message = packet.readUTF()
+			self.dispatch('receive_textArea', id, message)
+
+		elif CCC == (6, 9): # Receive tfm.exec.ChatMessage
+			message = packet.readUTF()
+			print(packet)
+			print(packet.buffer)
+			self.dispatch('lua_chat_message', Message(None, message, None, self))
 
 		else:
 			if self.LOG_UNHANDLED_PACKETS:
