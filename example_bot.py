@@ -39,7 +39,7 @@ async def on_ready():
 	print(
 			f'Connected to the community platform in {bot.loop.time() - boot_time:.2f} seconds')
 	# await bot.sendChannelMessage("dmStaff-GqAeYoZ", "hi :D")
-	sleep(3)
+	sleep(6)
 	await bot.enterTribe()
 	#await bot.joinRoom("#Yionutz","tdl")
 
