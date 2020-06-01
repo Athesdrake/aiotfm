@@ -10,7 +10,7 @@ from aiotfm.message import Channel
 from Notifier import Notifier
 
 #from dotenv import load_dotenv
-load_dotenv()
+#load_dotenv()
 
 config = {
 	'username': 'Nofeet#9658',
