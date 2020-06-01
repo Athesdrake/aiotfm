@@ -1,0 +1,1 @@
+worker python example_bot.py
