@@ -14,11 +14,11 @@ load_dotenv()
 
 config = {
 	'username': 'Nofeet#9658',
-	'password': os.environ.get('password'),
+	'password': os.environ['password'],
 	'encrypted': False,
 	'room': '*#Yionutz',
 	'api_id': 10187511,
-	'api_token': os.environ.get('api_token'),
+	'api_token': os.environ['api_token']
 }
 
 
@@ -56,12 +56,12 @@ async def on_tribe_inv(author, tribe):
 
 @bot.event
 async def on_whisper(message):
-	if message.content == 'moduledm':
-			await bot.sendCommand("module deathmatch")
-			await message.reply("done")
-	# if message.content == 'tribe':
-	# await bot.enterTribeHouse()
-	# await message.reply(message.content)'''
+	if message.author=="Yionutz#00000" and message.content == 'moduledm':
+		await bot.sendCommand("module deathmatch")
+		await message.reply("done")
+	if message.author=="Yionutz#00000" and message.content == 'tribe':
+		await bot.enterTribeHouse()
+		await message.reply("done")
 
 
 @bot.event
@@ -73,9 +73,8 @@ async def on_room_message(message):
 
 @bot.event
 async def on_channel_message(message):
-	print(message.content)
 	if message.channel.name == 'dmStaff-GqAeYoZ':
-		print(message.author)
+		print(message)
 
 
 @bot.event

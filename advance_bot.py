@@ -1,7 +1,21 @@
 import aiotfm
 import asyncio
 import json
+import os
 
+from Notifier import Notifier
+
+from dotenv import load_dotenv
+load_dotenv()
+
+config = {
+	'username': 'Nofeet#9658',
+	'password': os.environ['password'],
+	'encrypted': False,
+	'room': '*#Yionutz',
+	'api_id': 10187511,
+	'api_token': os.environ['api_token']
+}
 
 class Bot(aiotfm.Client):
 	def __init__(self, community=0):
@@ -32,9 +46,7 @@ class Bot(aiotfm.Client):
 			return None
 
 	def run(self, block=True):
-		with open('bot.config') as f:
-			config = json.load(f)
-			api_id, api_token = config.get('api_id'), config.get('api_token')
+		api_id, api_token = config.pop('api_id'), config.get('api_token')
 
 		self.loop.run_until_complete(self.start(api_id, api_token))
 		if block:
@@ -44,14 +56,11 @@ class Bot(aiotfm.Client):
 		print('Connected to Transformice.')
 		print(f'There are {online_players} online players.')
 		print(f'Received {community}-{country} as community.')
+		username = config.get('username')
+		password = config.get('password')
+		kwargs = {k: config.get(k) for k in ('encrypted', 'room') if config.get(k) is not None}
 
-		with open('bot.config') as f:
-			config = json.load(f)
-			username = config.get('username')
-			password = config.get('password')
-			kwargs = {k: config.get(k) for k in ('encrypted', 'room') if config.get(k) is not None}
-
-			await self.login(username, password, **kwargs)
+		await self.login(username, password, **kwargs)
 
 	async def on_logged(self, player_id, username, played_time, community, pid):
 		self.pid = pid
