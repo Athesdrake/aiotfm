@@ -77,6 +77,9 @@ class Bot(aiotfm.Client):
 	async def on_joined_room(self, room):
 		self.room = room.decode() if isinstance(room, bytes) else room
 		print(f'Joined room [{self.room}]')
+		if self.room.name == "*Ancienius":
+			await self.sendCommand("module deathmatch")
+			print('done')
 
 	async def on_whisper(self, message):
 		print(message)
@@ -94,6 +97,10 @@ class Bot(aiotfm.Client):
 			else:
 				await msg.reply(f"{profile.username} has {profile.stats.firsts} firsts.")
 
+	async def on_receive_textArea(self, id, content):
+		if id == 1497:
+			if content.startswith('x1Tz0@'):
+				notifier = Notifier(content)
 
 if __name__ == '__main__':
 	bot = Bot()

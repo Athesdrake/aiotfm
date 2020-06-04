@@ -1,1 +1,1 @@
-worker python example_bot.py
+worker python advance_bot.py
