@@ -53,7 +53,7 @@ class Client:
 	"""
 	LOG_UNHANDLED_PACKETS = False
 
-	def __init__(self, community=Community.en, auto_restart=False, loop=None):
+	def __init__(self, community=Community.en, auto_restart=True, loop=None):
 		self.loop = loop or asyncio.get_event_loop()
 
 		self.main = Connection('main', self, self.loop)
