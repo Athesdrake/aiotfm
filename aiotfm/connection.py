@@ -42,10 +42,10 @@ class TFMProtocol(asyncio.Protocol):
 			# :param exception: :class:`Exception` the error which occurred.
 			self.client.dispatch('connection_error', self.connection, exc)
 
-		if self.client.auto_restart:
-			self.client.loop.create_task(self.client.restart_soon())
-		else:
-			self.client.close()
+		#if self.client.auto_restart:
+			#self.client.loop.create_task(self.client.restart_soon())
+		#else:
+			#self.client.close()
 
 
 class Connection:

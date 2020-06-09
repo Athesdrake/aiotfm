@@ -70,7 +70,7 @@ class Bot(aiotfm.Client):
 		while not self.room.is_tribe:
 			await self.enterTribeHouse()
 			try:
-				await self.wait_for('on_joined_room', timeout=9)
+				await self.wait_for('on_joined_room', timeout=3)
 			except asyncio.TimeoutError:
 				pass
 
