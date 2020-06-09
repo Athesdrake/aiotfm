@@ -5,8 +5,8 @@ import os
 
 from Notifier import Notifier
 
-#from dotenv import load_dotenv
-#load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 config = {
 	'username': 'Nofeet#9658',
@@ -70,7 +70,7 @@ class Bot(aiotfm.Client):
 		while not self.room.is_tribe:
 			await self.enterTribeHouse()
 			try:
-				await self.wait_for('on_joined_room', timeout=3)
+				await self.wait_for('on_joined_room', timeout=9)
 			except asyncio.TimeoutError:
 				pass
 
