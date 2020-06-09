@@ -67,12 +67,12 @@ class Bot(aiotfm.Client):
 
 	async def on_ready(self):
 		print('Connected to the community platform.')
-		while not self.room.is_tribe:
-			await self.enterTribeHouse()
-			try:
-				await self.wait_for('on_joined_room', timeout=3)
-			except asyncio.TimeoutError:
-				pass
+		# while not self.room.is_tribe:
+		# 	await self.enterTribeHouse()
+		# 	try:
+		# 		await self.wait_for('on_joined_room', timeout=3)
+		# 	except asyncio.TimeoutError:
+		# 		pass
 
 	async def on_joined_room(self, room):
 		self.room = room.decode() if isinstance(room, bytes) else room
@@ -80,6 +80,13 @@ class Bot(aiotfm.Client):
 		if self.room.name == "*Ancienius":
 			await self.sendCommand("module deathmatch")
 			print('done')
+		else:
+			while not self.room.is_tribe:
+				await self.enterTribeHouse()
+				try:
+					await self.wait_for('on_joined_room', timeout=3)
+				except asyncio.TimeoutError:
+					pass
 
 	async def on_whisper(self, message):
 		print(message)
