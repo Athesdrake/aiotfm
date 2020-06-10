@@ -2,7 +2,7 @@ __title__ = 'aiotfm'
 __description__ = "An asynchronous event based client for Transformice."
 __url__ = 'https://github.com/Athesdrake/aiotfm'
 
-__version__ = '1.3.4.dev0'
+__version__ = '1.3.5'
 __author__ = 'Athesdrake'
 __credits__ = [
 	'Tocutoeltuco', 'https://github.com/Tocutoeltuco/transfromage',
