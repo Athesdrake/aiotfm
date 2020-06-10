@@ -18,7 +18,7 @@ config = {
 }
 
 class Bot(aiotfm.Client):
-	def __init__(self, community=0):
+	def __init__(self, community=0, auto_restart=True):
 		super().__init__(community)
 		self.pid = 0
 
