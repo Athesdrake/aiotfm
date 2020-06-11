@@ -44,8 +44,8 @@ class TFMProtocol(asyncio.Protocol):
 
 		if self.client.auto_restart:
 			self.client.loop.create_task(self.client.restart_soon())
-		#else:
-			#self.client.close()
+		else:
+			self.client.close()
 
 
 class Connection:
