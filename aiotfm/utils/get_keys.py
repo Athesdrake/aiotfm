@@ -24,7 +24,7 @@ async def get_keys(tfm_id, token):
 	:param tfm_id: :class:`int` your Transformice user id.
 	:param token: :class:`str` your api token.
 	"""
-	url = 'https://api.tocu.tk/get_transformice_keys.php'
+	url = 'https://api.tocuto.tk/get_transformice_keys.php'
 	params = {'tfmid': tfm_id, 'token': token}
 	headers = {"User-Agent": f"Mozilla/5.0 aiotfm/{__version__}"}
 
