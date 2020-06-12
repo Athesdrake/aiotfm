@@ -2,7 +2,7 @@ import aiotfm
 import asyncio
 import json
 import os
-
+import re
 from Notifier import Notifier
 
 # from dotenv import load_dotenv
@@ -78,7 +78,7 @@ class Bot(aiotfm.Client):
 		self.room = room.decode() if isinstance(room, bytes) else room
 		print(f'Joined room [{self.room}]')
 		if self.room.name == "*Ancienius":
-			await self.sendCommand("module deathmatch")
+			#await self.sendCommand("module deathmatch")
 			print('done')
 		else:
 			while not self.room.is_tribe:
@@ -88,10 +88,23 @@ class Bot(aiotfm.Client):
 				except asyncio.TimeoutError:
 					pass
 
+	# async def on_raw_socket(self, connection, packet):
+	# 	print(packet.readCode())
+	# 	print(packet)
+
+	async def on_eventNewGame(self, npCode):
+		if npCode == 6627689:
+			await self.sendCommand("module deathmatch")
+
 	async def on_whisper(self, message):
 		print(message)
-		if message.author != self.username and message.content.startswith('!'):
-			await self.execute(message, *message.content[1:].split(' '))
+		#if message.author != self.username and message.content.startswith('!'):
+			#await self.execute(message, *message.content[1:].split(' '))
+
+	async def on_channel_message(self, message):
+		if message.channel.name == 'dmStaff-GqAeYoZ' and self.room.name == "*Ancienius":
+			if message.author != self.username and message.content.startswith('!'):
+				await self.execute(message, *message.content[1:].split(' '))
 
 	async def execute(self, msg, cmd, *args):
 		if cmd == 'hi':
@@ -103,11 +116,20 @@ class Bot(aiotfm.Client):
 				await msg.reply("The player doesn't exists or isn't connected.")
 			else:
 				await msg.reply(f"{profile.username} has {profile.stats.firsts} firsts.")
+		elif cmd == 'find' and len(args)>0:
+			name = args[0]
+			await self.sendRoomMessage(f"!find {name}")
 
 	async def on_receive_textArea(self, id, content):
 		if id == 1497:
 			if content.startswith('x1Tz0@'):
 				notifier = Notifier(content)
+
+	async def on_lua_chat_message(self, message):
+		#print(message.content)
+		if bool(re.compile(".*</G><font color='#ff9478'>.*? farmer</font>").match(message.content)):
+			r = re.findall("<font *.*?>(.*?)</font>", message.content)
+			await self.sendChannelMessage('dmStaff-GqAeYoZ', f"[{r[0][:-1]}] -> {r[1]}")
 
 if __name__ == '__main__':
 	bot = Bot()

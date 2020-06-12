@@ -567,9 +567,13 @@ class Client:
 
 		elif CCC == (6, 9): # Receive tfm.exec.ChatMessage
 			message = packet.readUTF()
-			print(packet)
-			print(packet.buffer)
+			#print(packet)
+			#print(packet.buffer)
 			self.dispatch('lua_chat_message', Message(None, message, None, self))
+
+		elif CCC == (5, 2):
+			npcode = packet.read32()
+			self.dispatch('eventNewGame', npcode)
 
 		else:
 			if self.LOG_UNHANDLED_PACKETS:
@@ -692,7 +696,7 @@ class Client:
 				if message == 'id':
 					await client.sendCommand('profile '+author)
 					profile = await client.wait_for('on_profile', lambda p: p.username == author)
-					await client.sendRoomMessage('Your id: {}'.format(profile.id))
+					await client.sendRoomsendRoomMessage('Your id: {}'.format(profile.id))
 
 		:param event: :class:`str` the event name.
 		:param condition: Optionnal[`function`] A predicate to check what to wait for.
