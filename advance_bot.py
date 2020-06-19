@@ -5,8 +5,8 @@ import os
 import re
 from Notifier import Notifier
 
-# from dotenv import load_dotenv
-# load_dotenv()
+#from dotenv import load_dotenv
+#load_dotenv()
 
 config = {
 	'username': 'Nofeet#9658',
@@ -16,6 +16,7 @@ config = {
 	'api_id': 10187511,
 	'api_token': os.environ['api_token']
 }
+
 
 class Bot(aiotfm.Client):
 	def __init__(self, community=0, auto_restart=True):
@@ -45,11 +46,18 @@ class Bot(aiotfm.Client):
 		except asyncio.TimeoutError:
 			return None
 
+	async def processRestarting(self):
+		while True:
+			await asyncio.sleep(10.0)
+			print("Restarting transformice bot", flush=True)
+
 	def run(self, block=True):
 		api_id, api_token = config.pop('api_id'), config.get('api_token')
 
 		self.loop.run_until_complete(self.start(api_id, api_token))
+
 		if block:
+			asyncio.ensure_future(self.processRestarting())
 			self.loop.run_forever()
 
 	async def on_login_ready(self, online_players, community, country):
