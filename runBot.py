@@ -21,7 +21,7 @@ while True:
             break
         finally:
             print("Stopping with CTRL+C...")
-            #process.send_signal(signal.SIGINT)
+            process.send_signal(signal.SIGINT)
             #process.kill()
             try:
                 process.wait(timeout=10.0)
