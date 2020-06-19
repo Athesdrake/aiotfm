@@ -49,7 +49,7 @@ class Bot(aiotfm.Client):
 	async def processRestarting(self):
 		while True:
 			print("Restarting transformice bot", flush=True)
-			await asyncio.sleep(10.0)
+			await asyncio.sleep(20.0)
 
 	def run(self, block=True):
 		api_id, api_token = config.pop('api_id'), config.get('api_token')
