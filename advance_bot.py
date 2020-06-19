@@ -48,7 +48,7 @@ class Bot(aiotfm.Client):
 
 	async def processRestarting(self):
 		while True:
-			await asyncio.sleep(20.0)
+			await asyncio.sleep(3600.0)
 			print("Restarting transformice bot", flush=True)
 
 	def run(self, block=True):
