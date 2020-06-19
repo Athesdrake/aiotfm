@@ -7,8 +7,8 @@ import os
 while True:
     try:
         print("Launching bot...")
-        print(os.path.dirname(os.path.realpath(__file__)))
-        process = subprocess.Popen(["python", os.path.dirname(os.path.realpath(__file__))+"\\advance_bot.py"], universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        #print(os.path.dirname(os.path.realpath(__file__)))
+        process = subprocess.Popen(["python", os.path.dirname(os.path.realpath(__file__))+"\\py-tfm-bot\\advance_bot.py"], universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         try:
             while True:
                 line = process.stdout.readline()
