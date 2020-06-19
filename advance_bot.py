@@ -5,8 +5,8 @@ import os
 import re
 from Notifier import Notifier
 
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 config = {
 	'username': 'Nofeet#9658',
