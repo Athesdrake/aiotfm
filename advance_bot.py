@@ -5,8 +5,8 @@ import os
 import re
 from Notifier import Notifier
 
-# from dotenv import load_dotenv
-# load_dotenv()
+from dotenv import load_dotenv
+load_dotenv()
 
 config = {
 	'username': 'Nofeet#9658',
@@ -49,7 +49,8 @@ class Bot(aiotfm.Client):
 	async def processRestarting(self):
 		while True:
 			print("Restarting transformice bot", flush=True)
-			await asyncio.sleep(20.0)
+			sleep(10)
+			#await asyncio.sleep(20.0)
 
 	def run(self, block=True):
 		api_id, api_token = config.pop('api_id'), config.get('api_token')
