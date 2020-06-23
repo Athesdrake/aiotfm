@@ -799,6 +799,8 @@ class Client:
 		message = '\nAn error occurred while dispatching the event "{0}":\n\n{2}'
 		tb = traceback.format_exc(limit=-3)
 		print(message.format(event, err, tb), file=sys.stderr)
+		if event == "on_login_result":
+			print("Restarting transformice bot", flush=True)
 		return message.format(event, err, tb)
 
 	async def on_connection_error(self, conn, error):
