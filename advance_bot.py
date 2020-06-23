@@ -109,6 +109,9 @@ class Bot(aiotfm.Client):
 		#if message.author != self.username and message.content.startswith('!'):
 			#await self.execute(message, *message.content[1:].split(' '))
 
+	async def on_server_message(self, message):
+		print(f"[Server]: {message}")
+
 	async def on_channel_message(self, message):
 		if message.channel.name == 'dmStaff-GqAeYoZ' and self.room.name == "*Ancienius":
 			if message.author != self.username and message.content.startswith('!'):
