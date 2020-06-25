@@ -575,6 +575,11 @@ class Client:
 			npcode = packet.read32()
 			self.dispatch('eventNewGame', npcode)
 
+		elif CCC == (28, 88):
+			restartIn = packet.read32()
+			message = packet.readUTF()
+			self.dispatch('server_restart', restartIn, Message(None, message, None, self))
+
 		else:
 			if self.LOG_UNHANDLED_PACKETS:
 				print(CCC, bytes(packet.buffer)[2:])

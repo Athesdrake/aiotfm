@@ -20,15 +20,15 @@ while True:
         except KeyboardInterrupt:
             break
         finally:
-            print("Stopping with CTRL+C...")
+            #print("Stopping with CTRL+C...")
             process.send_signal(signal.SIGINT)
             #process.kill()
             try:
                 process.wait(timeout=10.0)
             except subprocess.TimeoutExpired:
-                print("Can not stop the process with CTRL+C. Killing it.")
+                #print("Can not stop the process with CTRL+C. Killing it.")
                 process.kill()
-
+                
             time.sleep(3.0)
     except Exception:
         print("Could not launch bot.")
