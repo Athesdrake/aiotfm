@@ -96,9 +96,10 @@ class Bot(aiotfm.Client):
 				except asyncio.TimeoutError:
 					pass
 
-	# async def on_raw_socket(self, connection, packet):
-	# 	print(packet.readCode())
-	# 	print(packet)
+	async def on_raw_socket(self, connection, packet):
+		if "[SERVER]" in packet:
+			print(packet.readCode())
+			print(packet)
 
 	async def on_eventNewGame(self, npCode):
 		if npCode == 6627689:
