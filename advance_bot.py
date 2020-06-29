@@ -97,7 +97,7 @@ class Bot(aiotfm.Client):
 					pass
 
 	async def on_raw_socket(self, connection, packet):
-		if "[SERVER]" in packet:
+		if "[SERVER]" in str(packet):
 			print(packet.readCode())
 			print(packet)
 
