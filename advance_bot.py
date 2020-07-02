@@ -61,9 +61,9 @@ class Bot(aiotfm.Client):
 			self.loop.run_forever()
 
 	async def on_login_ready(self, online_players, community, country):
-		print('Connected to Transformice.')
-		print(f'There are {online_players} online players.')
-		print(f'Received {community}-{country} as community.')
+		#print('Connected to Transformice.')
+		#print(f'There are {online_players} online players.')
+		#print(f'Received {community}-{country} as community.')
 		username = config.get('username')
 		password = config.get('password')
 		kwargs = {k: config.get(k) for k in ('encrypted', 'room') if config.get(k) is not None}
@@ -87,7 +87,8 @@ class Bot(aiotfm.Client):
 		print(f'Joined room [{self.room}]')
 		if self.room.name == "*Ancienius":
 			#await self.sendCommand("module deathmatch")
-			print('done')
+			test = 1
+			#print('done')
 		else:
 			while not self.room.is_tribe:
 				await self.enterTribeHouse()
