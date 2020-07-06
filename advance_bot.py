@@ -29,8 +29,8 @@ class Bot(aiotfm.Client):
 		if not handled: # Add compatibility to more packets
 			CCC = packet.readCode()
 
-			if CCC == (60, 4): # Tribulle V2 enabled
-				print(f'Tribulle 2 : {packet.readBool()}')
+			#if CCC == (60, 4): # Tribulle V2 enabled
+				#print(f'Tribulle 2 : {packet.readBool()}')
 
 	async def getProfile(self, username, timeout=3):
 		username = username.lower()
@@ -74,7 +74,8 @@ class Bot(aiotfm.Client):
 		self.pid = pid
 
 	async def on_ready(self):
-		print('Connected to the community platform.')
+		test=1
+		#print('Connected to the community platform.')
 		# while not self.room.is_tribe:
 		# 	await self.enterTribeHouse()
 		# 	try:
@@ -111,8 +112,8 @@ class Bot(aiotfm.Client):
 		#if message.author != self.username and message.content.startswith('!'):
 			#await self.execute(message, *message.content[1:].split(' '))
 	
-	async def on_server_restart(self, restartIn, message):
-		print(f"[Server]: {message} -> {restartIn}")
+	async def on_server_restart(self, restartIn):
+		print(f"[Server] restart in {restartIn}")
 
 	async def on_channel_message(self, message):
 		if message.channel.name == 'dmStaff-GqAeYoZ' and self.room.name == "*Ancienius":
