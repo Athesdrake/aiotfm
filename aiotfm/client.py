@@ -10,6 +10,7 @@ from aiotfm.utils import Locale, get_keys, shakikoo
 from aiotfm.connection import Connection
 from aiotfm.player import Profile, Player
 from aiotfm.tribe import Tribe
+from aiotfm.friend import Friend
 from aiotfm.message import Message, Whisper, Channel, ChannelMessage
 from aiotfm.shop import Shop
 from aiotfm.inventory import Inventory, InventoryItem, Trade
@@ -1016,6 +1017,22 @@ class Client:
 		for i in range(255, len(message), 255):
 			await asyncio.sleep(1)
 			await self.whisper(username, message[i:i + 255])
+
+	async def getFriendList(self):
+		"""|coro|
+		Get the client's friend list
+
+		:return: :class:`list`
+			List of friends
+		"""
+		await self.sendCP(28)
+
+		def is_friend_list(tc, packet):
+			return (tc == 34)
+
+		tc, packet = await self.wait_for('on_raw_cp', is_friend_list)
+
+		return Friend.from_packet(packet)
 
 	async def getTribe(self, disconnected=True):
 		"""|coro|
