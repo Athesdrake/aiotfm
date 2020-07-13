@@ -1032,7 +1032,7 @@ class Client:
 
 		tc, packet = await self.wait_for('on_raw_cp', is_friend_list)
 
-		return Friend.fromPacket(packet)
+		return Friend.from_packet(packet)
 
 	async def getTribe(self, disconnected=True):
 		"""|coro|

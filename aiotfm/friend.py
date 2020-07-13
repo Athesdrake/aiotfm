@@ -39,7 +39,7 @@ class Friend:
 		self.lastConnection = Date.fromtimestamp(packet.read32())
 
 	@staticmethod
-	def fromPacket(packet):
+	def from_packet(packet):
 		friends = []
 
 		soulmate = Friend(packet, True)
