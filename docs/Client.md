@@ -297,6 +297,11 @@ _coroutine_ Client.**whisper**(_self, username, message, overflow_) <a id="Clien
 
 ---
 
+_coroutine_ Client.**getFriendList**(_self_) <a id="Client.getFriendList" href="#Client.getFriendList">¶</a>
+>
+>Get the client's friend list
+---
+
 _coroutine_ Client.**getTribe**(_self, disconnected_) <a id="Client.getTribe" href="#Client.getTribe">¶</a>
 >
 >Gets the client's [`Tribe`](Tribe.md) and return it

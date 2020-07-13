@@ -222,7 +222,7 @@ Called when the client receives the result of joining a channel.
 
 ---
 
-## on_channel_leaved_result(_result_)
+## on_channel_left_result(_result_)
 Called when the client receives the result of leaving a channel.
 >__Parameters:__
 > * **result** - `int` result code.

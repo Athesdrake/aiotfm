@@ -438,7 +438,7 @@ class Client:
 
 				# :desc: Called when the client receives the result of leaving a channel.
 				# :param result: :class:`int` result code.
-				self.dispatch('channel_leaved_result', result)
+				self.dispatch('channel_left_result', result)
 
 			elif TC == 59: # Channel /who result
 				idSequence = packet.read32()
