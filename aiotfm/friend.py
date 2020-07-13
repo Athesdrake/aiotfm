@@ -1,5 +1,6 @@
 from aiotfm.utils import Date
 
+
 class Friend:
 	"""Represents a player in friend list, if you have one :feels:
 
@@ -25,7 +26,7 @@ class Friend:
 		The last connection of the player
 	"""
 
-	def __init__(self, packet, isSoulmate = False):
+	def __init__(self, packet, isSoulmate=False):
 		self.id = packet.read32()
 		self.name = packet.readUTF()
 		self.gender = packet.read8()
