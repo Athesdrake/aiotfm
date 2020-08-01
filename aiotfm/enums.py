@@ -41,6 +41,7 @@ class Community(IntEnum):
 	"""Enumerate the different game's communities."""
 	en = 0
 	int = 0
+	xx = 0
 	fr = 1
 	ru = 2
 	br = 3
