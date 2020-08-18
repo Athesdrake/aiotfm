@@ -33,7 +33,8 @@ class Client:
 	auto_restart: Optional[:class:`bool`]
 		Whether the client should automatically restart on error. Defaults to False.
 	bot_role: Optional[:class:`bool`]
-		Whether the has the game's special role bot or not. (avoids using the api endpoint and gives more stability)
+		Whether the has the game's special role bot or not.
+		Avoids using the api endpoint and gives more stability.
 	loop: Optional[event loop]
 		The `event loop`_ to use for asynchronous operations. If ``None`` is passed (defaults),
 		the event loop used will be ``asyncio.get_event_loop()``.
