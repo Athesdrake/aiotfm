@@ -8,6 +8,7 @@ Two argument can be passed to the [`Client`](#Client).**
 | :-: | :-: | :-: | :-- |
 | community | `int` | ✕ |  Defines the community of the client. Defaults to 0 (EN community). |
 | auto_restart | `bool` | ✕ |  Whether the client should automatically restart on error. Defaults to False. |
+| bot_role | `bool` | ✕ |  Whether the has the game's special role bot or not. Avoids using the api endpoint and gives more stability. |
 | loop | `event loop` | ✕ |  The [`event loop`](https://docs.python.org/3/library/asyncio-eventloops.html) to use for asynchronous operations. If ``None`` is passed (defaults), the event loop used will be ``asyncio.get_event_loop()``. |
 
 | Attributes | Type | Can be None | Description |
@@ -194,8 +195,8 @@ _coroutine_ Client.**start**(_self, api_tfmid, api_token, keys_) <a id="Client.s
 >Starts the client.
 >
 >__Parameters:__
-> * **api_tfmid** - `int` or `str` your Transformice id.
-> * **api_token** - `str` your token to access the API.
+> * **api_tfmid** - Optional[`int`] your Transformice id.
+> * **api_token** - Optional[`str`] your token to access the API.
 
 ---
 
@@ -229,7 +230,7 @@ _coroutine_ Client.**login**(_self, username, password, encrypted, room_) <a id=
 
 Client.**run**(_self, api_tfmid, api_token, username, password, \*\*kwargs_) <a id="Client.run" href="#Client.run">¶</a>
 >
->A blocking call that do the event loop initialization for you.
+>A blocking call that does the event loop initialization for you.
 >
 >__Equivalent to__:
 >```Python
