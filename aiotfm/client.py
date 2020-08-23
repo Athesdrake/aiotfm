@@ -1082,7 +1082,7 @@ class Client:
 				raise CommunityPlatformError(118, result)
 		return Tribe(packet)
 
-	async def getRoomList(self, gamemode):
+	async def getRoomList(self, gamemode=0):
 		"""|coro|
 		Get the room list
 
