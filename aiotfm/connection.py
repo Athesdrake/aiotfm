@@ -85,7 +85,7 @@ class Connection:
 		if not self.open:
 			return
 
-		if cipher:
+		if not self.client.bot_role and cipher:
 			packet.xor_cipher(self.client.keys.msg, self.fingerprint)
 
 		self.transport.write(packet.export(self.fingerprint))

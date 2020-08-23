@@ -10,6 +10,7 @@ from aiotfm.utils import Locale, get_keys, shakikoo
 from aiotfm.connection import Connection
 from aiotfm.player import Profile, Player
 from aiotfm.tribe import Tribe
+from aiotfm.friend import Friend
 from aiotfm.message import Message, Whisper, Channel, ChannelMessage
 from aiotfm.shop import Shop
 from aiotfm.inventory import Inventory, InventoryItem, Trade
@@ -31,6 +32,9 @@ class Client:
 		Defines the community of the client. Defaults to 0 (EN community).
 	auto_restart: Optional[:class:`bool`]
 		Whether the client should automatically restart on error. Defaults to False.
+	bot_role: Optional[:class:`bool`]
+		Whether the has the game's special role bot or not.
+		Avoids using the api endpoint and gives more stability.
 	loop: Optional[event loop]
 		The `event loop`_ to use for asynchronous operations. If ``None`` is passed (defaults),
 		the event loop used will be ``asyncio.get_event_loop()``.
@@ -53,7 +57,7 @@ class Client:
 	"""
 	LOG_UNHANDLED_PACKETS = False
 
-	def __init__(self, community=Community.en, auto_restart=False, loop=None):
+	def __init__(self, community=Community.en, auto_restart=False, bot_role=False, loop=None):
 		self.loop = loop or asyncio.get_event_loop()
 
 		self.main = Connection('main', self, self.loop)
@@ -78,6 +82,8 @@ class Client:
 		self.api_tfmid = None
 		self.api_token = None
 		self._restarting = False
+
+		self.bot_role = bot_role
 
 		self._channels = []
 
@@ -437,7 +443,7 @@ class Client:
 
 				# :desc: Called when the client receives the result of leaving a channel.
 				# :param result: :class:`int` result code.
-				self.dispatch('channel_leaved_result', result)
+				self.dispatch('channel_left_result', result)
 
 			elif TC == 59: # Channel /who result
 				idSequence = packet.read32()
@@ -804,9 +810,11 @@ class Client:
 		Creates a connection with the main server.
 		"""
 
+		ip = "51.75.130.180" if self.bot_role else self.keys.server_ip
+
 		for port in random.sample([13801, 11801, 12801, 14801], 4):
 			try:
-				await self.main.connect(self.keys.server_ip, port)
+				await self.main.connect(ip, port)
 			except Exception:
 				pass
 			else:
@@ -821,7 +829,12 @@ class Client:
 		"""|coro|
 		Sends the handshake packet so the server recognizes this socket as a player.
 		"""
-		packet = Packet.new(28, 1).write16(self.keys.version).writeString(self.keys.connection)
+		packet = Packet.new(28, 1)
+		if self.bot_role:
+			packet.write16(666)
+		else:
+			packet.write16(self.keys.version).writeString(self.keys.connection)
+
 		packet.writeString('Desktop').writeString('-').write32(0x1fbd).writeString('')
 		packet.writeString('74696720697320676f6e6e61206b696c6c206d7920626f742e20736f20736164')
 		packet.writeString(
@@ -832,19 +845,21 @@ class Client:
 
 		await self.main.send(packet)
 
-	async def start(self, api_tfmid, api_token, keys=None):
+	async def start(self, api_tfmid=None, api_token=None, keys=None):
 		"""|coro|
 		Starts the client.
 
-		:param api_tfmid: :class:`int` or :class:`str` your Transformice id.
-		:param api_token: :class:`str` your token to access the API.
+		:param api_tfmid: Optional[:class:`int`] your Transformice id.
+		:param api_token: Optional[:class:`str`] your token to access the API.
 		"""
-		if keys is not None:
-			self.keys = keys
-		else:
-			self.api_tfmid = api_tfmid
-			self.api_token = api_token
-			self.keys = await get_keys(api_tfmid, api_token)
+
+		if not self.bot_role:
+			if keys is not None:
+				self.keys = keys
+			else:
+				self.api_tfmid = api_tfmid
+				self.api_token = api_token
+				self.keys = await get_keys(api_tfmid, api_token)
 
 		await self.connect()
 		await self.sendHandshake()
@@ -878,10 +893,11 @@ class Client:
 		self.main = Connection('main', self, self.loop)
 		self.bulle = None
 
-		if keys is not None:
-			self.keys = keys
-		else:
-			self.keys = keys = await get_keys(self.api_tfmid, self.api_token)
+		if not self.bot_role:
+			if keys is not None:
+				self.keys = keys
+			else:
+				self.keys = keys = await get_keys(self.api_tfmid, self.api_token)
 
 		await self.connect()
 		await self.sendHandshake()
@@ -901,13 +917,18 @@ class Client:
 
 		packet = Packet.new(26, 8).writeString(username).writeString(password)
 		packet.writeString("app:/TransformiceAIR.swf/[[DYNAMIC]]/2/[[DYNAMIC]]/4")
-		packet.writeString(room).write32(self.authkey ^ self.keys.auth).write8(0).writeString('')
-		packet.cipher(self.keys.identification).write8(0)
+		packet.writeString(room)
+		if not self.bot_role:
+			packet.write32(self.authkey ^ self.keys.auth)
+		packet.write8(0).writeString('')
+		if not self.bot_role:
+			packet.cipher(self.keys.identification)
+		packet.write8(0)
 
 		await self.main.send(packet)
 
 	def run(self, api_tfmid, api_token, username, password, **kwargs):
-		"""A blocking call that do the event loop initialization for you.
+		"""A blocking call that does the event loop initialization for you.
 
 		Equivalent to: ::
 			@bot.event
@@ -1016,6 +1037,22 @@ class Client:
 		for i in range(255, len(message), 255):
 			await asyncio.sleep(1)
 			await self.whisper(username, message[i:i + 255])
+
+	async def getFriendList(self):
+		"""|coro|
+		Get the client's friend list
+
+		:return: :class:`list`
+			List of friends
+		"""
+		await self.sendCP(28)
+
+		def is_friend_list(tc, packet):
+			return (tc == 34)
+
+		tc, packet = await self.wait_for('on_raw_cp', is_friend_list)
+
+		return Friend.from_packet(packet)
 
 	async def getTribe(self, disconnected=True):
 		"""|coro|

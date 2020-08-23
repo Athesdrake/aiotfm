@@ -14,6 +14,7 @@ You can find here all documentation on `aiotfm`.
     * [Client.enterTribe](Client.md#Client.enterTribe)
     * [Client.enterTribeHouse](Client.md#Client.enterTribeHouse)
     * [Client.event](Client.md#Client.event)
+    * [Client.getFriendList](Client.md#Client.getFriendList)
     * [Client.getTribe](Client.md#Client.getTribe)
     * [Client.get\_channel](Client.md#Client.get_channel)
     * [Client.get\_trade](Client.md#Client.get_trade)
