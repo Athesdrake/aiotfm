@@ -2,7 +2,7 @@ from enum import IntEnum
 
 
 class ChatCommunity(IntEnum):
-	"""Enumerate the different chat's communities."""
+	"""Enumerates the different chat's communities."""
 	int = -1
 	en = 1
 	fr = 2
@@ -38,7 +38,7 @@ class ChatCommunity(IntEnum):
 
 
 class Community(IntEnum):
-	"""Enumerate the different game's communities."""
+	"""Enumerates the different game's communities."""
 	en = 0
 	int = 0
 	xx = 0
@@ -76,7 +76,7 @@ class Community(IntEnum):
 
 
 class TradeState(IntEnum):
-	"""Enumerate the different states a trade can have."""
+	"""Enumerates the different states a trade can have."""
 	ON_INVITE = 0
 	ACCEPTING = 1
 	TRADING = 2
@@ -85,7 +85,7 @@ class TradeState(IntEnum):
 
 
 class TradeError(IntEnum):
-	"""Enumerate the different error codes the server could send."""
+	"""Enumerates the different error codes the server could send."""
 	ALREADY_TRADING = 0
 	INVITE_DECLINED = 1
 	CANCELLED = 2
@@ -97,7 +97,7 @@ class TradeError(IntEnum):
 
 
 class Permissions(IntEnum):
-	"""Enumerate the different tribe's rank's permissions."""
+	"""Enumerates the different tribe's rank's permissions."""
 	IS_LEADER = 2
 	CAN_CHANGE_GREETING_MESSAGE = 4
 	CAN_EDIT_RANKS = 8
@@ -109,3 +109,23 @@ class Permissions(IntEnum):
 	CAN_LOAD_MAP = 512
 	CAN_LOAD_LUA = 512
 	CAN_MANAGE_FORUM = 1024
+
+
+class GameMode(IntEnum):
+	"""Enumerates the different room gamemodes"""
+	NORMAL = 1
+	BOOTCAMP = 2
+	VANILLA = 3
+	SURVIVOR = 8
+	RACING = 9
+	DEFILENTE = 10
+	MUSIC = 11
+	SHAMAN = 13
+	VILLAGE = 16
+	MODULES = 18
+	MADCHESS = 20
+	CELOUSCO = 22
+	RANKED = 31
+	DUEL = 33
+	ARENA = 34
+	DOMINATION = 42

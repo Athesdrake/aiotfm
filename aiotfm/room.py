@@ -1,4 +1,9 @@
 from aiotfm.errors import AiotfmException
+from aiotfm.enums import GameMode
+
+from collections import namedtuple
+
+RoomEntry = namedtuple('RoomEntry', 'community name player_count limit is_funcorp')
 
 
 class Room:
@@ -81,3 +86,54 @@ class Room:
 			if filter_(player):
 				return player
 		return default
+
+
+class RoomList:
+	"""Represents the list of rooms in the server.
+
+	Attributes
+	----------
+	gamemode: :class:`aiotfm.enums.GameMode`
+		The list's gamemode.
+	rooms: List[`RoomEntry`]
+		The list of normal rooms.
+	pinned_rooms: List[`RoomEntry`]
+		The list of pinned(/module) rooms.
+	gamemodes: List[:class:`aiotfm.enums.GameMode`]
+		The list of gamemodes available.
+	"""
+	def __init__(self, gamemode, rooms, pinned_rooms, gamemodes):
+		self.gamemode = gamemode
+		self.rooms = rooms
+		self.pinned_rooms = pinned_rooms
+		self.gamemodes = gamemodes
+
+	@classmethod
+	def from_packet(cls, packet):
+		gamemodes = [GameMode(packet.read8()) for _ in range(packet.read8())]
+		gamemode = GameMode(packet.read8())
+		rooms = []
+		pinned = []
+
+		while packet.pos < len(packet.buffer):
+			is_pinned = packet.readBool()
+			community = packet.read8()
+			name = packet.readUTF()
+
+			if is_pinned:
+				player_count = packet.readUTF()
+				packet.readUTF() # command
+				packet.readUTF() # command arg
+
+				if player_count.isdigit():
+					player_count = int(player_count)
+
+				pinned.append(RoomEntry(community, name, player_count, 0, False))
+			else:
+				player_count = packet.read16()
+				limit = packet.read8()
+				is_funcorp = packet.readBool()
+
+				rooms.append(RoomEntry(community, name, player_count, limit, is_funcorp))
+
+		return cls(gamemode, rooms, pinned, gamemodes)
