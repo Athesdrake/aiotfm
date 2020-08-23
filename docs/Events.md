@@ -135,6 +135,11 @@ Called when the client receives the ping response from the server.
 
 ---
 
+## on_room_list()
+Dispatched when the client receives the room list
+
+---
+
 ## on_lua_log(_log_)
 Called when the client receives lua logs from #Lua.
 >__Parameters:__

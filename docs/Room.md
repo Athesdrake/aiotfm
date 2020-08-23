@@ -53,3 +53,19 @@ Room.**get\_player**(_self, default, \*\*kwargs_) <a id="Room.get_player" href="
 
 ---
 
+## RoomList
+**Represents the list of rooms in the server.**
+
+| Attributes | Type | Can be None | Description |
+| :-: | :-: | :-: | :-- |
+| gamemode | [`GameMode`](Enums.md#GameMode) | ✕ |  The list's gamemode. |
+| rooms | `List[` | ✕ |  The list of normal rooms. |
+| pinned_rooms | `List[` | ✕ |  The list of pinned(/module) rooms. |
+| gamemodes | `List[:class:` | ✕ |  The list of gamemodes available. |
+
+@*classmethod*<br>
+RoomList.**from\_packet**(_cls, packet_) <a id="RoomList.from_packet" href="#RoomList.from_packet">¶</a>
+>
+>
+---
+
