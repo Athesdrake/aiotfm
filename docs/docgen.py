@@ -229,9 +229,9 @@ def generate(filename, doc_name):
 						for name, desc in params:
 							f.write(f'> * **{name}** - {format(desc, {})}\n')
 
-						if returns is not None:
-							returns = format(returns, {})
-							f.write(f'>\n>__Returns:__ {returns}\n')
+					if returns is not None:
+						returns = format(returns, {})
+						f.write(f'>\n>__Returns:__ {returns}\n')
 
 				f.write('\n---\n\n')
 
@@ -491,7 +491,7 @@ def generate_enums():
 if __name__ == '__main__':
 	files = [
 		'Client', 'Player', 'Tribe', 'Message', 'Connection',
-		'Inventory', 'Packet', 'Room', 'Shop', 'Errors'
+		'Inventory', 'Packet', 'Room', 'Shop', 'Errors', 'Friend'
 	]
 	weights = {
 		'Client': 1,

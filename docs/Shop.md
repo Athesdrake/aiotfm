@@ -23,7 +23,9 @@
 ### Methods
 Shop.**to\_dict**(_self_) <a id="Shop.to_dict" href="#Shop.to_dict">¶</a>
 >
->Export the shop into a serializable dict.
+>Export the shop into a serializable dict.>
+>__Returns:__ `dict`
+
 ---
 
 Shop.**cost**(_self, outfit_) <a id="Shop.cost" href="#Shop.cost">¶</a>
@@ -133,7 +135,9 @@ Item.**parse**(_cls, cat, string_) <a id="Item.parse" href="#Item.parse">¶</a>
 ### Methods
 ShopItem.**to\_dict**(_self_) <a id="ShopItem.to_dict" href="#ShopItem.to_dict">¶</a>
 >
->Export the item into a serializable dict.
+>Export the item into a serializable dict.>
+>__Returns:__ `dict`
+
 ---
 
 @*classmethod*<br>

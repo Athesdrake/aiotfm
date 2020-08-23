@@ -1,7 +1,7 @@
 # Enums' Documentation
 
 ## ChatCommunity
-**Enumerate the different chat's communities.**
+**Enumerates the different chat's communities.**
 
 | Item | Value |
 |:---- |:-----:|
@@ -37,7 +37,7 @@
 ---
 
 ## Community
-**Enumerate the different game's communities.**
+**Enumerates the different game's communities.**
 
 | Item | Value |
 |:---- |:-----:|
@@ -75,7 +75,7 @@
 ---
 
 ## TradeState
-**Enumerate the different states a trade can have.**
+**Enumerates the different states a trade can have.**
 
 | Item | Value |
 |:---- |:-----:|
@@ -88,7 +88,7 @@
 ---
 
 ## TradeError
-**Enumerate the different error codes the server could send.**
+**Enumerates the different error codes the server could send.**
 
 | Item | Value |
 |:---- |:-----:|
@@ -104,7 +104,7 @@
 ---
 
 ## Permissions
-**Enumerate the different tribe's rank's permissions.**
+**Enumerates the different tribe's rank's permissions.**
 
 | Item | Value |
 |:---- |:-----:|
@@ -119,6 +119,30 @@
 | CAN_LOAD_MAP | *`512`* |
 | CAN_LOAD_LUA | *`512`* |
 | CAN_MANAGE_FORUM | *`1024`* |
+
+---
+
+## GameMode
+**Enumerates the different room gamemodes**
+
+| Item | Value |
+|:---- |:-----:|
+| NORMAL | *`1`* |
+| BOOTCAMP | *`2`* |
+| VANILLA | *`3`* |
+| SURVIVOR | *`8`* |
+| RACING | *`9`* |
+| DEFILENTE | *`10`* |
+| MUSIC | *`11`* |
+| SHAMAN | *`13`* |
+| VILLAGE | *`16`* |
+| MODULES | *`18`* |
+| MADCHESS | *`20`* |
+| CELOUSCO | *`22`* |
+| RANKED | *`31`* |
+| DUEL | *`33`* |
+| ARENA | *`34`* |
+| DOMINATION | *`42`* |
 
 ---
 

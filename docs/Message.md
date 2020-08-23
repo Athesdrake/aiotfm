@@ -56,7 +56,9 @@ _coroutine_ Channel.**leave**(_self_) <a id="Channel.leave" href="#Channel.leave
 
 _coroutine_ Channel.**who**(_self_) <a id="Channel.who" href="#Channel.who">¶</a>
 >
->Sends the command /who to the channel and returns the list of players.
+>Sends the command /who to the channel and returns the list of players.>
+>__Returns:__ List[[`Player`](Player.md)]
+
 ---
 
 ## ChannelMessage

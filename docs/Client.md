@@ -300,7 +300,9 @@ _coroutine_ Client.**whisper**(_self, username, message, overflow_) <a id="Clien
 
 _coroutine_ Client.**getFriendList**(_self_) <a id="Client.getFriendList" href="#Client.getFriendList">¶</a>
 >
->Get the client's friend list
+>Get the client's friend list>
+>__Returns:__ List[[`Friend`](Friend.md)]  List of friends
+
 ---
 
 _coroutine_ Client.**getTribe**(_self, disconnected_) <a id="Client.getTribe" href="#Client.getTribe">¶</a>
@@ -311,6 +313,17 @@ _coroutine_ Client.**getTribe**(_self, disconnected_) <a id="Client.getTribe" hr
 > * **disconnected** - `bool` if True retrieves also the disconnected members.
 >
 >__Returns:__ [`Tribe`](Tribe.md) or ``None``.
+
+---
+
+_coroutine_ Client.**getRoomList**(_self, gamemode_) <a id="Client.getRoomList" href="#Client.getRoomList">¶</a>
+>
+>Get the room list
+>
+>__Parameters:__
+> * **gamemode** - Optional[[`GameMode`](Enums.md#GameMode)] the room's gamemode.
+>
+>__Returns:__ [`RoomList`](Room.md#RoomList) the room list for the given gamemode
 
 ---
 
@@ -361,6 +374,24 @@ _coroutine_ Client.**enterTribeHouse**(_self_) <a id="Client.enterTribeHouse" hr
 >Alias for [`enterTribe`](#Client.enterTribe)
 ---
 
+_coroutine_ Client.**enterInvTribeHouse**(_self, author_) <a id="Client.enterInvTribeHouse" href="#Client.enterInvTribeHouse">¶</a>
+>
+>Join the tribe house of another player after receiving an /inv.
+>
+>__Parameters:__
+> * **author** - `str` the author's username who sent the invitation.
+
+---
+
+_coroutine_ Client.**recruit**(_self, player_) <a id="Client.recruit" href="#Client.recruit">¶</a>
+>
+>Send a recruit request to a player.
+>
+>__Parameters:__
+> * **player** - `str` the player's username you want to recruit.
+
+---
+
 _coroutine_ Client.**joinRoom**(_self, room_name, password, community, auto_) <a id="Client.joinRoom" href="#Client.joinRoom">¶</a>
 >
 >Join a room.
@@ -392,24 +423,6 @@ _coroutine_ Client.**leaveChannel**(_self, channel_) <a id="Client.leaveChannel"
 >
 >__Parameters:__
 > * **channel** - [`Channel`](Message.md#Channel) channel to leave.
-
----
-
-_coroutine_ Client.**enterInvTribeHouse**(_self, author_) <a id="Client.enterInvTribeHouse" href="#Client.enterInvTribeHouse">¶</a>
->
->Join the tribe house of another player after receiving an /inv.
->
->__Parameters:__
-> * **author** - `str` the author's username who sent the invitation.
-
----
-
-_coroutine_ Client.**recruit**(_self, player_) <a id="Client.recruit" href="#Client.recruit">¶</a>
->
->Send a recruit request to a player.
->
->__Parameters:__
-> * **player** - `str` the player's username you want to recruit.
 
 ---
 

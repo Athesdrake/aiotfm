@@ -81,7 +81,9 @@ Inventory.**get**(_self, item_id_) <a id="Inventory.get" href="#Inventory.get">Â
 
 Inventory.**sort**(_self_) <a id="Inventory.sort" href="#Inventory.sort">Â¶</a>
 >
->Sort the inventory the same way the client does.
+>Sort the inventory the same way the client does.>
+>__Returns:__ `list`
+
 ---
 
 ## TradeContainer

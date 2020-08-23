@@ -14,7 +14,7 @@ from aiotfm.friend import Friend
 from aiotfm.message import Message, Whisper, Channel, ChannelMessage
 from aiotfm.shop import Shop
 from aiotfm.inventory import Inventory, InventoryItem, Trade
-from aiotfm.room import Room
+from aiotfm.room import Room, RoomList
 from aiotfm.enums import TradeError, Community
 from aiotfm.errors import AiotfmException, InvalidEvent, CommunityPlatformError, \
 	AlreadyConnected, IncorrectPassword, LoginError, ServerUnreachable
@@ -286,6 +286,11 @@ class Client:
 		elif CCC == (26, 25): # Ping
 			# :desc: Called when the client receives the ping response from the server.
 			self.dispatch('ping')
+
+		elif CCC == (26, 35): # Room list
+			roomlist = RoomList.from_packet(packet)
+			# :desc: Dispatched when the client receives the room list
+			self.dispatch('room_list', roomlist)
 
 		elif CCC == (28, 6): # Server ping
 			await connection.send(Packet.new(28, 6).write8(packet.read8()))
@@ -1042,13 +1047,12 @@ class Client:
 		"""|coro|
 		Get the client's friend list
 
-		:return: :class:`list`
-			List of friends
+		:return: List[:class:`aiotfm.Friend`]  List of friends
 		"""
 		await self.sendCP(28)
 
 		def is_friend_list(tc, packet):
-			return (tc == 34)
+			return tc == 34
 
 		tc, packet = await self.wait_for('on_raw_cp', is_friend_list)
 
@@ -1077,6 +1081,17 @@ class Client:
 			else:
 				raise CommunityPlatformError(118, result)
 		return Tribe(packet)
+
+	async def getRoomList(self, gamemode):
+		"""|coro|
+		Get the room list
+
+		:param gamemode: Optional[:class:`aiotfm.enums.GameMode`] the room's gamemode.
+		:return: :class:`aiotfm.room.RoomList` the room list for the given gamemode
+		"""
+		await self.main.send(Packet.new(26, 35).write8(int(gamemode)))
+
+		return await self.wait_for('on_room_list', lambda r: r.gamemode == gamemode)
 
 	async def playEmote(self, emote, flag='be'):
 		"""|coro|
@@ -1139,6 +1154,22 @@ class Client:
 		"""
 		await self.enterTribe()
 
+	async def enterInvTribeHouse(self, author):
+		"""|coro|
+		Join the tribe house of another player after receiving an /inv.
+
+		:param author: :class:`str` the author's username who sent the invitation.
+		"""
+		await self.main.send(Packet.new(16, 2).writeString(author))
+
+	async def recruit(self, player):
+		"""|coro|
+		Send a recruit request to a player.
+
+		:param player: :class:`str` the player's username you want to recruit.
+		"""
+		await self.sendCP(78, Packet().writeString(player))
+
 	async def joinRoom(self, room_name, password=None, community=None, auto=False):
 		"""|coro|
 		Join a room.
@@ -1182,22 +1213,6 @@ class Client:
 			name = channel
 
 		await self.sendCP(56, Packet().writeString(name))
-
-	async def enterInvTribeHouse(self, author):
-		"""|coro|
-		Join the tribe house of another player after receiving an /inv.
-
-		:param author: :class:`str` the author's username who sent the invitation.
-		"""
-		await self.main.send(Packet.new(16, 2).writeString(author))
-
-	async def recruit(self, player):
-		"""|coro|
-		Send a recruit request to a player.
-
-		:param player: :class:`str` the player's username you want to recruit.
-		"""
-		await self.sendCP(78, Packet().writeString(player))
 
 	async def requestShopList(self):
 		"""|coro|
