@@ -491,7 +491,7 @@ def generate_enums():
 if __name__ == '__main__':
 	files = [
 		'Client', 'Player', 'Tribe', 'Message', 'Connection',
-		'Inventory', 'Packet', 'Room', 'Shop', 'Errors'
+		'Inventory', 'Packet', 'Room', 'Shop', 'Errors', 'Friend'
 	]
 	weights = {
 		'Client': 1,
