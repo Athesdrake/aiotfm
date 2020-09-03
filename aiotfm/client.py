@@ -838,7 +838,7 @@ class Client:
 		if self.bot_role:
 			packet.write16(666)
 		else:
-			packet.write16(self.keys.version).writeString(self.keys.connection)
+			packet.write16(self.keys.version).writeString('en').writeString(self.keys.connection)
 
 		packet.writeString('Desktop').writeString('-').write32(0x1fbd).writeString('')
 		packet.writeString('74696720697320676f6e6e61206b696c6c206d7920626f742e20736f20736164')
