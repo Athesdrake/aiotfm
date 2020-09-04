@@ -112,11 +112,12 @@ Called when the client successfully logged in.
 
 ---
 
-## on_login_ready(_online_players, community, country_)
+## on_login_ready(_online_players, community, community, country_)
 Called when the client can login through the game.
 >__Parameters:__
 > * **online_players** - `int` the number of player connected to the game.
-> * **community** - [`Community`](Enums.md#Community) the community the server suggest.
+> * **community** - [`Community`](Enums.md#Community) the community the server is suggesting.
+> * **community** - `str` the language the server is suggesting.
 > * **country** - `str` the country detected from your ip.
 
 ---
