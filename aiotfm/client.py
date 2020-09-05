@@ -843,7 +843,7 @@ class Client:
 			packet.write16(self.keys.version).writeString('en').writeString(self.keys.connection)
 
 		packet.writeString('Desktop').writeString('-').write32(0x1fbd).writeString('')
-		packet.writeString('74696720697320676f6e6e61206b696c6c206d7920626f742e20736f20736164')
+		packet.writeBytes(b'\x00@ca26ba3ada3fc0aadba7d94e5677bee000333d8f46bab4c3cb32e615587e7212')
 		packet.writeString(
 			"A=t&SA=t&SV=t&EV=t&MP3=t&AE=t&VE=t&ACC=t&PR=t&SP=f&SB=f&DEB=f&V=LNX 29,0,0,140&M=Adobe"
 			" Linux&R=1920x1080&COL=color&AR=1.0&OS=Linux&ARCH=x86&L=en&IME=t&PR32=t&PR64=t&LS=en-U"
