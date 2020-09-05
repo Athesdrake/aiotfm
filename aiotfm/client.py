@@ -838,6 +838,7 @@ class Client:
 		"""
 		packet = Packet.new(28, 1)
 		if self.bot_role:
+			packet.writeString("en")
 			packet.write16(666)
 		else:
 			packet.write16(self.keys.version).writeString('en').writeString(self.keys.connection)
