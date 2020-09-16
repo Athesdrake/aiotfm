@@ -2,7 +2,7 @@ __title__ = 'aiotfm'
 __description__ = "An asynchronous event based client for Transformice."
 __url__ = 'https://github.com/Athesdrake/aiotfm'
 
-__version__ = '1.3.8'
+__version__ = '1.3.12'
 __author__ = 'Athesdrake'
 __credits__ = [
 	'Tocutoeltuco', 'https://github.com/Tocutoeltuco/transfromage',
@@ -11,7 +11,7 @@ __credits__ = [
 
 __license__ = """MIT License
 
-Copyright (c) 2019 AthesDrake
+Copyright (c) 2019-2020 AthesDrake
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

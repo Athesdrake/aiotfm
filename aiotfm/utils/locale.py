@@ -122,6 +122,6 @@ class Locale:
 
 				# Decompress the file and parse it
 				content = zlib.decompress(await r.read()).decode('utf-8')
-				table = {k: v for k, v in (t.split('=', 1) for t in content.split('¤') if t)}
+				table = {k: v for k, v in (t.split('=', 1) for t in content.split('\n-\n') if t)}
 				# Add the translation table
 				self.locales[self._locale] = table

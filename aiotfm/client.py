@@ -258,6 +258,7 @@ class Client:
 		elif CCC == (26, 3): # Handshake OK
 			online_players = packet.read32()
 			community = Community[packet.readUTF()]
+			language = packet.readUTF()
 			country = packet.readUTF()
 			self.authkey = packet.read32()
 
@@ -272,9 +273,10 @@ class Client:
 
 			# :desc: Called when the client can login through the game.
 			# :param online_players: :class:`int` the number of player connected to the game.
-			# :param community: :class:`aiotfm.enums.Community` the community the server suggest.
+			# :param community: :class:`aiotfm.enums.Community` the community the server is suggesting.
+			# :param community: :class:`str` the language the server is suggesting.
 			# :param country: :class:`str` the country detected from your ip.
-			self.dispatch('login_ready', online_players, community, country)
+			self.dispatch('login_ready', online_players, community, language, country)
 
 		elif CCC == (26, 12): # Login result
 			# :desc: Called when the client failed logging.
@@ -838,7 +840,7 @@ class Client:
 		if self.bot_role:
 			packet.write16(666)
 		else:
-			packet.write16(self.keys.version).writeString(self.keys.connection)
+			packet.write16(self.keys.version).writeString('en').writeString(self.keys.connection)
 
 		packet.writeString('Desktop').writeString('-').write32(0x1fbd).writeString('')
 		packet.writeString('74696720697320676f6e6e61206b696c6c206d7920626f742e20736f20736164')
@@ -1082,7 +1084,7 @@ class Client:
 				raise CommunityPlatformError(118, result)
 		return Tribe(packet)
 
-	async def getRoomList(self, gamemode):
+	async def getRoomList(self, gamemode=0):
 		"""|coro|
 		Get the room list
 
