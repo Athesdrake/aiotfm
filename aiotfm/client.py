@@ -257,14 +257,13 @@ class Client:
 
 		elif CCC == (26, 3): # Handshake OK
 			online_players = packet.read32()
-			community = Community[packet.readUTF()]
 			language = packet.readUTF()
 			country = packet.readUTF()
 			self.authkey = packet.read32()
 
 			self.loop.create_task(self._heartbeat_loop())
 
-			await connection.send(Packet.new(8, 2).write8(self.community.value).write8(0))
+			await connection.send(Packet.new(176, 2).writeUTF(language))
 
 			os_info = Packet.new(28, 17).writeString('en').writeString('Linux')
 			os_info.writeString('LNX 29,0,0,140').write8(0)
@@ -273,10 +272,9 @@ class Client:
 
 			# :desc: Called when the client can login through the game.
 			# :param online_players: :class:`int` the number of player connected to the game.
-			# :param community: :class:`aiotfm.enums.Community` the community the server is suggesting.
-			# :param community: :class:`str` the language the server is suggesting.
+			# :param language: :class:`str` the language the server is suggesting.
 			# :param country: :class:`str` the country detected from your ip.
-			self.dispatch('login_ready', online_players, community, language, country)
+			self.dispatch('login_ready', online_players, language, country)
 
 		elif CCC == (26, 12): # Login result
 			# :desc: Called when the client failed logging.
