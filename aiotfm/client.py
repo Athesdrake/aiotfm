@@ -1184,7 +1184,7 @@ class Client:
 		if password is not None:
 			packet = Packet.new(5, 39).writeString(password).writeString(room_name)
 		else:
-			packet = Packet.new(5, 38).write8(Community(community or self.community).value)
+			packet = Packet.new(5, 38).writeString(Community(community or self.community).name)
 			packet.writeString(room_name).writeBool(auto)
 
 		await self.main.send(packet)
