@@ -277,8 +277,8 @@ class Client:
 		elif CCC == (26, 12): # Login result
 			# :desc: Called when the client failed logging.
 			# :param code: :class:`int` the error code.
-			# :param code: :class:`str` error messages.
-			# :param code: :class:`str` error messages.
+			# :param error1: :class:`str` error messages.
+			# :param error2: :class:`str` error messages.
 			self.dispatch('login_result', packet.read8(), packet.readUTF(), packet.readUTF())
 
 		elif CCC == (26, 25): # Ping
