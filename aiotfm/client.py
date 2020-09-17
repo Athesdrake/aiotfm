@@ -435,18 +435,22 @@ class Client:
 				self.dispatch('ready')
 
 			elif TC == 55: # Channel join result
+				sequenceId = packet.read32()
 				result = packet.read8()
 
 				# :desc: Called when the client receives the result of joining a channel.
+				# :param sequenceId: :class:`int` identifier returned by :meth:`Client.sendCP`.
 				# :param result: :class:`int` result code.
-				self.dispatch('channel_joined_result', result)
+				self.dispatch('channel_joined_result', sequenceId, result)
 
 			elif TC == 57: # Channel leave result
+				sequenceId = packet.read32()
 				result = packet.read8()
 
 				# :desc: Called when the client receives the result of leaving a channel.
+				# :param sequenceId: :class:`int` identifier returned by :meth:`Client.sendCP`.
 				# :param result: :class:`int` result code.
-				self.dispatch('channel_left_result', result)
+				self.dispatch('channel_left_result', sequenceId, result)
 
 			elif TC == 59: # Channel /who result
 				idSequence = packet.read32()
