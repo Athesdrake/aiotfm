@@ -154,18 +154,16 @@ class Client:
 			self.dispatch('room_password', Room(packet.readUTF()))
 
 		elif CCC == (6, 6): # Room message
-			player_id = packet.read32()
 			username = packet.readUTF()
-			commu = packet.read8()
 			message = packet.readUTF()
-			player = self.room.get_player(pid=player_id)
+			player = self.room.get_player(username=username)
 
 			if player is None:
-				player = Player(username, pid=player_id)
+				player = Player(username)
 
 			# :desc: Called when the client receives a message from the room.
 			# :param message: :class:`aiotfm.message.Message` the message.
-			self.dispatch('room_message', Message(player, message, commu, self))
+			self.dispatch('room_message', Message(player, message, self))
 
 		elif CCC == (6, 20): # Server message
 			packet.readBool() # if False then the message will appear in the #Server channel
@@ -257,14 +255,13 @@ class Client:
 
 		elif CCC == (26, 3): # Handshake OK
 			online_players = packet.read32()
-			community = Community[packet.readUTF()]
 			language = packet.readUTF()
 			country = packet.readUTF()
 			self.authkey = packet.read32()
 
 			self.loop.create_task(self._heartbeat_loop())
 
-			await connection.send(Packet.new(8, 2).write8(self.community.value).write8(0))
+			await connection.send(Packet.new(176, 2).writeUTF(language))
 
 			os_info = Packet.new(28, 17).writeString('en').writeString('Linux')
 			os_info.writeString('LNX 29,0,0,140').write8(0)
@@ -273,16 +270,15 @@ class Client:
 
 			# :desc: Called when the client can login through the game.
 			# :param online_players: :class:`int` the number of player connected to the game.
-			# :param community: :class:`aiotfm.enums.Community` the community the server is suggesting.
-			# :param community: :class:`str` the language the server is suggesting.
+			# :param language: :class:`str` the language the server is suggesting.
 			# :param country: :class:`str` the country detected from your ip.
-			self.dispatch('login_ready', online_players, community, language, country)
+			self.dispatch('login_ready', online_players, language, country)
 
 		elif CCC == (26, 12): # Login result
 			# :desc: Called when the client failed logging.
 			# :param code: :class:`int` the error code.
-			# :param code: :class:`str` error messages.
-			# :param code: :class:`str` error messages.
+			# :param error1: :class:`str` error messages.
+			# :param error2: :class:`str` error messages.
 			self.dispatch('login_result', packet.read8(), packet.readUTF(), packet.readUTF())
 
 		elif CCC == (26, 25): # Ping
@@ -439,18 +435,22 @@ class Client:
 				self.dispatch('ready')
 
 			elif TC == 55: # Channel join result
+				sequenceId = packet.read32()
 				result = packet.read8()
 
 				# :desc: Called when the client receives the result of joining a channel.
+				# :param sequenceId: :class:`int` identifier returned by :meth:`Client.sendCP`.
 				# :param result: :class:`int` result code.
-				self.dispatch('channel_joined_result', result)
+				self.dispatch('channel_joined_result', sequenceId, result)
 
 			elif TC == 57: # Channel leave result
+				sequenceId = packet.read32()
 				result = packet.read8()
 
 				# :desc: Called when the client receives the result of leaving a channel.
+				# :param sequenceId: :class:`int` identifier returned by :meth:`Client.sendCP`.
 				# :param result: :class:`int` result code.
-				self.dispatch('channel_left_result', result)
+				self.dispatch('channel_left_result', sequenceId, result)
 
 			elif TC == 59: # Channel /who result
 				idSequence = packet.read32()
@@ -485,9 +485,13 @@ class Client:
 				self.dispatch('channel_closed', name)
 
 			elif TC == 64: # Channel message
-				author, community = packet.readUTF(), packet.read32()
+				username, community = packet.readUTF(), packet.read32()
 				channel_name, message = packet.readUTF(), packet.readUTF()
 				channel = self.get_channel(channel_name)
+				author = self.room.get_player(username=username)
+
+				if author is None:
+					author = Player(username)
 
 				if channel is None:
 					channel = Channel(channel_name, self)
@@ -958,13 +962,11 @@ class Client:
 		self.loop.run_until_complete(self.wait_for('on_login_ready'))
 		asyncio.ensure_future(self.login(username, password, **kwargs), loop=self.loop)
 
-		self.loop.run_forever()
-		# try:
-		# 	self.loop.run_forever()
-		# except:
-		# 	# add self.close
-		# 	# asyncio.ensure_future(self.close())
-		# 	raise
+		try:
+			self.loop.run_forever()
+		finally:
+			self.loop.run_until_complete(self.loop.shutdown_asyncgens())
+			self.loop.close()
 
 	def close(self):
 		"""Closes the sockets."""
@@ -972,9 +974,9 @@ class Client:
 		if self.bulle is not None:
 			self.bulle.close()
 
-		if not self.auto_restart:
+		if not self.auto_restart and self.loop.is_running():
 			# The process is not exited if the loop is still running
-			self.loop.close()
+			self.loop.stop()
 
 	async def sendCP(self, code, data=b''):
 		"""|coro|
@@ -1056,7 +1058,7 @@ class Client:
 		def is_friend_list(tc, packet):
 			return tc == 34
 
-		tc, packet = await self.wait_for('on_raw_cp', is_friend_list)
+		tc, packet = await self.wait_for('on_raw_cp', is_friend_list, timeout=5)
 
 		return Friend.from_packet(packet)
 
@@ -1073,27 +1075,34 @@ class Client:
 		def is_tribe(tc, packet):
 			return (tc == 109 and packet.read32() == sid) or tc == 130
 
-		tc, packet = await self.wait_for('on_raw_cp', is_tribe)
+		tc, packet = await self.wait_for('on_raw_cp', is_tribe, timeout=5)
 		if tc == 109:
-			result = packet.readByte()
+			result = packet.read8()
 			if result == 1:
-				tc, packet = await self.wait_for('on_raw_cp', lambda tc, p: tc == 130)
+				tc, packet = await self.wait_for('on_raw_cp', lambda tc, p: tc == 130, timeout=5)
 			elif result == 17:
 				return None
 			else:
 				raise CommunityPlatformError(118, result)
 		return Tribe(packet)
 
-	async def getRoomList(self, gamemode=0):
+	async def getRoomList(self, gamemode=0, timeout=3):
 		"""|coro|
 		Get the room list
 
 		:param gamemode: Optional[:class:`aiotfm.enums.GameMode`] the room's gamemode.
-		:return: :class:`aiotfm.room.RoomList` the room list for the given gamemode
+		:param timeout: Optional[:class:`int`] timeout in seconds. Defaults to 3 seconds.
+		:return: :class:`aiotfm.room.RoomList` the room list for the given gamemode or None
 		"""
 		await self.main.send(Packet.new(26, 35).write8(int(gamemode)))
 
-		return await self.wait_for('on_room_list', lambda r: r.gamemode == gamemode)
+		def predicate(roomlist):
+			return gamemode == 0 or roomlist.gamemode == gamemode
+
+		try:
+			return await self.wait_for('on_room_list', predicate, timeout=timeout)
+		except asyncio.TimeoutError:
+			return None
 
 	async def playEmote(self, emote, flag='be'):
 		"""|coro|
@@ -1186,7 +1195,7 @@ class Client:
 		if password is not None:
 			packet = Packet.new(5, 39).writeString(password).writeString(room_name)
 		else:
-			packet = Packet.new(5, 38).write8(Community(community or self.community).value)
+			packet = Packet.new(5, 38).writeString(Community(community or self.community).name)
 			packet.writeString(room_name).writeBool(auto)
 
 		await self.main.send(packet)
