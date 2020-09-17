@@ -1086,16 +1086,23 @@ class Client:
 				raise CommunityPlatformError(118, result)
 		return Tribe(packet)
 
-	async def getRoomList(self, gamemode=0):
+	async def getRoomList(self, gamemode=0, timeout=3):
 		"""|coro|
 		Get the room list
 
 		:param gamemode: Optional[:class:`aiotfm.enums.GameMode`] the room's gamemode.
-		:return: :class:`aiotfm.room.RoomList` the room list for the given gamemode
+		:param timeout: Optional[:class:`int`] timeout in seconds. Defaults to 3 seconds.
+		:return: :class:`aiotfm.room.RoomList` the room list for the given gamemode or None
 		"""
 		await self.main.send(Packet.new(26, 35).write8(int(gamemode)))
 
-		return await self.wait_for('on_room_list', lambda r: r.gamemode == gamemode)
+		def predicate(roomlist):
+			return gamemode == 0 or roomlist.gamemode == gamemode
+
+		try:
+			return await self.wait_for('on_room_list', predicate, timeout=timeout)
+		except asyncio.TimeoutError:
+			return None
 
 	async def playEmote(self, emote, flag='be'):
 		"""|coro|
