@@ -154,18 +154,16 @@ class Client:
 			self.dispatch('room_password', Room(packet.readUTF()))
 
 		elif CCC == (6, 6): # Room message
-			player_id = packet.read32()
 			username = packet.readUTF()
-			commu = packet.read8()
 			message = packet.readUTF()
-			player = self.room.get_player(pid=player_id)
+			player = self.room.get_player(username=username)
 
 			if player is None:
-				player = Player(username, pid=player_id)
+				player = Player(username)
 
 			# :desc: Called when the client receives a message from the room.
 			# :param message: :class:`aiotfm.message.Message` the message.
-			self.dispatch('room_message', Message(player, message, commu, self))
+			self.dispatch('room_message', Message(player, message, self))
 
 		elif CCC == (6, 20): # Server message
 			packet.readBool() # if False then the message will appear in the #Server channel
