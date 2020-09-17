@@ -485,9 +485,13 @@ class Client:
 				self.dispatch('channel_closed', name)
 
 			elif TC == 64: # Channel message
-				author, community = packet.readUTF(), packet.read32()
+				username, community = packet.readUTF(), packet.read32()
 				channel_name, message = packet.readUTF(), packet.readUTF()
 				channel = self.get_channel(channel_name)
+				author = self.room.get_player(username=username)
+
+				if author is None:
+					author = Player(username)
 
 				if channel is None:
 					channel = Channel(channel_name, self)
