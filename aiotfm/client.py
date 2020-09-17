@@ -962,13 +962,11 @@ class Client:
 		self.loop.run_until_complete(self.wait_for('on_login_ready'))
 		asyncio.ensure_future(self.login(username, password, **kwargs), loop=self.loop)
 
-		self.loop.run_forever()
-		# try:
-		# 	self.loop.run_forever()
-		# except:
-		# 	# add self.close
-		# 	# asyncio.ensure_future(self.close())
-		# 	raise
+		try:
+			self.loop.run_forever()
+		finally:
+			self.loop.run_until_complete(self.loop.shutdown_asyncgens())
+			self.loop.close()
 
 	def close(self):
 		"""Closes the sockets."""
@@ -976,9 +974,9 @@ class Client:
 		if self.bulle is not None:
 			self.bulle.close()
 
-		if not self.auto_restart:
+		if not self.auto_restart and self.loop.is_running():
 			# The process is not exited if the loop is still running
-			self.loop.close()
+			self.loop.stop()
 
 	async def sendCP(self, code, data=b''):
 		"""|coro|
