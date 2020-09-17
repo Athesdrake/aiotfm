@@ -1058,7 +1058,7 @@ class Client:
 		def is_friend_list(tc, packet):
 			return tc == 34
 
-		tc, packet = await self.wait_for('on_raw_cp', is_friend_list)
+		tc, packet = await self.wait_for('on_raw_cp', is_friend_list, timeout=5)
 
 		return Friend.from_packet(packet)
 
@@ -1075,11 +1075,11 @@ class Client:
 		def is_tribe(tc, packet):
 			return (tc == 109 and packet.read32() == sid) or tc == 130
 
-		tc, packet = await self.wait_for('on_raw_cp', is_tribe)
+		tc, packet = await self.wait_for('on_raw_cp', is_tribe, timeout=5)
 		if tc == 109:
-			result = packet.readByte()
+			result = packet.read8()
 			if result == 1:
-				tc, packet = await self.wait_for('on_raw_cp', lambda tc, p: tc == 130)
+				tc, packet = await self.wait_for('on_raw_cp', lambda tc, p: tc == 130, timeout=5)
 			elif result == 17:
 				return None
 			else:
