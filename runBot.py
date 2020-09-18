@@ -9,7 +9,7 @@ while True:
     try:
         print( os.path.abspath('aiotdfadvance_bot.py'))
         print("Launching bot...")
-        process = subprocess.Popen(["python", os.path.abspath('aiotfm\\advance_bot.py')], universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(["python", os.path.abspath('\\advance_bot.py')], universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         try:
             while True:
                 line = process.stdout.readline()
