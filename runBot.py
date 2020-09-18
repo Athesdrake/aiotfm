@@ -2,12 +2,14 @@ import subprocess
 import signal
 import time
 import traceback
-import os 
+import os
+
 
 while True:
     try:
+        print( os.path.abspath('aiotdfadvance_bot.py'))
         print("Launching bot...")
-        process = subprocess.Popen(["python", "advance_bot.py"], universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(["python", os.path.abspath('aiotfm\\advance_bot.py')], universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         try:
             while True:
                 line = process.stdout.readline()
@@ -21,7 +23,7 @@ while True:
             break
         finally:
             #print("Stopping with CTRL+C...")
-            process.send_signal(signal.SIGINT)
+           # process.send_signal(signal.SIGINT)
             process.kill()
             try:
                 process.wait(timeout=10.0)

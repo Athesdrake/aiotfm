@@ -6,8 +6,8 @@ import re
 from Notifier import Notifier
 from aiotfm.client import Client
 
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 config = {
 	'username': 'Nofeet#9658',
