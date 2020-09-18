@@ -140,7 +140,7 @@ class Bot(aiotfm.Client):
 				notifier = Notifier(content)
 
 	async def on_lua_chat_message(self, message):
-		#print(message.content)
+		print(message.content)
 		if bool(re.compile(".*</G><font color='#ff9478'>.*? farmer</font>").match(message.content)):
 			r = re.findall("<font *.*?>(.*?)</font>", message.content)
 			await self.sendChannelMessage('dmStaff-GqAeYoZ', f"[{r[0][:-1]}] -> {r[1]}")

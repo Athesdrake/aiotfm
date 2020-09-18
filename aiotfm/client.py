@@ -579,7 +579,7 @@ class Client:
 			message = packet.readUTF()
 			#print(packet)
 			#print(packet.buffer)
-			self.dispatch('lua_chat_message', Message(None, message, None, self))
+			self.dispatch('lua_chat_message', Message(None, message, None))
 
 		elif CCC == (5, 2):
 			npcode = packet.read32()
