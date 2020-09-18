@@ -94,11 +94,11 @@ async def on_receive_textArea(id, content):
 		if content.startswith('x1Tz0@'):
 			notifier = Notifier(content)
 
-# @bot.event
-# async def on_raw_socket(connection, packet):
-#     print(packet)
-#     print(packet.readCode())
-#     print('end')
+@bot.event
+async def on_raw_socket(connection, packet):
+    print(packet)
+    print(packet.readCode())
+    print('end')
 
 
 loop = asyncio.get_event_loop()

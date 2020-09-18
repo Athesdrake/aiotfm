@@ -10,10 +10,11 @@ from aiotfm.utils import Locale, get_keys, shakikoo
 from aiotfm.connection import Connection
 from aiotfm.player import Profile, Player
 from aiotfm.tribe import Tribe
+from aiotfm.friend import Friend
 from aiotfm.message import Message, Whisper, Channel, ChannelMessage
 from aiotfm.shop import Shop
 from aiotfm.inventory import Inventory, InventoryItem, Trade
-from aiotfm.room import Room
+from aiotfm.room import Room, RoomList
 from aiotfm.enums import TradeError, Community
 from aiotfm.errors import AiotfmException, InvalidEvent, CommunityPlatformError, \
 	AlreadyConnected, IncorrectPassword, LoginError, ServerUnreachable
@@ -22,19 +23,19 @@ from aiotfm.errors import AiotfmException, InvalidEvent, CommunityPlatformError,
 class Client:
 	"""Represents a client that connects to Transformice.
 	Two argument can be passed to the :class:`Client`.
-
 	.. _event loop: https://docs.python.org/3/library/asyncio-eventloops.html
-
 	Parameters
 	----------
 	community: Optional[:class:`int`]
 		Defines the community of the client. Defaults to 0 (EN community).
 	auto_restart: Optional[:class:`bool`]
 		Whether the client should automatically restart on error. Defaults to False.
+	bot_role: Optional[:class:`bool`]
+		Whether the has the game's special role bot or not.
+		Avoids using the api endpoint and gives more stability.
 	loop: Optional[event loop]
 		The `event loop`_ to use for asynchronous operations. If ``None`` is passed (defaults),
 		the event loop used will be ``asyncio.get_event_loop()``.
-
 	Attributes
 	----------
 	username: Optional[:class:`str`]
@@ -53,7 +54,7 @@ class Client:
 	"""
 	LOG_UNHANDLED_PACKETS = False
 
-	def __init__(self, community=Community.en, auto_restart=False, loop=None):
+	def __init__(self, community=Community.en, auto_restart=True, bot_role=True, loop=None):
 		self.loop = loop or asyncio.get_event_loop()
 
 		self.main = Connection('main', self, self.loop)
@@ -79,12 +80,13 @@ class Client:
 		self.api_token = None
 		self._restarting = False
 
+		self.bot_role = bot_role
+
 		self._channels = []
 
 	def data_received(self, data, connection):
 		"""|coro|
 		Dispatches the received data.
-
 		:param data: :class:`bytes` the received data.
 		:param connection: :class:`aiotfm.Connection` the connection that received
 			the data.
@@ -104,16 +106,13 @@ class Client:
 		"""|coro|
 		Handles the known packets and dispatches events.
 		Subclasses should handle only the unhandled packets from this method.
-
 		Example: ::
 			class Bot(aiotfm.Client):
 				async def handle_packet(self, conn, packet):
 					handled = await super().handle_packet(conn, packet.copy())
-
 					if not handled:
 						# Handle here the unhandled packets.
 						pass
-
 		:param connection: :class:`aiotfm.Connection` the connection that received
 			the packet.
 		:param packet: :class:`aiotfm.Packet` the packet.
@@ -148,18 +147,16 @@ class Client:
 			self.dispatch('room_password', Room(packet.readUTF()))
 
 		elif CCC == (6, 6): # Room message
-			player_id = packet.read32()
 			username = packet.readUTF()
-			commu = packet.read8()
 			message = packet.readUTF()
-			player = self.room.get_player(pid=player_id)
+			player = self.room.get_player(username=username)
 
 			if player is None:
-				player = Player(username, pid=player_id)
+				player = Player(username)
 
 			# :desc: Called when the client receives a message from the room.
 			# :param message: :class:`aiotfm.message.Message` the message.
-			self.dispatch('room_message', Message(player, message, commu, self))
+			self.dispatch('room_message', Message(player, message, self))
 
 		elif CCC == (6, 20): # Server message
 			packet.readBool() # if False then the message will appear in the #Server channel
@@ -251,13 +248,13 @@ class Client:
 
 		elif CCC == (26, 3): # Handshake OK
 			online_players = packet.read32()
-			community = Community[packet.readUTF()]
+			language = packet.readUTF()
 			country = packet.readUTF()
 			self.authkey = packet.read32()
 
 			self.loop.create_task(self._heartbeat_loop())
 
-			await connection.send(Packet.new(8, 2).write8(self.community.value).write8(0))
+			await connection.send(Packet.new(176, 2).writeUTF(language))
 
 			os_info = Packet.new(28, 17).writeString('en').writeString('Linux')
 			os_info.writeString('LNX 29,0,0,140').write8(0)
@@ -266,20 +263,25 @@ class Client:
 
 			# :desc: Called when the client can login through the game.
 			# :param online_players: :class:`int` the number of player connected to the game.
-			# :param community: :class:`aiotfm.enums.Community` the community the server suggest.
+			# :param language: :class:`str` the language the server is suggesting.
 			# :param country: :class:`str` the country detected from your ip.
-			self.dispatch('login_ready', online_players, community, country)
+			self.dispatch('login_ready', online_players, language, country)
 
 		elif CCC == (26, 12): # Login result
 			# :desc: Called when the client failed logging.
 			# :param code: :class:`int` the error code.
-			# :param code: :class:`str` error messages.
-			# :param code: :class:`str` error messages.
+			# :param error1: :class:`str` error messages.
+			# :param error2: :class:`str` error messages.
 			self.dispatch('login_result', packet.read8(), packet.readUTF(), packet.readUTF())
 
 		elif CCC == (26, 25): # Ping
 			# :desc: Called when the client receives the ping response from the server.
 			self.dispatch('ping')
+
+		elif CCC == (26, 35): # Room list
+			roomlist = RoomList.from_packet(packet)
+			# :desc: Dispatched when the client receives the room list
+			self.dispatch('room_list', roomlist)
 
 		elif CCC == (28, 6): # Server ping
 			await connection.send(Packet.new(28, 6).write8(packet.read8()))
@@ -426,18 +428,22 @@ class Client:
 				self.dispatch('ready')
 
 			elif TC == 55: # Channel join result
+				sequenceId = packet.read32()
 				result = packet.read8()
 
 				# :desc: Called when the client receives the result of joining a channel.
+				# :param sequenceId: :class:`int` identifier returned by :meth:`Client.sendCP`.
 				# :param result: :class:`int` result code.
-				self.dispatch('channel_joined_result', result)
+				self.dispatch('channel_joined_result', sequenceId, result)
 
 			elif TC == 57: # Channel leave result
+				sequenceId = packet.read32()
 				result = packet.read8()
 
 				# :desc: Called when the client receives the result of leaving a channel.
+				# :param sequenceId: :class:`int` identifier returned by :meth:`Client.sendCP`.
 				# :param result: :class:`int` result code.
-				self.dispatch('channel_leaved_result', result)
+				self.dispatch('channel_left_result', sequenceId, result)
 
 			elif TC == 59: # Channel /who result
 				idSequence = packet.read32()
@@ -472,9 +478,13 @@ class Client:
 				self.dispatch('channel_closed', name)
 
 			elif TC == 64: # Channel message
-				author, community = packet.readUTF(), packet.read32()
+				username, community = packet.readUTF(), packet.read32()
 				channel_name, message = packet.readUTF(), packet.readUTF()
 				channel = self.get_channel(channel_name)
+				author = self.room.get_player(username=username)
+
+				if author is None:
+					author = Player(username)
 
 				if channel is None:
 					channel = Channel(channel_name, self)
@@ -561,6 +571,7 @@ class Client:
 				self.dispatch('player_update', before, after)
 
 		elif CCC == (29, 20): # Receive TextArea
+			print('daaaaaaaaaaa')
 			id = packet.read32()
 			message = packet.readUTF()
 			self.dispatch('receive_textArea', id, message)
@@ -569,13 +580,13 @@ class Client:
 			message = packet.readUTF()
 			#print(packet)
 			#print(packet.buffer)
-			self.dispatch('lua_chat_message', Message(None, message, None, self))
+			self.dispatch('lua_chat_message', Message(None, message, self))
 
-		elif CCC == (5, 2):
+		elif CCC == (5, 2): # EventNewGame
 			npcode = packet.read32()
 			self.dispatch('eventNewGame', npcode)
 
-		elif CCC == (28, 88):
+		elif CCC == (28, 88): # Server Restart
 			restartIn = packet.read32()
 			self.dispatch('server_restart', restartIn)
 
@@ -590,16 +601,13 @@ class Client:
 		"""|coro|
 		Handles the known packets from the old protocol and dispatches events.
 		Subclasses should handle only the unhandled packets from this method.
-
 		Example: ::
 			class Bot(aiotfm.Client):
 				async def handle_old_packet(self, conn, oldCCC, data):
 					handled = await super().handle_old_packet(conn, data.copy())
-
 					if not handled:
 						# Handle here the unhandled packets.
 						pass
-
 		:param connection: :class:`aiotfm.Connection` the connection that received
 			the packet.
 		:param oldCCC: :class:`tuple` the packet identifiers on the old protocol.
@@ -678,7 +686,6 @@ class Client:
 
 	def event(self, coro):
 		"""A decorator that registers an event.
-
 		More about events [here](Events.md).
 		"""
 		name = coro.__name__
@@ -693,15 +700,13 @@ class Client:
 
 	def wait_for(self, event, condition=None, timeout=None, stopPropagation=False):
 		"""Wait for an event.
-
 		Example: ::
 			@client.event
 			async def on_room_message(author, message):
 				if message == 'id':
 					await client.sendCommand('profile '+author)
 					profile = await client.wait_for('on_profile', lambda p: p.username == author)
-					await client.sendRoomsendRoomMessage('Your id: {}'.format(profile.id))
-
+					await client.sendRoomMessage('Your id: {}'.format(profile.id))
 		:param event: :class:`str` the event name.
 		:param condition: Optionnal[`function`] A predicate to check what to wait for.
 			The arguments must meet the parameters of the event being waited for.
@@ -728,12 +733,10 @@ class Client:
 	async def _run_event(self, coro, event_name, *args, **kwargs):
 		"""|coro|
 		Runs an event and handle the error if any.
-
 		:param coro: a coroutine function.
 		:param event_name: :class:`str` the event's name.
 		:param args: arguments to pass to the coro.
 		:param kwargs: keyword arguments to pass to the coro.
-
 		:return: :class:`bool` whether the event ran successfully or not
 		"""
 		try:
@@ -757,11 +760,9 @@ class Client:
 
 	def dispatch(self, event, *args, **kwargs):
 		"""Dispatches events
-
 		:param event: :class:`str` event's name. (without 'on_')
 		:param args: arguments to pass to the coro.
 		:param kwargs: keyword arguments to pass to the coro.
-
 		:return: [`Task`](https://docs.python.org/3/library/asyncio-task.html#asyncio.Task)
 			the _run_event wrapper task
 		"""
@@ -803,8 +804,6 @@ class Client:
 		message = '\nAn error occurred while dispatching the event "{0}":\n\n{2}'
 		tb = traceback.format_exc(limit=-3)
 		print(message.format(event, err, tb), file=sys.stderr)
-		if event == "on_login_result":
-			print("Restarting transformice bot", flush=True)
 		return message.format(event, err, tb)
 
 	async def on_connection_error(self, conn, error):
@@ -825,9 +824,11 @@ class Client:
 		Creates a connection with the main server.
 		"""
 
+		ip = "51.75.130.180" if self.bot_role else self.keys.server_ip
+
 		for port in random.sample([13801, 11801, 12801, 14801], 4):
 			try:
-				await self.main.connect(self.keys.server_ip, port)
+				await self.main.connect(ip, port)
 			except Exception:
 				pass
 			else:
@@ -842,7 +843,12 @@ class Client:
 		"""|coro|
 		Sends the handshake packet so the server recognizes this socket as a player.
 		"""
-		packet = Packet.new(28, 1).write16(self.keys.version).writeString(self.keys.connection)
+		packet = Packet.new(28, 1)
+		if self.bot_role:
+			packet.write16(666)
+		else:
+			packet.write16(self.keys.version).writeString('en').writeString(self.keys.connection)
+
 		packet.writeString('Desktop').writeString('-').write32(0x1fbd).writeString('')
 		packet.writeString('74696720697320676f6e6e61206b696c6c206d7920626f742e20736f20736164')
 		packet.writeString(
@@ -853,19 +859,20 @@ class Client:
 
 		await self.main.send(packet)
 
-	async def start(self, api_tfmid, api_token, keys=None):
+	async def start(self, api_tfmid=None, api_token=None, keys=None):
 		"""|coro|
 		Starts the client.
-
-		:param api_tfmid: :class:`int` or :class:`str` your Transformice id.
-		:param api_token: :class:`str` your token to access the API.
+		:param api_tfmid: Optional[:class:`int`] your Transformice id.
+		:param api_token: Optional[:class:`str`] your token to access the API.
 		"""
-		if keys is not None:
-			self.keys = keys
-		else:
-			self.api_tfmid = api_tfmid
-			self.api_token = api_token
-			self.keys = await get_keys(api_tfmid, api_token)
+
+		if not self.bot_role:
+			if keys is not None:
+				self.keys = keys
+			else:
+				self.api_tfmid = api_tfmid
+				self.api_token = api_token
+				self.keys = await get_keys(api_tfmid, api_token)
 
 		await self.connect()
 		await self.sendHandshake()
@@ -873,7 +880,6 @@ class Client:
 
 	async def restart_soon(self, *args, delay=5.0, **kwargs):
 		"""Restarts the client in several seconds.
-
 		:param delay: :class:`int` the delay before restarting. Default is 5 seconds.
 		:param args: arguments to pass to the :meth:`Client.restart` method.
 		:param kwargs: keyword arguments to pass to the :meth:`Client.restart` method."""
@@ -887,7 +893,6 @@ class Client:
 
 	async def restart(self, keys=None):
 		"""Restarts the client.
-
 		:param keys:"""
 
 		# :desc: Notify when the client restarts.
@@ -899,10 +904,11 @@ class Client:
 		self.main = Connection('main', self, self.loop)
 		self.bulle = None
 
-		if keys is not None:
-			self.keys = keys
-		else:
-			self.keys = keys = await get_keys(self.api_tfmid, self.api_token)
+		if not self.bot_role:
+			if keys is not None:
+				self.keys = keys
+			else:
+				self.keys = keys = await get_keys(self.api_tfmid, self.api_token)
 
 		await self.connect()
 		await self.sendHandshake()
@@ -911,7 +917,6 @@ class Client:
 	async def login(self, username, password, encrypted=True, room='*aiotfm'):
 		"""|coro|
 		Log in the game.
-
 		:param username: :class:`str` the client username.
 		:param password: :class:`str` the client password.
 		:param encrypted: Optional[:class:`bool`] whether the password is already encrypted or not.
@@ -922,19 +927,22 @@ class Client:
 
 		packet = Packet.new(26, 8).writeString(username).writeString(password)
 		packet.writeString("app:/TransformiceAIR.swf/[[DYNAMIC]]/2/[[DYNAMIC]]/4")
-		packet.writeString(room).write32(self.authkey ^ self.keys.auth).write8(0).writeString('')
-		packet.cipher(self.keys.identification).write8(0)
+		packet.writeString(room)
+		if not self.bot_role:
+			packet.write32(self.authkey ^ self.keys.auth)
+		packet.write8(0).writeString('')
+		if not self.bot_role:
+			packet.cipher(self.keys.identification)
+		packet.write8(0)
 
 		await self.main.send(packet)
 
 	def run(self, api_tfmid, api_token, username, password, **kwargs):
-		"""A blocking call that do the event loop initialization for you.
-
+		"""A blocking call that does the event loop initialization for you.
 		Equivalent to: ::
 			@bot.event
 			async def on_login_ready(*a):
 				await bot.login(username, password)
-
 			loop = asyncio.get_event_loop()
 			loop.create_task(bot.start(api_id, api_token))
 			loop.run_forever()
@@ -951,13 +959,11 @@ class Client:
 		self.loop.run_until_complete(self.wait_for('on_login_ready'))
 		asyncio.ensure_future(self.login(username, password, **kwargs), loop=self.loop)
 
-		self.loop.run_forever()
-		# try:
-		# 	self.loop.run_forever()
-		# except:
-		# 	# add self.close
-		# 	# asyncio.ensure_future(self.close())
-		# 	raise
+		try:
+			self.loop.run_forever()
+		finally:
+			self.loop.run_until_complete(self.loop.shutdown_asyncgens())
+			self.loop.close()
 
 	def close(self):
 		"""Closes the sockets."""
@@ -965,14 +971,13 @@ class Client:
 		if self.bulle is not None:
 			self.bulle.close()
 
-		if not self.auto_restart:
+		if not self.auto_restart and self.loop.is_running():
 			# The process is not exited if the loop is still running
-			self.loop.close()
+			self.loop.stop()
 
 	async def sendCP(self, code, data=b''):
 		"""|coro|
 		Send a packet to the community platform.
-
 		:param code: :class:`int` the community platform code.
 		:param data: :class:`aiotfm.Packet` or :class:`bytes` the data.
 		"""
@@ -987,7 +992,6 @@ class Client:
 	async def sendRoomMessage(self, message):
 		"""|coro|
 		Send a message to the room.
-
 		:param message: :class:`str` the content of the message.
 		"""
 		packet = Packet.new(6, 6).writeString(message)
@@ -997,7 +1001,6 @@ class Client:
 	async def sendTribeMessage(self, message):
 		"""|coro|
 		Send a message to the tribe.
-
 		:param message: :class:`str` the content of the message.
 		"""
 		await self.sendCP(50, Packet().writeString(message))
@@ -1005,7 +1008,6 @@ class Client:
 	async def sendChannelMessage(self, channel, message):
 		"""|coro|
 		Send a message to a public channel.
-
 		:param channel: :class:`str` the channel's name.
 		:param message: :class:`str` the content of the message.
 		"""
@@ -1017,7 +1019,6 @@ class Client:
 	async def whisper(self, username, message, overflow=False):
 		"""|coro|
 		Whisper to a player.
-
 		:param username: :class:`str` the player to whisper.
 		:param message: :class:`str` the content of the whisper.
 		:param overflow: :class:`bool` will send the complete message if True, splitted
@@ -1038,10 +1039,23 @@ class Client:
 			await asyncio.sleep(1)
 			await self.whisper(username, message[i:i + 255])
 
+	async def getFriendList(self):
+		"""|coro|
+		Get the client's friend list
+		:return: List[:class:`aiotfm.Friend`]  List of friends
+		"""
+		await self.sendCP(28)
+
+		def is_friend_list(tc, packet):
+			return tc == 34
+
+		tc, packet = await self.wait_for('on_raw_cp', is_friend_list, timeout=5)
+
+		return Friend.from_packet(packet)
+
 	async def getTribe(self, disconnected=True):
 		"""|coro|
 		Gets the client's :class:`aiotfm.Tribe` and return it
-
 		:param disconnected: :class:`bool` if True retrieves also the disconnected members.
 		:return: :class:`aiotfm.Tribe` or ``None``.
 		"""
@@ -1051,21 +1065,37 @@ class Client:
 		def is_tribe(tc, packet):
 			return (tc == 109 and packet.read32() == sid) or tc == 130
 
-		tc, packet = await self.wait_for('on_raw_cp', is_tribe)
+		tc, packet = await self.wait_for('on_raw_cp', is_tribe, timeout=5)
 		if tc == 109:
-			result = packet.readByte()
+			result = packet.read8()
 			if result == 1:
-				tc, packet = await self.wait_for('on_raw_cp', lambda tc, p: tc == 130)
+				tc, packet = await self.wait_for('on_raw_cp', lambda tc, p: tc == 130, timeout=5)
 			elif result == 17:
 				return None
 			else:
 				raise CommunityPlatformError(118, result)
 		return Tribe(packet)
 
+	async def getRoomList(self, gamemode=0, timeout=3):
+		"""|coro|
+		Get the room list
+		:param gamemode: Optional[:class:`aiotfm.enums.GameMode`] the room's gamemode.
+		:param timeout: Optional[:class:`int`] timeout in seconds. Defaults to 3 seconds.
+		:return: :class:`aiotfm.room.RoomList` the room list for the given gamemode or None
+		"""
+		await self.main.send(Packet.new(26, 35).write8(int(gamemode)))
+
+		def predicate(roomlist):
+			return gamemode == 0 or roomlist.gamemode == gamemode
+
+		try:
+			return await self.wait_for('on_room_list', predicate, timeout=timeout)
+		except asyncio.TimeoutError:
+			return None
+
 	async def playEmote(self, emote, flag='be'):
 		"""|coro|
 		Play an emote.
-
 		:param emote: :class:`int` the emote's id.
 		:param flag: Optional[:class:`str`] the flag for the emote id 10. Defaults to 'be'.
 		"""
@@ -1078,7 +1108,6 @@ class Client:
 	async def sendSmiley(self, smiley):
 		"""|coro|
 		Makes the client showing a smiley above it's head.
-
 		:param smiley: :class:`int` the smiley's id. (from 0 to 9)
 		"""
 		if smiley < 0 or smiley > 9:
@@ -1091,7 +1120,6 @@ class Client:
 	async def loadLua(self, lua_code):
 		"""|coro|
 		Load a lua code in the room.
-
 		:param lua_code: :class:`str` or :class:`bytes` the lua code to send.
 		"""
 		if isinstance(lua_code, str):
@@ -1104,7 +1132,6 @@ class Client:
 	async def sendCommand(self, command):
 		"""|coro|
 		Send a command to the game.
-
 		:param command: :class:`str` the command to send.
 		"""
 		packet = Packet.new(6, 26).writeString(command[:255])
@@ -1123,11 +1150,24 @@ class Client:
 		"""
 		await self.enterTribe()
 
+	async def enterInvTribeHouse(self, author):
+		"""|coro|
+		Join the tribe house of another player after receiving an /inv.
+		:param author: :class:`str` the author's username who sent the invitation.
+		"""
+		await self.main.send(Packet.new(16, 2).writeString(author))
+
+	async def recruit(self, player):
+		"""|coro|
+		Send a recruit request to a player.
+		:param player: :class:`str` the player's username you want to recruit.
+		"""
+		await self.sendCP(78, Packet().writeString(player))
+
 	async def joinRoom(self, room_name, password=None, community=None, auto=False):
 		"""|coro|
 		Join a room.
 		The event 'on_joined_room' is dispatched when the client has successfully joined the room.
-
 		:param password: :class:`str` if given the client will ignore `community` and `auto` parameters
 			and will connect to the room with the given password.
 		:param room_name: :class:`str` the room's name.
@@ -1137,7 +1177,7 @@ class Client:
 		if password is not None:
 			packet = Packet.new(5, 39).writeString(password).writeString(room_name)
 		else:
-			packet = Packet.new(5, 38).write8(Community(community or self.community).value)
+			packet = Packet.new(5, 38).writeString(Community(community or self.community).name)
 			packet.writeString(room_name).writeBool(auto)
 
 		await self.main.send(packet)
@@ -1147,7 +1187,6 @@ class Client:
 		Join a #channel.
 		The event 'on_channel_joined' is dispatched when the client has successfully joined
 		a channel.
-
 		:param name: :class:`str` the channel's name
 		:param permanent: Optional[:class:`bool`] if True (default) the server will automatically
 		reconnect the user to this channel when logged in.
@@ -1157,7 +1196,6 @@ class Client:
 	async def leaveChannel(self, channel):
 		"""|coro|
 		Leaves a #channel.
-
 		:param channel: :class:`aiotfm.message.Channel` channel to leave.
 		"""
 		if isinstance(channel, Channel):
@@ -1167,22 +1205,6 @@ class Client:
 
 		await self.sendCP(56, Packet().writeString(name))
 
-	async def enterInvTribeHouse(self, author):
-		"""|coro|
-		Join the tribe house of another player after receiving an /inv.
-
-		:param author: :class:`str` the author's username who sent the invitation.
-		"""
-		await self.main.send(Packet.new(16, 2).writeString(author))
-
-	async def recruit(self, player):
-		"""|coro|
-		Send a recruit request to a player.
-
-		:param player: :class:`str` the player's username you want to recruit.
-		"""
-		await self.sendCP(78, Packet().writeString(player))
-
 	async def requestShopList(self):
 		"""|coro|
 		Send a request to the server to get the shop list."""
@@ -1191,7 +1213,6 @@ class Client:
 	async def startTrade(self, player):
 		"""|coro|
 		Starts a trade with the given player.
-
 		:param player: :class:`aiotfm.Player` the player to trade with.
 		:return: :class:`aiotfm.inventory.Trade` the resulting trade"""
 		if isinstance(player, Player) and player.pid == -1:

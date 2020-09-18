@@ -10,14 +10,11 @@ class Message:
 	----------
 	author: :class:`aiotfm.Player`
 		The message's author.
-	community: :class:`aiotfm.enums.ChatCommunity`
-		The author's community. Note: the community isn't the author's language!
 	content: `str`
 		The actual content of the message.
 	"""
-	def __init__(self, author, content, community, client):
+	def __init__(self, author, content, client):
 		self.author = author
-		self.community = ChatCommunity(community)
 		self.content = content
 		self._client = client
 
@@ -49,9 +46,9 @@ class Whisper(Message):
 		True if the author is the client.
 	"""
 	def __init__(self, author, community, receiver, content, client):
-		super().__init__(author, content, community, client)
+		super().__init__(author, content, client)
 		self.receiver = receiver
-
+		self.community = ChatCommunity(community)
 		self.sent = self.author == client.username
 
 	def __str__(self):
@@ -127,8 +124,9 @@ class ChannelMessage(Message):
 	content: `str`
 		The actual content of the message."""
 	def __init__(self, author, community, content, channel):
-		super().__init__(author, content, community, channel._client)
+		super().__init__(author, content, channel._client)
 		self.channel = channel
+		self.community = ChatCommunity(community)
 
 	async def reply(self, message):
 		"""|coro|

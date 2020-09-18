@@ -1,4 +1,5 @@
 from aiotfm.errors import AiotfmException
+from aiotfm.enums import GameMode
 
 
 class Room:
@@ -81,3 +82,113 @@ class Room:
 			if filter_(player):
 				return player
 		return default
+
+
+class RoomEntry:
+	__slots__ = (
+		'name', 'language', 'country', 'player_count', 'limit',
+		'is_funcorp', 'is_pinned', 'command', 'args'
+	)
+
+	def __init__(
+		self, name, language, country, player_count,
+		limit=0, is_funcorp=False, is_pinned=False,
+		command='', args=''
+	):
+		self.name = name
+		self.language = language
+		self.country = country
+		self.player_count = player_count
+		self.limit = limit
+		self.is_funcorp = is_funcorp
+		self.is_pinned = is_pinned
+		self.command = command
+		self.args = args
+
+	def __repr__(self):
+		return '<{} {}>'.format(
+			self.__class__.__name__,
+			' '.join('{}={!r}'.format(key, getattr(self, key)) for key in self.__slots__)
+		)
+
+
+class DropdownRoomEntry(RoomEntry):
+	__slots__ = ('entries',)
+
+	def __init__(self, entries, *args, **kwargs):
+		super().__init__(*args, **kwargs, is_pinned=True)
+		self.entries = entries
+
+
+class RoomList:
+	"""Represents the list of rooms in the server.
+
+	Attributes
+	----------
+	gamemode: :class:`aiotfm.enums.GameMode`
+		The list's gamemode.
+	rooms: List[`RoomEntry`]
+		The list of normal rooms.
+	pinned_rooms: List[`RoomEntry`]
+		The list of pinned(/module) rooms.
+	gamemodes: List[:class:`aiotfm.enums.GameMode`]
+		The list of gamemodes available.
+	"""
+	def __init__(self, gamemode, rooms, pinned_rooms, gamemodes):
+		self.gamemode = gamemode
+		self.rooms = rooms
+		self.pinned_rooms = pinned_rooms
+		self.gamemodes = gamemodes
+
+	@classmethod
+	def from_packet(cls, packet):
+		gamemodes = [GameMode(packet.read8()) for _ in range(packet.read8())]
+		gamemode = GameMode(packet.read8())
+		rooms = []
+		pinned = []
+
+		while packet.pos < len(packet.buffer):
+			is_pinned = packet.readBool()
+			language = packet.readUTF()
+			country = packet.readUTF()
+			name = packet.readUTF()
+
+			if is_pinned:
+				player_count = packet.readUTF()
+				command = packet.readUTF()
+				args = packet.readUTF()
+
+				if player_count.isdigit():
+					player_count = int(player_count)
+
+				if command == 'lm':
+					entries = []
+					room = DropdownRoomEntry(entries, name, language, country, player_count)
+
+					for mode in args.split('&~'):
+						if ',' not in mode:
+							continue
+
+						name, count = mode.split(',')
+						entries.append(RoomEntry(
+							name, room.language, room.country, int(count),
+							command='mjj', args='m ' + name
+						))
+
+					pinned.append(room)
+				else:
+					pinned.append(RoomEntry(
+						name, language, country, player_count,
+						command=command, args=args, is_pinned=True
+					))
+			else:
+				player_count = packet.read16()
+				limit = packet.read8()
+				is_funcorp = packet.readBool()
+
+				rooms.append(RoomEntry(
+					name, language, country, player_count,
+					limit=limit, is_funcorp=is_funcorp
+				))
+
+		return cls(gamemode, rooms, pinned, gamemodes)
