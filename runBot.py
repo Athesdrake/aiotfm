@@ -6,7 +6,7 @@ import os
 
 while True:
     try:
-        #print("Launching bot...")
+        print("Launching bot...")
         process = subprocess.Popen(["python", "advance_bot.py"], universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         try:
             while True:
@@ -22,7 +22,7 @@ while True:
         finally:
             #print("Stopping with CTRL+C...")
             process.send_signal(signal.SIGINT)
-            #process.kill()
+            process.kill()
             try:
                 process.wait(timeout=10.0)
             except subprocess.TimeoutExpired:

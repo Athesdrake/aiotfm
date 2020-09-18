@@ -54,7 +54,7 @@ class Client:
 	"""
 	LOG_UNHANDLED_PACKETS = False
 
-	def __init__(self, community=Community.en, auto_restart=True, bot_role=True, loop=None):
+	def __init__(self, community=Community.en, auto_restart=False, bot_role=False, loop=None):
 		self.loop = loop or asyncio.get_event_loop()
 
 		self.main = Connection('main', self, self.loop)
@@ -571,7 +571,6 @@ class Client:
 				self.dispatch('player_update', before, after)
 
 		elif CCC == (29, 20): # Receive TextArea
-			print('daaaaaaaaaaa')
 			id = packet.read32()
 			message = packet.readUTF()
 			self.dispatch('receive_textArea', id, message)
@@ -580,13 +579,13 @@ class Client:
 			message = packet.readUTF()
 			#print(packet)
 			#print(packet.buffer)
-			self.dispatch('lua_chat_message', Message(None, message, self))
+			self.dispatch('lua_chat_message', Message(None, message, None, self))
 
-		elif CCC == (5, 2): # EventNewGame
+		elif CCC == (5, 2):
 			npcode = packet.read32()
 			self.dispatch('eventNewGame', npcode)
 
-		elif CCC == (28, 88): # Server Restart
+		elif CCC == (28, 88):
 			restartIn = packet.read32()
 			self.dispatch('server_restart', restartIn)
 
