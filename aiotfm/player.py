@@ -210,7 +210,7 @@ class Profile:
 
 		modeStats = []
 		for _ in range(packet.read8()):
-			modeStats.append((packet.read8(), packet.read32(), packet.read32(), packet.read8()))
+			modeStats.append((packet.read8(), packet.read32(), packet.read32(), packet.read16()))
 		self.stats = Stats(stats, modeStats)
 
 		self.equippedOrb = packet.read8()
@@ -218,6 +218,7 @@ class Profile:
 		for _ in range(packet.read8()):
 			self.orbs.add(packet.read8())
 
+		packet.readBool()
 		self.adventurePoints = packet.read32()
 
 
