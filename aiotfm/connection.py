@@ -94,7 +94,7 @@ class Connection:
 	def close(self):
 		"""Closes the connection."""
 		self.open = False
-		if not self.transport.is_closing():
+		if self.transport is not None and not self.transport.is_closing():
 			self.transport.write_eof()
 			self.transport.close()
 
