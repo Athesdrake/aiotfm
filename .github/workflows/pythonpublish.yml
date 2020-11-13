@@ -30,6 +30,7 @@ jobs:
           flake8 aiotfm --count --select F6,F7,F82,E9
           pylint aiotfm --disable=all --enable=E
   deploy:
+    needs: lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
