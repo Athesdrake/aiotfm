@@ -21,4 +21,4 @@ jobs:
           pip install -r requirements.txt
       - name: Lint with flake8
         run: |
-          flake8 aiotfm --count --ignore W191,E261,W292,E117 --max-line-length=100 --statistics
+          flake8 --count --statistics
