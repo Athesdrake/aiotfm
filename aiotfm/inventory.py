@@ -150,9 +150,15 @@ class Inventory:
 		Shorthand for :class:`aiotfm.inventory.Inventory`.items.get"""
 		return self.items.get(item_id, InventoryItem(item_id))
 
+	def getEquipped(self):
+		"""Return all equipped items. Items are sorted.
+		:return: List[:class:`aiotfm.inventory.InventoryItem`]
+		"""
+		return sorted((i for i in self.items.values() if i.is_equipped), key=lambda i: i.slot)
+
 	def sort(self):
 		"""Sort the inventory the same way the client does.
-		:return: :class:`list`
+		:return: List[:class:`aiotfm.inventory.InventoryItem`]
 		"""
 		def cmp(a, b):
 			if (a.is_currency or b.is_currency) and not (a.is_currency and b.is_currency):
