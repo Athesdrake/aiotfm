@@ -20,7 +20,7 @@ class TFMProtocol(asyncio.Protocol):
 					if not byte & 0x80:
 						break
 				else:
-					raise Exception("wtf")
+					raise Exception("wtf") # pragma: no cover
 
 			if len(self.buffer) >= self.length:
 				self.client.data_received(self.buffer[:self.length], self.connection)

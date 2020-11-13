@@ -37,7 +37,7 @@ async def get_keys(tfm_id, token):
 	internal_error_step = data.pop('internal_error_step', 0)
 	error = data.pop('error', None)
 
-	if success:
+	if success: # pragma: no cover
 		if not internal_error:
 			keys = Keys(**data)
 			if len(keys.packet) > 0 and len(keys.identification) > 0 and len(keys.msg) > 0:

@@ -15,3 +15,10 @@ build/*
 upload.py
 bot.py
 regex
+
+# pytest
+.pytest_cache/
+
+# coverage
+.coverage
+htmlcov/
