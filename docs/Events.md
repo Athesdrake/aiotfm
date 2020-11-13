@@ -121,12 +121,12 @@ Called when the client can login through the game.
 
 ---
 
-## on_login_result(_code, code, code_)
+## on_login_result(_code, error1, error2_)
 Called when the client failed logging.
 >__Parameters:__
 > * **code** - `int` the error code.
-> * **code** - `str` error messages.
-> * **code** - `str` error messages.
+> * **error1** - `str` error messages.
+> * **error2** - `str` error messages.
 
 ---
 
@@ -220,16 +220,18 @@ Called when the client is successfully connected to the community platform.
 
 ---
 
-## on_channel_joined_result(_result_)
+## on_channel_joined_result(_sequenceId, result_)
 Called when the client receives the result of joining a channel.
 >__Parameters:__
+> * **sequenceId** - `int` identifier returned by [`sendCP`](#Client.sendCP).
 > * **result** - `int` result code.
 
 ---
 
-## on_channel_left_result(_result_)
+## on_channel_left_result(_sequenceId, result_)
 Called when the client receives the result of leaving a channel.
 >__Parameters:__
+> * **sequenceId** - `int` identifier returned by [`sendCP`](#Client.sendCP).
 > * **result** - `int` result code.
 
 ---

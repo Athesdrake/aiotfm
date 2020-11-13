@@ -79,10 +79,17 @@ Inventory.**get**(_self, item_id_) <a id="Inventory.get" href="#Inventory.get">�
 >Shorthand for [`Inventory`](Inventory.md#Inventory).items.get
 ---
 
+Inventory.**getEquipped**(_self_) <a id="Inventory.getEquipped" href="#Inventory.getEquipped">¶</a>
+>
+>Return all equipped items. Items are sorted.>
+>__Returns:__ List[[`InventoryItem`](Inventory.md#InventoryItem)]
+
+---
+
 Inventory.**sort**(_self_) <a id="Inventory.sort" href="#Inventory.sort">¶</a>
 >
 >Sort the inventory the same way the client does.>
->__Returns:__ `list`
+>__Returns:__ List[[`InventoryItem`](Inventory.md#InventoryItem)]
 
 ---
 

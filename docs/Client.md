@@ -316,14 +316,15 @@ _coroutine_ Client.**getTribe**(_self, disconnected_) <a id="Client.getTribe" hr
 
 ---
 
-_coroutine_ Client.**getRoomList**(_self, gamemode_) <a id="Client.getRoomList" href="#Client.getRoomList">¶</a>
+_coroutine_ Client.**getRoomList**(_self, gamemode, timeout_) <a id="Client.getRoomList" href="#Client.getRoomList">¶</a>
 >
 >Get the room list
 >
 >__Parameters:__
 > * **gamemode** - Optional[[`GameMode`](Enums.md#GameMode)] the room's gamemode.
+> * **timeout** - Optional[`int`] timeout in seconds. Defaults to 3 seconds.
 >
->__Returns:__ [`RoomList`](Room.md#RoomList) the room list for the given gamemode
+>__Returns:__ [`RoomList`](Room.md#RoomList) the room list for the given gamemode or None
 
 ---
 
