@@ -14,7 +14,15 @@ class Notifier:
 
   def manageContent(self):
     if self.pref == "x1Tz0@":
-      room, reported_at, winner = self.args[0], int(self.args[1]), self.args[2]
+      room, reported_at, winner = re.match('(.*)(#.*)', self.args[0]).groups(), int(self.args[1]), self.args[2]
+
+      commu = room[0].replace('-','')
+      sala = room[1]
+      pays = {
+        "en": "gb",
+        "*": "xx"
+      }
+      pay = commu in pays and pays[commu] or commu
 
       playerList = ""
       for i in range(len(self.args)-1):
@@ -31,9 +39,9 @@ class Notifier:
           "embeds": [
               {
                   "author": {
-                      "name": room[3:],
+                      "name": sala,
                       "url": "https://discordapp.com",
-                      "icon_url": f"https://atelier801.com/img/pays/{room[:2].replace('en','gb')}.png"
+                      "icon_url": f"https://atelier801.com/img/pays/{pay}.png"
                   },
                   "color": 12370112,
                   "footer": {
