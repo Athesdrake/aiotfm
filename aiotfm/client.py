@@ -6,7 +6,7 @@ import traceback
 import warnings
 
 from aiotfm.packet import Packet
-from aiotfm.utils import Locale, get_keys, shakikoo
+from aiotfm.utils import Locale, get_keys, shakikoo, Keys
 from aiotfm.connection import Connection
 from aiotfm.player import Profile, Player
 from aiotfm.tribe import Tribe
@@ -823,7 +823,7 @@ class Client:
 		Creates a connection with the main server.
 		"""
 
-		ip = "51.75.130.180" if self.bot_role else self.keys.server_ip
+		ip = self.keys.server_ip
 
 		for port in random.sample([13801, 11801, 12801, 14801], 4):
 			try:
@@ -842,11 +842,9 @@ class Client:
 		"""|coro|
 		Sends the handshake packet so the server recognizes this socket as a player.
 		"""
-		packet = Packet.new(28, 1)
-		if self.bot_role:
-			packet.write16(666)
-		else:
-			packet.write16(self.keys.version).writeString('en').writeString(self.keys.connection)
+		packet = Packet.new(28, 1).write16(self.keys.version).write8(8)
+		if not self.bot_role:
+			packet.writeString('en').writeString(self.keys.connection)
 
 		packet.writeString('Desktop').writeString('-').write32(0x1fbd).writeString('')
 		packet.writeString('74696720697320676f6e6e61206b696c6c206d7920626f742e20736f20736164')
@@ -866,7 +864,9 @@ class Client:
 		:param api_token: Optional[:class:`str`] your token to access the API.
 		"""
 
-		if not self.bot_role:
+		if self.bot_role:
+			self.keys = Keys(dict(version=666))
+		else:
 			if keys is not None:
 				self.keys = keys
 			else:
