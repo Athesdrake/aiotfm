@@ -865,7 +865,7 @@ class Client:
 		"""
 
 		if self.bot_role:
-			self.keys = Keys(dict(version=666))
+			self.keys = Keys(version=666)
 		else:
 			if keys is not None:
 				self.keys = keys
