@@ -64,6 +64,8 @@ class Client:
 		self.bulle = None
 
 		self._waiters = {}
+		self._hb_task = None
+		self._close_event_loop = False
 
 		self.room = None
 		self.trade = None
@@ -259,7 +261,7 @@ class Client:
 			country = packet.readUTF()
 			self.authkey = packet.read32()
 
-			self.loop.create_task(self._heartbeat_loop())
+			self._hb_task = self.loop.create_task(self._heartbeat_loop())
 
 			await connection.send(Packet.new(176, 2).writeUTF(language))
 
@@ -963,6 +965,7 @@ class Client:
 		asyncio.ensure_future(self.login(username, password, **kwargs), loop=self.loop)
 
 		try:
+			self._close_event_loop = True
 			self.loop.run_forever()
 		finally:
 			self.loop.run_until_complete(self.loop.shutdown_asyncgens())
@@ -974,9 +977,13 @@ class Client:
 		if self.bulle is not None:
 			self.bulle.close()
 
+		if self._hb_task is not None and not self._hb_task.done():
+			self._hb_task.cancel()
+
 		if not self.auto_restart and self.loop.is_running():
-			# The process is not exited if the loop is still running
-			self.loop.stop()
+			if self._close_event_loop:
+				# The process is not exited if the loop is still running in self.run
+				self.loop.stop()
 
 	async def sendCP(self, code, data=b''):
 		"""|coro|
