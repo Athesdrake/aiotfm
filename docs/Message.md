@@ -7,7 +7,6 @@ Convert an instance to string to get the representation in game of the message.*
 | Attributes | Type | Can be None | Description |
 | :-: | :-: | :-: | :-- |
 | author | [`Player`](Player.md) | ✕ |  The message's author. |
-| community | [`ChatCommunity`](Enums.md#ChatCommunity) | ✕ |  The author's community. Note: the community isn't the author's language! |
 | content | `str` | ✕ |  The actual content of the message. |
 
 ## Whisper

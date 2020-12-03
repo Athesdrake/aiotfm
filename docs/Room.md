@@ -53,6 +53,8 @@ Room.**get\_player**(_self, default, \*\*kwargs_) <a id="Room.get_player" href="
 
 ---
 
+## RoomEntry
+## DropdownRoomEntry
 ## RoomList
 **Represents the list of rooms in the server.**
 

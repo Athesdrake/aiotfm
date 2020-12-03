@@ -13,7 +13,7 @@ Join the **_[Fifty Shades of Lua](https://discord.gg/qmdryEB)_** [discord](https
 This API depends on an [endpoint](https://api.tocu.tk/get_transformice_keys.php) that gives you access to the Transformice encryption keys.
 
 To use it you will need a token which you can get by [applying through this form](https://forms.gle/N6Et1hLGQ9hmg95F6). See below to know the names of Transfromage managers who handle the token system.
-- **[Tocutoeltuco](https://github.com/Tocutoeltuco)** @discord=> `Tocutoeltuco#0018` <sub>`212634414021214209`</sub>;
+- **[Tocutoeltuco](https://github.com/Tocutoeltuco)** @discord=> `Tocu#0018` <sub>`212634414021214209`</sub>;
 - **[Blank3495](https://github.com/Blank3495)** @discord=> `󠂪󠂪 󠂪󠂪 󠂪󠂪󠂪󠂪 󠂪󠂪 󠂪󠂪󠂪󠂪 󠂪󠂪 󠂪󠂪#8737` <sub>`436703225140346881`</sub>;
 - **[Bolodefchoco](https://github.com/Lautenschlager-id)** @discord=> `Lautenschlager#2555` <sub>`285878295759814656`</sub>.
 
@@ -62,6 +62,7 @@ To update aiotfm, use the following command:
 import aiotfm
 
 bot = aiotfm.Client()
+
 
 @bot.event
 async def on_ready():

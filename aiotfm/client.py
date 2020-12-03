@@ -6,7 +6,7 @@ import traceback
 import warnings
 
 from aiotfm.packet import Packet
-from aiotfm.utils import Locale, get_keys, shakikoo
+from aiotfm.utils import Locale, get_keys, shakikoo, Keys
 from aiotfm.connection import Connection
 from aiotfm.player import Profile, Player
 from aiotfm.tribe import Tribe
@@ -64,6 +64,8 @@ class Client:
 		self.bulle = None
 
 		self._waiters = {}
+		self._hb_task = None
+		self._close_event_loop = False
 
 		self.room = None
 		self.trade = None
@@ -259,7 +261,7 @@ class Client:
 			country = packet.readUTF()
 			self.authkey = packet.read32()
 
-			self.loop.create_task(self._heartbeat_loop())
+			self._hb_task = self.loop.create_task(self._heartbeat_loop())
 
 			await connection.send(Packet.new(176, 2).writeUTF(language))
 
@@ -821,7 +823,7 @@ class Client:
 		Creates a connection with the main server.
 		"""
 
-		ip = "51.75.130.180" if self.bot_role else self.keys.server_ip
+		ip = self.keys.server_ip
 
 		for port in random.sample([13801, 11801, 12801, 14801], 4):
 			try:
@@ -840,11 +842,9 @@ class Client:
 		"""|coro|
 		Sends the handshake packet so the server recognizes this socket as a player.
 		"""
-		packet = Packet.new(28, 1)
-		if self.bot_role:
-			packet.write16(666)
-		else:
-			packet.write16(self.keys.version).writeString('en').writeString(self.keys.connection)
+		packet = Packet.new(28, 1).write16(self.keys.version).write8(8)
+		if not self.bot_role:
+			packet.writeString('en').writeString(self.keys.connection)
 
 		packet.writeString('Desktop').writeString('-').write32(0x1fbd).writeString('')
 		packet.writeString('74696720697320676f6e6e61206b696c6c206d7920626f742e20736f20736164')
@@ -864,7 +864,9 @@ class Client:
 		:param api_token: Optional[:class:`str`] your token to access the API.
 		"""
 
-		if not self.bot_role:
+		if self.bot_role:
+			self.keys = Keys(dict(version=666))
+		else:
 			if keys is not None:
 				self.keys = keys
 			else:
@@ -963,6 +965,7 @@ class Client:
 		asyncio.ensure_future(self.login(username, password, **kwargs), loop=self.loop)
 
 		try:
+			self._close_event_loop = True
 			self.loop.run_forever()
 		finally:
 			self.loop.run_until_complete(self.loop.shutdown_asyncgens())
@@ -974,9 +977,13 @@ class Client:
 		if self.bulle is not None:
 			self.bulle.close()
 
+		if self._hb_task is not None and not self._hb_task.done():
+			self._hb_task.cancel()
+
 		if not self.auto_restart and self.loop.is_running():
-			# The process is not exited if the loop is still running
-			self.loop.stop()
+			if self._close_event_loop:
+				# The process is not exited if the loop is still running in self.run
+				self.loop.stop()
 
 	async def sendCP(self, code, data=b''):
 		"""|coro|

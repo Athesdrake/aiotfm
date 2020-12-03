@@ -455,8 +455,8 @@ def generate_enums():
 	with open('../aiotfm/enums.py', 'r', encoding='utf-8') as f:
 		code: ast.Module = ast.parse(f.read(), '../enums.py')
 
-	with open(f'Enums.md', 'w', encoding='utf-8') as f:
-		f.write(f"# Enums' Documentation\n\n")
+	with open('Enums.md', 'w', encoding='utf-8') as f:
+		f.write("# Enums' Documentation\n\n")
 
 		for klass in (node for node in code.body if isinstance(node, ClassDef)):
 			tree.append(klass.name)
