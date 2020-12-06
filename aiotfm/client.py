@@ -842,7 +842,7 @@ class Client:
 		"""|coro|
 		Sends the handshake packet so the server recognizes this socket as a player.
 		"""
-		packet = Packet.new(28, 1).write16(self.keys.version).write8(8)
+		packet = Packet.new(28, 1).write16(self.keys.version)
 		if not self.bot_role:
 			packet.writeString('en').writeString(self.keys.connection)
 
