@@ -18,6 +18,8 @@ class Friend:
 		True if the the player also added you to their friend list
 	isOnline: :class:`bool`
 		True if the player is online
+	hasAvatar: :class:`bool`
+		True if the player has an avatar
 	community: :class:`int`
 		What community the player is on
 	roomName: :class:`str`
@@ -27,10 +29,10 @@ class Friend:
 	"""
 
 	def __init__(self, packet, isSoulmate=False):
-		self.id = packet.read32()
+		self.hasAvatar = packet.read32() != 0
 		self.name = packet.readUTF()
 		self.gender = packet.read8()
-		packet.read32() # id
+		self.id = packet.read32()
 		self.isSoulmate = isSoulmate
 		self.isAddedBack = packet.readBool()
 		self.isConnected = packet.readBool()
