@@ -129,3 +129,18 @@ class GameMode(IntEnum):
 	DUEL = 33
 	ARENA = 34
 	DOMINATION = 42
+
+
+class Game(IntEnum):
+	"""Enumerates the different Atelier801 games."""
+	INVALID = 0
+
+	TRANSFORMICE = 4
+	FORTORESSE = 6
+	BOUBOUM = 7
+	NEKODANCER = 15
+	DEADMAZE = 17
+
+	@classmethod
+	def _missing_(cls, value):
+		return cls.INVALID

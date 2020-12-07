@@ -1,4 +1,5 @@
 from aiotfm.utils import Date
+from aiotfm.enums import Game
 
 
 class Friend:
@@ -20,8 +21,8 @@ class Friend:
 		True if the player is online
 	hasAvatar: :class:`bool`
 		True if the player has an avatar
-	community: :class:`int`
-		What community the player is on
+	game: :class:`aiotfm.enums.Game`
+		What game the player is playing on
 	roomName: :class:`str`
 		The player's room name, empty string if isAddedBack is False
 	lastConnection: :class:`Date`
@@ -36,7 +37,7 @@ class Friend:
 		self.isSoulmate = isSoulmate
 		self.isAddedBack = packet.readBool()
 		self.isConnected = packet.readBool()
-		self.community = packet.read32()
+		self.game = Game(packet.read32())
 		self.roomName = packet.readUTF()
 		self.lastConnection = Date.fromtimestamp(packet.read32())
 

@@ -1,5 +1,5 @@
 from aiotfm.utils import Date
-from aiotfm.enums import Permissions
+from aiotfm.enums import Permissions, Game
 
 
 class Tribe:
@@ -57,12 +57,14 @@ class Member:
 		The username of the member.
 	gender: :class:`int`
 		The member's gender.
+	hasAvatar: :class:`bool`
+		True if the player has an avatar
 	lastConnection: :class`Date`
 		The last connection of the member.
 	rank_id: :class:`int`
 		The rank's id of the member.
-	game_id: :class:`int`
-		The game's id the player is playing.
+	game: :class:`aiotfm.enums.Game`
+		What game the player is playing on
 	room: :class:`str`
 		The room where the player is.
 	rank: :class:`Rank`
@@ -72,13 +74,13 @@ class Member:
 	"""
 	def __init__(self, tribe, packet):
 		self.tribe = tribe
-		self.id = packet.read32()
+		self.hasAvatar = packet.read32() != 0
 		self.name = packet.readUTF()
 		self.gender = packet.read8()
-		packet.read32() # id
+		self.id = packet.read32()
 		self.lastConnection = Date.fromtimestamp(packet.read32())
 		self.rank_id = packet.read8()
-		self.game_id = packet.read32()
+		self.game = Game(packet.read32())
 		self.room = packet.readUTF()
 
 	@property
@@ -89,7 +91,7 @@ class Member:
 	@property
 	def online(self):
 		"""return True if the member is online."""
-		return self.game_id != 1
+		return self.game != Game.INVALID
 
 
 class Rank:
