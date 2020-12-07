@@ -32,9 +32,10 @@ Tribe.**get\_member**(_self, name_) <a id="Tribe.get_member" href="#Tribe.get_me
 | id | `int` | ✕ |  The player's id of the member. |
 | name | `str` | ✕ |  The username of the member. |
 | gender | `int` | ✕ |  The member's gender. |
+| hasAvatar | `bool` | ✕ |  True if the player has an avatar |
 | lastConnection | `:class` | ✕ |  The last connection of the member. |
 | rank_id | `int` | ✕ |  The rank's id of the member. |
-| game_id | `int` | ✕ |  The game's id the player is playing. |
+| game | [`Game`](Enums.md#Game) | ✕ |  What game the player is playing on |
 | room | `str` | ✕ |  The room where the player is. |
 | rank | [`Rank`](#rank) | ✕ |  The member's rank. |
 | online | `bool` | ✕ |  True if the member is online. |

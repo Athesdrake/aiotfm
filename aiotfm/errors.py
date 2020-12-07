@@ -93,3 +93,23 @@ class TradeOnWrongState(AiotfmException):
 		super().__init__(f'Can not {action} when the trade is {TradeState[state]}.')
 		self.action = action
 		self.state = state
+
+
+class InvalidAccountError(AiotfmException):
+	"""Exception thrown when a server action does not find a user."""
+	def __init__(self, player):
+		super().__init__(f'The account {player} does not exist.')
+		self.player = player
+
+
+class FriendLimitError(AiotfmException):
+	"""Exception thrown when your friend list is full."""
+	def __init__(self):
+		super().__init__('You can\'t add more friends.')
+
+
+class CantFriendPlayerError(AiotfmException):
+	"""Exception thrown when the server does not let you friend a player."""
+	def __init__(self, player):
+		super().__init__(f'You can\'t friend the player {player}')
+		self.player = player

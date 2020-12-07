@@ -10,7 +10,7 @@ from aiotfm.utils import Locale, get_keys, shakikoo, Keys
 from aiotfm.connection import Connection
 from aiotfm.player import Profile, Player
 from aiotfm.tribe import Tribe
-from aiotfm.friend import Friend
+from aiotfm.friend import Friend, FriendList
 from aiotfm.message import Message, Whisper, Channel, ChannelMessage
 from aiotfm.shop import Shop
 from aiotfm.inventory import Inventory, InventoryItem, Trade
@@ -54,6 +54,8 @@ class Client:
 		anything.
 	locale: :class:`aiotfm.locale.Locale`
 		The bot's locale (translations).
+	friends: Optional[:class:`aiotfm.friends.FriendList`]
+		The bot's friend list
 	"""
 	LOG_UNHANDLED_PACKETS = False
 
@@ -76,6 +78,8 @@ class Client:
 		self.locale = Locale()
 		self.community = Community(community)
 		self.cp_fingerprint = 0
+
+		self.friends = None
 
 		self.keys = None
 		self.authkey = 0
@@ -433,8 +437,80 @@ class Client:
 			self.dispatch('raw_cp', TC, packet.copy(copy_pos=True))
 
 			if TC == 3: # Connected to the community platform
+				await self.sendCP(28) # Request friend list
+
 				# :desc: Called when the client is successfully connected to the community platform.
 				self.dispatch('ready')
+
+			elif TC == 32: # Friend connected
+				if self.friends is None:
+					return True
+
+				friend = self.friends.get_friend(packet.readUTF())
+				friend.isConnected = True
+
+				# :desc: Called when a friend connects to the game (not entirely fetched)
+				# :param friend: :class:`aiotfm.friend.Friend` friend after this update
+				self.dispatch('friend_connected', friend)
+
+			elif TC == 33: # Friend disconnected
+				if self.friends is None:
+					return True
+
+				friend = self.friends.get_friend(packet.readUTF())
+				friend.isConnected = False
+
+				# :desc: Called when a friend disconnects from the game (not entirely fetched)
+				# :param friend: :class:`aiotfm.friend.Friend` friend after this update
+				self.dispatch('friend_disconnected', friend)
+
+			elif TC == 34: # Friend list loaded
+				self.friends = FriendList(self, packet)
+
+				# :desc: Called when the friend list is loaded.
+				# :param friends: :class:`aiotfm.friend.FriendList` the friend list
+				self.dispatch('friends_loaded', self.friends)
+
+			elif TC == 35 or TC == 36: # Friend update / addition
+				if self.friends is None:
+					return True
+
+				new = Friend(self.friends, packet)
+				old = self.friends.get_friend(new.name)
+
+				if old is not None:
+					if old.isSoulmate: # Not sent by the server, checked locally.
+						self.friends.soulmate = new
+						new.isSoulmate = True
+
+					self.friends.friends.remove(old)
+				self.friends.friends.append(new)
+
+				if old is None:
+					# :desc: Called when a friend is added
+					# :param friend: :class:`aiotfm.friend.Friend` the friend
+					self.dispatch('new_friend', new)
+
+				else:
+					# :desc: Called when a friend is updated
+					# :param before: :class:`aiotfm.friend.Friend` friend before this update
+					# :param after: :class:`aiotfm.friend.Friend` friend after this update
+					self.dispatch('friend_update', old, new)
+
+			elif TC == 37: # Remove friend
+				if self.friends is None:
+					return True
+
+				friend = self.friends.get_friend(packet.read32())
+				if friend is not None:
+					if friend == self.friends.soulmate:
+						self.friends.soulmate = None
+
+					self.friends.friends.remove(friend)
+
+					# :desc: Called when a friend is removed
+					# :param friend: :class:`aiotfm.friend.Friend` the friend
+					self.dispatch('friend_remove', friend)
 
 			elif TC == 55: # Channel join result
 				sequenceId = packet.read32()
@@ -1053,21 +1129,6 @@ class Client:
 		for i in range(255, len(message), 255):
 			await asyncio.sleep(1)
 			await self.whisper(username, message[i:i + 255])
-
-	async def getFriendList(self):
-		"""|coro|
-		Get the client's friend list
-
-		:return: List[:class:`aiotfm.Friend`]  List of friends
-		"""
-		await self.sendCP(28)
-
-		def is_friend_list(tc, packet):
-			return tc == 34
-
-		tc, packet = await self.wait_for('on_raw_cp', is_friend_list, timeout=5)
-
-		return Friend.from_packet(packet)
 
 	async def getTribe(self, disconnected=True):
 		"""|coro|

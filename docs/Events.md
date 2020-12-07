@@ -220,6 +220,49 @@ Called when the client is successfully connected to the community platform.
 
 ---
 
+## on_friend_connected(_friend_)
+Called when a friend connects to the game (not entirely fetched)
+>__Parameters:__
+> * **friend** - [`Friend`](Friend.md#Friend) friend after this update
+
+---
+
+## on_friend_disconnected(_friend_)
+Called when a friend disconnects from the game (not entirely fetched)
+>__Parameters:__
+> * **friend** - [`Friend`](Friend.md#Friend) friend after this update
+
+---
+
+## on_friends_loaded(_friends_)
+Called when the friend list is loaded.
+>__Parameters:__
+> * **friends** - [`FriendList`](Friend.md#FriendList) the friend list
+
+---
+
+## on_new_friend(_friend_)
+Called when a friend is added
+>__Parameters:__
+> * **friend** - [`Friend`](Friend.md#Friend) the friend
+
+---
+
+## on_friend_update(_before, after_)
+Called when a friend is updated
+>__Parameters:__
+> * **before** - [`Friend`](Friend.md#Friend) friend before this update
+> * **after** - [`Friend`](Friend.md#Friend) friend after this update
+
+---
+
+## on_friend_remove(_friend_)
+Called when a friend is removed
+>__Parameters:__
+> * **friend** - [`Friend`](Friend.md#Friend) the friend
+
+---
+
 ## on_channel_joined_result(_sequenceId, result_)
 Called when the client receives the result of joining a channel.
 >__Parameters:__
