@@ -224,10 +224,9 @@ async def test_tribe_message(bot: Client):
 
 
 async def test_friend_list(bot: Client):
-	friendlist = await bot.getFriendList()
-	print([f.name for f in friendlist])
+	print([f.name for f in bot.friends])
 
-	assert friendlist is not None
+	assert bot.friends is not None
 
 
 async def test_tribe(bot: Client):
