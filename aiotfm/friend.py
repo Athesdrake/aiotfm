@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Iterable
 
 import aiotfm
 from aiotfm.enums import Game
@@ -31,6 +31,9 @@ class FriendList:
 			self.friends.append(Friend(self, packet))
 
 		self._client: aiotfm.Client = client
+
+	def __iter__(self) -> Iterable['Friend']:
+		return iter(self.friends)
 
 	def get_friend(self, search: Union[Player, str, int]) -> 'Friend':
 		"""Returns a friend from their name (or id) or None if not found.
