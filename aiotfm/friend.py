@@ -60,13 +60,11 @@ class FriendList:
 			if friend is None:
 				return
 
-		sid = self._client.cp_fingerprint + 1
-
 		if friend.isSoulmate:
-			await self._client.sendCP(26, Packet())
+			sid = await self._client.sendCP(26, Packet())
 			result, error = 27, 36
 		else:
-			await self._client.sendCP(20, Packet().writeString(friend.name.lower()))
+			sid = await self._client.sendCP(20, Packet().writeString(friend.name.lower()))
 			result, error = 21, 30
 
 		def is_deletion(tc, packet):
@@ -98,8 +96,7 @@ class FriendList:
 		if friend is not None:
 			return friend
 
-		sid = self._client.cp_fingerprint + 1
-		await self._client.sendCP(18, Packet().writeString(name))
+		sid = await self._client.sendCP(18, Packet().writeString(name))
 
 		def is_addition(tc, packet):
 			return tc == 19 and packet.read32() == sid

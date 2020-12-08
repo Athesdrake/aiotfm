@@ -77,7 +77,6 @@ class Client:
 		self.username = None
 		self.locale = Locale()
 		self.community = Community(community)
-		self.cp_fingerprint = 0
 
 		self.friends = None
 
@@ -94,6 +93,7 @@ class Client:
 		self._channels = []
 
 	def data_received(self, data, connection):
+		self._sequenceId: int = 0
 		"""|coro|
 		Dispatches the received data.
 
@@ -1068,13 +1068,13 @@ class Client:
 		:param code: :class:`int` the community platform code.
 		:param data: :class:`aiotfm.Packet` or :class:`bytes` the data.
 		"""
-		self.cp_fingerprint = fp = (self.cp_fingerprint + 1) % 0XFFFFFFFF
+		self._sequenceId = sid = (self._sequenceId + 1) % 0XFFFFFFFF
 
 		packet = Packet.new(60, 3).write16(code)
-		packet.write32(self.cp_fingerprint).writeBytes(data)
+		packet.write32(self._sequenceId).writeBytes(data)
 		await self.main.send(packet, cipher=True)
 
-		return fp
+		return sid
 
 	async def sendRoomMessage(self, message):
 		"""|coro|
@@ -1137,8 +1137,7 @@ class Client:
 		:param disconnected: :class:`bool` if True retrieves also the disconnected members.
 		:return: :class:`aiotfm.Tribe` or ``None``.
 		"""
-		sid = self.cp_fingerprint + 1
-		await self.sendCP(108, Packet().writeBool(disconnected))
+		sid = await self.sendCP(108, Packet().writeBool(disconnected))
 
 		def is_tribe(tc, packet):
 			return (tc == 109 and packet.read32() == sid) or tc == 130
@@ -1207,9 +1206,7 @@ class Client:
 		if isinstance(lua_code, str):
 			lua_code = lua_code.encode()
 
-		packet = Packet.new(29, 1).write24(len(lua_code)).writeBytes(lua_code)
-
-		await self.bulle.send(packet)
+		await self.bulle.send(Packet.new(29, 1).write24(len(lua_code)).writeBytes(lua_code))
 
 	async def sendCommand(self, command):
 		"""|coro|
@@ -1217,9 +1214,7 @@ class Client:
 
 		:param command: :class:`str` the command to send.
 		"""
-		packet = Packet.new(6, 26).writeString(command[:255])
-
-		await self.main.send(packet, cipher=True)
+		await self.main.send(Packet.new(6, 26).writeString(command[:255]), cipher=True)
 
 	async def enterTribe(self):
 		"""|coro|
