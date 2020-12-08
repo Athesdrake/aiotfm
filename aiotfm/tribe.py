@@ -1,7 +1,8 @@
 from typing import List, Union
 
-from aiotfm import Packet, Player
 from aiotfm.enums import Game, Permissions
+from aiotfm.packet import Packet
+from aiotfm.player import Player
 from aiotfm.utils import Date
 
 

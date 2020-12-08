@@ -1,8 +1,8 @@
 from typing import Any, Callable, List, Optional
 
-from aiotfm import Packet
 from aiotfm.enums import GameMode
 from aiotfm.errors import AiotfmException
+from aiotfm.packet import Packet
 from aiotfm.player import Player
 
 
