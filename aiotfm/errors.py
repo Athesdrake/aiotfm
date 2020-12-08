@@ -7,7 +7,7 @@ class AiotfmException(Exception):
 
 class LoginError(AiotfmException):
 	"""Exception thrown when the login failed."""
-	def __init__(self, code):
+	def __init__(self, code: int):
 		self.code = code
 		super().__init__('Login Failed ! Error code: {.code}.'.format(self))
 
@@ -81,7 +81,7 @@ class XXTEAInvalidKeys(XXTEAError):
 
 class CommunityPlatformError(AiotfmException):
 	"""Exception thrown when the community platform send an error code."""
-	def __init__(self, category, code):
+	def __init__(self, category: int, code: int):
 		super().__init__('Internal error: {}-{}'.format(category, code))
 		self.category = category
 		self.code = code
@@ -89,17 +89,17 @@ class CommunityPlatformError(AiotfmException):
 
 class TradeOnWrongState(AiotfmException):
 	"""Exception thrown when the client try an impossible action on trade due to its state."""
-	def __init__(self, action, state):
+	def __init__(self, action: str, state: TradeState):
 		super().__init__(f'Can not {action} when the trade is {TradeState[state]}.')
-		self.action = action
-		self.state = state
+		self.action: str = action
+		self.state: TradeState = state
 
 
 class InvalidAccountError(AiotfmException):
 	"""Exception thrown when a server action does not find a user."""
-	def __init__(self, player):
+	def __init__(self, player: str):
 		super().__init__(f'The account {player} does not exist.')
-		self.player = player
+		self.player: str = player
 
 
 class FriendLimitError(AiotfmException):
@@ -110,6 +110,6 @@ class FriendLimitError(AiotfmException):
 
 class CantFriendPlayerError(AiotfmException):
 	"""Exception thrown when the server does not let you friend a player."""
-	def __init__(self, player):
+	def __init__(self, player: str):
 		super().__init__(f'You can\'t friend the player {player}')
-		self.player = player
+		self.player: str = player

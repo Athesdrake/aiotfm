@@ -1,5 +1,8 @@
+from typing import List, Union
+
+from aiotfm import Packet, Player
+from aiotfm.enums import Game, Permissions
 from aiotfm.utils import Date
-from aiotfm.enums import Permissions, Game
 
 
 class Tribe:
@@ -20,13 +23,13 @@ class Tribe:
 	ranks: :class:`list`
 		The ranks' list of the tribe.
 	"""
-	def __init__(self, packet):
-		self.id = packet.read32()
-		self.name = packet.readUTF()
-		self.welcomeMessage = packet.readUTF()
-		self.mapcode = packet.read32()
-		self.members = []
-		self.ranks = []
+	def __init__(self, packet: Packet):
+		self.id: int = packet.read32()
+		self.name: str = packet.readUTF()
+		self.welcomeMessage: str = packet.readUTF()
+		self.mapcode: str = packet.read32()
+		self.members: List[Member] = []
+		self.ranks: List[Rank] = []
 
 		for i in range(packet.read16()):
 			self.members.append(Member(self, packet))
@@ -34,7 +37,7 @@ class Tribe:
 		for i in range(packet.read16()):
 			self.ranks.append(Rank.from_packet(i, packet))
 
-	def get_member(self, name):
+	def get_member(self, name: Union[Player, str]) -> 'Member':
 		"""Returns a member from it's name or None if not found.
 		:param name: :class:`str` or :class:`aiotfm.Player` the name of the member.
 		:return: :class:`aiotfm.tribe.Member` or None
@@ -72,24 +75,33 @@ class Member:
 	online: :class:`bool`
 		True if the member is online.
 	"""
-	def __init__(self, tribe, packet):
-		self.tribe = tribe
-		self.hasAvatar = packet.read32() != 0
-		self.name = packet.readUTF()
-		self.gender = packet.read8()
-		self.id = packet.read32()
-		self.lastConnection = Date.fromtimestamp(packet.read32())
-		self.rank_id = packet.read8()
-		self.game = Game(packet.read32())
-		self.room = packet.readUTF()
+	def __init__(self, tribe: Tribe, packet: Packet):
+		self.tribe: Tribe = tribe
+		self.hasAvatar: bool = packet.read32() != 0
+		self.name: str = packet.readUTF()
+		self.gender: int = packet.read8()
+		self.id: int = packet.read32()
+		self.lastConnection: Date = Date.fromtimestamp(packet.read32())
+		self.rank_id: int = packet.read8()
+		self.game: Game = Game(packet.read32())
+		self.room: str = packet.readUTF()
 
 	@property
-	def rank(self):
+	def rank(self) -> 'Rank':
 		"""return the :class:`Rank` of the member."""
 		return self.tribe.ranks[self.rank_id]
 
 	@property
-	def online(self):
+	def avatar(self) -> str:
+		"""Return the player's avatar's url."""
+		if self.hasAvatar:
+			return f'https://avatars.atelier801.com/{self.id % 10000}/{self.id}.jpg'
+
+		# default avatar
+		return 'https://avatars.atelier801.com/0/0.jpg'
+
+	@property
+	def online(self) -> bool:
 		"""return True if the member is online."""
 		return self.game != Game.INVALID
 
@@ -106,68 +118,68 @@ class Rank:
 	perm: :class:`int`
 		The rank's permissions.
 	"""
-	def __init__(self, id_, name, perm):
-		self.id = id_
-		self.name = name
-		self.perm = perm
+	def __init__(self, id_: int, name: str, perm: int):
+		self.id: int = id_
+		self.name: str = name
+		self.perm: int = perm
 
 	@property
-	def isLeader(self):
+	def isLeader(self) -> bool:
 		"""True if it's the tribe's leader's rank."""
 		return bool(self.perm & Permissions.IS_LEADER)
 
 	@property
-	def canChangeGreetingMessage(self):
+	def canChangeGreetingMessage(self) -> bool:
 		"""True if it has the permission to change the greeting message."""
 		return bool(self.perm & Permissions.CAN_CHANGE_GREETING_MESSAGE)
 
 	@property
-	def canEditRanks(self):
+	def canEditRanks(self) -> bool:
 		"""True if it has the permission to edit ranks."""
 		return bool(self.perm & Permissions.CAN_EDIT_RANKS)
 
 	@property
-	def canChangeMembersRanks(self):
+	def canChangeMembersRanks(self) -> bool:
 		"""True if it has the permission to change members' rank."""
 		return bool(self.perm & Permissions.CAN_CHANGE_MEMBERS_RANKS)
 
 	@property
-	def canInvite(self):
+	def canInvite(self) -> bool:
 		"""True if it has the permission to invite someone to the tribe."""
 		return bool(self.perm & Permissions.CAN_INVITE)
 
 	@property
-	def canExclude(self):
+	def canExclude(self) -> bool:
 		"""True if it has the permission to exclude someone of the tribe."""
 		return bool(self.perm & Permissions.CAN_EXCLUDE)
 
 	@property
-	def canPlayMusic(self):
+	def canPlayMusic(self) -> bool:
 		"""True if it has the permission to play music inside the tribe's house."""
 		return bool(self.perm & Permissions.CAN_PLAY_MUSIC)
 
 	@property
-	def canChangeTribeHouseMap(self):
+	def canChangeTribeHouseMap(self) -> bool:
 		"""True if it has the permission to change the tribe's house's map."""
 		return bool(self.perm & Permissions.CAN_CHANGE_TRIBE_HOUSE_MAP)
 
 	@property
-	def canLoadMap(self):
+	def canLoadMap(self) -> bool:
 		"""True if it has the permission to load maps inside the tribe's house."""
 		return bool(self.perm & Permissions.CAN_LOAD_MAP)
 
 	@property
-	def canLoadLua(self):
+	def canLoadLua(self) -> bool:
 		"""True if it has the permission to load Lua inside the tribe's house."""
 		return bool(self.perm & Permissions.CAN_LOAD_LUA)
 
 	@property
-	def canManageForum(self):
+	def canManageForum(self) -> bool:
 		"""True if it has the permission to mange the tribe's forum."""
 		return bool(self.perm & Permissions.CAN_MANAGE_FORUM)
 
 	@classmethod
-	def from_packet(cls, id_, packet):
+	def from_packet(cls, id_: int, packet: Packet):
 		"""Reads a Tribe from a packet.
 		:param id: :class:`int` the tribe's id.
 		:param packet: :class:`aiotfm.Packet`"""

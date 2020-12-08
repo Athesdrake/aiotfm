@@ -1,6 +1,7 @@
 import struct
+from typing import ByteString, List, Optional, Tuple, Union
 
-from aiotfm.errors import XXTEAInvalidPacket, XXTEAInvalidKeys
+from aiotfm.errors import XXTEAInvalidKeys, XXTEAInvalidPacket
 
 
 class Packet:
@@ -19,14 +20,14 @@ class Packet:
 	pos: :class:`int`
 		The position inside the buffer.
 	"""
-	def __init__(self, buffer=None):
+	def __init__(self, buffer: Optional[ByteString] = None):
 		if buffer is None:
 			buffer = bytearray()
 		elif not isinstance(buffer, bytearray):
 			buffer = bytearray(buffer)
 
-		self.buffer = buffer
-		self.pos = 0
+		self.buffer: bytearray = buffer
+		self.pos: int = 0
 
 	def __repr__(self):
 		return '<Packet {!r}>'.format(bytes(self))
@@ -35,7 +36,7 @@ class Packet:
 		return bytes(self.buffer)
 
 	@classmethod
-	def new(cls, c, cc=None):
+	def new(cls, c: Union[int, list, tuple], cc: Optional[int] = None):
 		"""Create a new instance of Packet initialized by two bytes: c and cc."""
 		if isinstance(c, (tuple, list)):
 			c, cc = c
@@ -44,7 +45,7 @@ class Packet:
 
 		return cls().write8(c).write8(cc)
 
-	def copy(self, copy_pos=False):
+	def copy(self, copy_pos: bool = False) -> 'Packet':
 		"""Returns a copy of the Packet"""
 		p = Packet()
 		if copy_pos:
@@ -53,45 +54,45 @@ class Packet:
 		p.buffer = self.buffer.copy()
 		return p
 
-	def readBytes(self, nbr=1):
+	def readBytes(self, nbr: int = 1) -> int:
 		"""Read raw bytes from the buffer."""
 		self.pos += nbr
 		return self.buffer[self.pos - nbr:self.pos]
 
-	def readCode(self):
+	def readCode(self) -> Tuple[int, int]:
 		"""Read two bytes: c and cc."""
 		return self.read8(), self.read8()
 
-	def read8(self):
+	def read8(self) -> int:
 		"""Read a single byte from the buffer."""
 		self.pos += 1
 		return self.buffer[self.pos - 1]
 
-	def read16(self):
+	def read16(self) -> int:
 		"""Read a short (two bytes) from the buffer"""
 		return struct.unpack('>H', self.readBytes(2))[0]
 
-	def read24(self):
+	def read24(self) -> int:
 		"""Read three bytes from the buffer"""
 		return int.from_bytes(self.readBytes(3), 'big')
 
-	def read32(self):
+	def read32(self) -> int:
 		"""Read an int (four bytes) from the buffer"""
 		return struct.unpack('>I', self.readBytes(4))[0]
 
-	def readBool(self):
+	def readBool(self) -> bool:
 		"""Read a boolean (one byte) from the buffer"""
 		return self.read8() == 1
 
-	def readString(self):
+	def readString(self) -> bytes:
 		"""return a encoded string (in bytes)"""
 		return bytes(self.readBytes(self.read16()))
 
-	def readUTF(self):
+	def readUTF(self) -> str:
 		"""return a decoded string"""
 		return self.readString().decode()
 
-	def writeBytes(self, content):
+	def writeBytes(self, content: Union['Packet', ByteString]) -> 'Packet':
 		"""Write raw bytes to the buffer"""
 		if isinstance(content, Packet):
 			self.buffer.extend(content.buffer)
@@ -99,45 +100,45 @@ class Packet:
 			self.buffer.extend(content)
 		return self
 
-	def writeCode(self, c, cc):
+	def writeCode(self, c: int, cc: int) -> 'Packet':
 		"""Write two bytes: c and cc."""
 		return self.write8(c).write8(cc)
 
-	def write8(self, value):
+	def write8(self, value: int) -> 'Packet':
 		"""Write a single byte to the buffer"""
 		self.buffer.append(value & 0xff)
 		return self
 
-	def write16(self, value):
+	def write16(self, value: int) -> 'Packet':
 		"""Write a short (two bytes) to the buffer"""
 		self.buffer.extend(struct.pack('>H', value & 0xffff))
 		return self
 
-	def write24(self, value):
+	def write24(self, value: int) -> 'Packet':
 		"""Write three bytes to the buffer"""
 		self.buffer.extend((value & 0xffffff).to_bytes(3, 'big'))
 		return self
 
-	def write32(self, value):
+	def write32(self, value: int) -> 'Packet':
 		"""Write an int (four bytes) to the buffer"""
 		self.buffer.extend(struct.pack('>I', value & 0xffffffff))
 		return self
 
-	def writeBool(self, value):
+	def writeBool(self, value: bool) -> 'Packet':
 		"""Write a boolean (one byte) to the buffer"""
 		return self.write8(1 if value else 0)
 
-	def writeString(self, string):
+	def writeString(self, string: Union[str, ByteString]) -> 'Packet':
 		"""Write a string to the buffer"""
 		if isinstance(string, str):
 			string = string.encode()
 		return self.write16(len(string)).writeBytes(string)
 
-	def writeUTF(self, string):
+	def writeUTF(self, string: Union[str, ByteString]) -> 'Packet':
 		"""Write a string to the buffer. Alias for .writeString"""
 		return self.writeString(string)
 
-	def export(self, fp=0):
+	def export(self, fp: int = 0) -> bytes:
 		"""Generates the header then converts the whole packet to bytes and returns it."""
 		m = Packet()
 		size = len(self.buffer)
@@ -151,12 +152,12 @@ class Packet:
 
 		return bytes(m.buffer + self.buffer)
 
-	def xor_cipher(self, key, fp):
+	def xor_cipher(self, key: List[int], fp: int) -> 'Packet':
 		"""Cipher the packet with the XOR algorithm."""
 		self.buffer[2:] = (byte ^ key[i % 20] for i, byte in enumerate(self.buffer[2:], fp + 1))
 		return self
 
-	def cipher(self, key):
+	def cipher(self, key: List[int]) -> 'Packet':
 		"""Cipher the packet with the XXTEA algorithm."""
 		if len(self.buffer) < 2:
 			raise XXTEAInvalidPacket("The Packet is empty.")
@@ -183,7 +184,7 @@ class Packet:
 DELTA = 0x9e3779b9
 
 
-def xxtea_encode(v, n, key):
+def xxtea_encode(v: List[int], n: int, key: List[int]):
 	"""https://en.wikipedia.org/wiki/XXTEA"""
 	cycles = 6 + 52 // n
 	sum_ = 0

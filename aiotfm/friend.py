@@ -1,9 +1,11 @@
-from aiotfm.utils import Date
+from typing import List, Optional, Union
+
+import aiotfm
 from aiotfm.enums import Game
+from aiotfm.errors import CantFriendPlayerError, CommunityPlatformError, FriendLimitError, InvalidAccountError
 from aiotfm.packet import Packet
 from aiotfm.player import Player
-from aiotfm.errors import CommunityPlatformError, InvalidAccountError, \
-	FriendLimitError, CantFriendPlayerError
+from aiotfm.utils import Date
 
 
 class FriendList:
@@ -16,9 +18,9 @@ class FriendList:
 	friends: :class:`list`
 		Your friends.
 	"""
-	def __init__(self, client, packet):
-		self.friends = []
-		self.soulmate = None
+	def __init__(self, client: 'aiotfm.Client', packet: Packet):
+		self.friends: List[Friend] = []
+		self.soulmate: Friend = None
 
 		soulmate = Friend(self, packet, True)
 		if soulmate.id != 0:
@@ -28,9 +30,9 @@ class FriendList:
 		for i in range(packet.read16()):
 			self.friends.append(Friend(self, packet))
 
-		self._client = client
+		self._client: aiotfm.Client = client
 
-	def get_friend(self, search):
+	def get_friend(self, search: Union[Player, str, int]) -> 'Friend':
 		"""Returns a friend from their name (or id) or None if not found.
 		:param search: :class:`str` or :class:`aiotfm.Player` or :class:`int` search query
 		:return: :class:`aiotfm.friend.Friend` or None
@@ -49,7 +51,7 @@ class FriendList:
 				if search == f.name:
 					return f
 
-	async def remove(self, friend):
+	async def remove(self, friend: Union[Player, 'Friend', str]):
 		"""|coro|
 		Remove a friend. If they're your soulmate, divorce them.
 		:param friend: :class:`str` or :class:`aiotfm.Player` or :class:`aiotfm.friend.Friend`
@@ -83,7 +85,7 @@ class FriendList:
 			self.soulmate = None
 		self.friends.remove(friend)
 
-	async def add(self, name):
+	async def add(self, name: Union[Player, str]) -> Optional['Friend']:
 		"""|coro|
 		Add a friend.
 		:param name: :class:`str` or :class:`aiotfm.Player`
@@ -146,19 +148,28 @@ class Friend:
 		The last connection of the player
 	"""
 
-	def __init__(self, flist, packet, isSoulmate=False):
-		self.hasAvatar = packet.read32() != 0
-		self.name = packet.readUTF()
-		self.gender = packet.read8()
-		self.id = packet.read32()
-		self.isSoulmate = isSoulmate
-		self.isAddedBack = packet.readBool()
-		self.isConnected = packet.readBool()
-		self.game = Game(packet.read32())
-		self.roomName = packet.readUTF()
-		self.lastConnection = Date.fromtimestamp(packet.read32())
+	def __init__(self, flist: FriendList, packet: Packet, isSoulmate: bool = False):
+		self.hasAvatar: bool = packet.read32() != 0
+		self.name: str = packet.readUTF()
+		self.gender: int = packet.read8()
+		self.id: int = packet.read32()
+		self.isSoulmate: bool = isSoulmate
+		self.isAddedBack: bool = packet.readBool()
+		self.isConnected: bool = packet.readBool()
+		self.game: Game = Game(packet.read32())
+		self.roomName: str = packet.readUTF()
+		self.lastConnection: Date = Date.fromtimestamp(packet.read32())
 
-		self._flist = flist
+		self._flist: FriendList = flist
+
+	@property
+	def avatar(self) -> str:
+		"""Return the player's avatar's url."""
+		if self.hasAvatar:
+			return f'https://avatars.atelier801.com/{self.id % 10000}/{self.id}.jpg'
+
+		# default avatar
+		return 'https://avatars.atelier801.com/0/0.jpg'
 
 	def remove(self):
 		"""|coro|
