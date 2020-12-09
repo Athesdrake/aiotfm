@@ -224,9 +224,13 @@ async def test_tribe_message(bot: Client):
 
 
 async def test_friend_list(bot: Client):
-	print([f.name for f in bot.friends])
+	if bot.friends is None:
+		bot.wait_for('on_friends_loaded', timeout=3)
 
-	assert bot.friends is not None
+	friends = [f.name.lower() for f in bot.friends]
+	print(friends)
+
+	assert 'athesdrake#0000' in friends
 
 
 async def test_tribe(bot: Client):
