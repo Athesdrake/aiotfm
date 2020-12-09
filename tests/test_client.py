@@ -196,7 +196,7 @@ async def test_channel(bot: Client):
 
 
 async def test_whisper(bot: Client):
-	for i in range(10):
+	for i in range(5):
 		fut: asyncio.Future = bot.wait_for('on_whisper', timeout=3)
 		await bot.whisper(bot.username, '[[aiotfm test]]')
 		msg: aiotfm.message.Whisper = await fut
@@ -207,9 +207,9 @@ async def test_whisper(bot: Client):
 		assert msg.sent
 		assert '[[aiotfm test]]' in str(msg)
 
-		await asyncio.sleep(1)
+		await asyncio.sleep(1.5)
 		await msg.reply('Working!')
-		await asyncio.sleep(1)
+		await asyncio.sleep(1.5)
 
 
 async def test_tribe_message(bot: Client):
