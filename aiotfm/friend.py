@@ -152,10 +152,10 @@ class Friend:
 	"""
 
 	def __init__(self, flist: FriendList, packet: Packet, isSoulmate: bool = False):
-		self.hasAvatar: bool = packet.read32() != 0
+		self.id: int = packet.read32()
 		self.name: str = packet.readUTF()
 		self.gender: int = packet.read8()
-		self.id: int = packet.read32()
+		self.hasAvatar: bool = packet.read32() != 0
 		self.isSoulmate: bool = isSoulmate
 		self.isAddedBack: bool = packet.readBool()
 		self.isConnected: bool = packet.readBool()
