@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Union, Optional
 
 from aiotfm.enums import Game, Permissions
 from aiotfm.packet import Packet
@@ -28,7 +28,7 @@ class Tribe:
 		self.id: int = packet.read32()
 		self.name: str = packet.readUTF()
 		self.welcomeMessage: str = packet.readUTF()
-		self.mapcode: str = packet.read32()
+		self.mapcode: int = packet.read32()
 		self.members: List[Member] = []
 		self.ranks: List[Rank] = []
 
@@ -38,7 +38,7 @@ class Tribe:
 		for i in range(packet.read16()):
 			self.ranks.append(Rank.from_packet(i, packet))
 
-	def get_member(self, name: Union[Player, str]) -> 'Member':
+	def get_member(self, name: Union[Player, str]) -> Optional['Member']:
 		"""Returns a member from it's name or None if not found.
 		:param name: :class:`str` or :class:`aiotfm.Player` the name of the member.
 		:return: :class:`aiotfm.tribe.Member` or None

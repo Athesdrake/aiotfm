@@ -1,4 +1,4 @@
-from typing import List, Optional, Set, Tuple
+from typing import List, Optional, Set, Tuple, Union
 
 from aiotfm.packet import Packet
 
@@ -61,7 +61,7 @@ class Shop:
 			"items": items
 		}
 
-	def cost(self, outfit: str) -> Tuple[int, int, int]:
+	def cost(self, outfit: 'Outfit') -> Tuple[int, int, int]:
 		"""Compute and return the total price of an outfit.
 		:param outfit: :class:`aiotfm.shop.Outfit`
 		:return: :class:`tuple`[:class:`int`]
@@ -73,7 +73,11 @@ class Shop:
 		for item in outfit.items:
 			if item.id == 0:
 				continue
+
 			item = self.getItem(item)
+			if item is None:
+				continue
+
 			cheese += item.cheese if item.cheese < 1000001 else 0
 			if item.fraise == 0 and item.cheese < 1000001:
 				fraise_sup += item.cheese
@@ -169,13 +173,15 @@ class Item:
 		return cls(cat, id_, colors)
 
 	@classmethod
-	def parse(cls, cat: int, string: str) -> 'Item':
+	def parse(cls, cat: int, string: Union[List[str], str]) -> 'Item':
 		"""Parse an Item from a string.
 		:param cat: :class:`int` the item's category.
 		:param string: :class:`str` the item.
 		:return: :class:`aiotfm.shop.Item`
 		"""
-		string = string.split('_')
+		if isinstance(string, str):
+			string = string.split('_')
+
 		id_ = int(string[0])
 		if len(string) == 1:
 			return cls(cat, id_)

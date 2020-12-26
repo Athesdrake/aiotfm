@@ -1,4 +1,4 @@
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, List, Optional, Union
 
 from aiotfm.enums import GameMode
 from aiotfm.errors import AiotfmException
@@ -57,7 +57,7 @@ class Room:
 		:return: `Iterable` The filtered players."""
 		return [p for p in self.players.values() if predicate(p)][:max_]
 
-	def get_player(self, default: Optional[Any] = None, **kwargs) -> Player:
+	def get_player(self, default: Optional[Any] = None, **kwargs) -> Union[Player, Any]:
 		"""Gets one player in the room with an identifier.
 
 		:param kwargs: Which identifier to use. Can be either name, username, id or pid.
@@ -97,7 +97,7 @@ class RoomEntry:
 	def __init__(
 		self, name: str, language: str, country: str, player_count: int,
 		limit: int = 0, is_funcorp: bool = False, is_pinned: bool = False,
-		command: Optional[str] = '', args: Optional[str] = ''
+		command: str = '', args: str = ''
 	):
 		self.name: str = name
 		self.language: str = language
@@ -151,8 +151,8 @@ class RoomList:
 	def from_packet(cls, packet: Packet):
 		gamemodes = [GameMode(packet.read8()) for _ in range(packet.read8())]
 		gamemode = GameMode(packet.read8())
-		rooms = []
-		pinned = []
+		rooms: List[RoomEntry] = []
+		pinned: List[RoomEntry] = []
 
 		while packet.pos < len(packet.buffer):
 			is_pinned = packet.readBool()
@@ -169,7 +169,7 @@ class RoomList:
 					player_count = int(player_count)
 
 				if command == 'lm':
-					entries = []
+					entries: List[RoomEntry] = []
 					room = DropdownRoomEntry(entries, name, language, country, player_count)
 
 					for mode in args.split('&~'):

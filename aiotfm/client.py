@@ -1115,7 +1115,7 @@ class Client:
 		self._closed = True
 		self._close_event.set_result(('stop', 0, None))
 
-	async def sendCP(self, code: int, data: bytes = b'') -> int:
+	async def sendCP(self, code: int, data: Union[Packet, ByteString] = b'') -> int:
 		"""|coro|
 		Send a packet to the community platform.
 
@@ -1161,7 +1161,7 @@ class Client:
 
 		return await self.sendCP(48, Packet().writeString(channel).writeString(message))
 
-	async def whisper(self, username: str, message: AnyStr, overflow: bool = False):
+	async def whisper(self, username: Union[Player, str], message: AnyStr, overflow: bool = False):
 		"""|coro|
 		Whisper to a player.
 

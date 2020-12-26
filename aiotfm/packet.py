@@ -36,6 +36,7 @@ class Packet:
 		return bytes(self.buffer)
 
 	@classmethod
+	def new(cls, c: Union[int, List[int], Tuple[int, int]], cc: Optional[int] = None):
 		"""Create a new instance of Packet initialized by two bytes: c and cc."""
 		if isinstance(c, (tuple, list)):
 			c, cc = c
@@ -53,7 +54,7 @@ class Packet:
 		p.buffer = self.buffer.copy()
 		return p
 
-	def readBytes(self, nbr: int = 1) -> int:
+	def readBytes(self, nbr: int = 1) -> bytes:
 		"""Read raw bytes from the buffer."""
 		self.pos += nbr
 		return self.buffer[self.pos - nbr:self.pos]

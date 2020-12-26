@@ -20,7 +20,7 @@ class FriendList:
 	"""
 	def __init__(self, client: 'aiotfm.Client', packet: Packet):
 		self.friends: List[Friend] = []
-		self.soulmate: Friend = None
+		self.soulmate: Optional[Friend] = None
 
 		soulmate = Friend(self, packet, True)
 		if soulmate.id != 0:
@@ -35,7 +35,7 @@ class FriendList:
 	def __iter__(self) -> Iterable['Friend']:
 		return iter(self.friends)
 
-	def get_friend(self, search: Union[Player, str, int]) -> 'Friend':
+	def get_friend(self, search: Union[Player, str, int]) -> Optional['Friend']:
 		"""Returns a friend from their name (or id) or None if not found.
 		:param search: :class:`str` or :class:`aiotfm.Player` or :class:`int` search query
 		:return: :class:`aiotfm.friend.Friend` or None

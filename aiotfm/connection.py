@@ -32,7 +32,7 @@ class TFMProtocol(Protocol):
 				del self.buffer[:self.length]
 				self.length = 0
 
-	def connection_made(self, transport: Transport):
+	def connection_made(self, transport: BaseTransport):
 		# :desc: Called when a connection has been successfully made with the server.
 		# :param connection: :class:`Connection` the connection that has been made.
 		self.connection.open = True
