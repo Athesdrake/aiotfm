@@ -85,6 +85,12 @@ class Player:
 		self.ducking = False
 		self.jumping = False
 
+	def __repr__(self):
+		info = ' '.join([f'{field}={getattr(self, field)!r}' for field in ('id', 'pid') if getattr(self, field) != -1])
+		if info:
+			info = ' ' + info
+		return f'<Player username={self.username!r}{info}>'
+
 	@classmethod
 	def from_packet(cls, packet: Packet):
 		"""Reads a Player from a packet.

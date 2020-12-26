@@ -141,8 +141,10 @@ class Item:
 
 		self.colors: List[int] = colors or []
 
-	def __eq__(self, other: 'Item'):
-		return self.category == other.category and self.id == other.id
+	def __eq__(self, other: object):
+		if isinstance(other, Item):
+			return self.category == other.category and self.id == other.id
+		return NotImplemented
 
 	def __hash__(self):
 		return self.uid
@@ -305,10 +307,12 @@ class Outfit:
 		self.id: int = id_
 		self.flags: int = flags
 
-	def __eq__(self, other: 'Outfit'):
+	def __eq__(self, other: object):
 		if isinstance(other, str):
 			return self.look == other
-		return self.look == other.look
+		if isinstance(other, Outfit):
+			return self.look == other.look
+		return NotImplemented
 
 	def __hash__(self):
 		return hash(hash(self.look) + hash(self.id))
@@ -433,8 +437,10 @@ class ShamanObject:
 		self.cheese: int = cheese
 		self.fraise: int = fraise
 
-	def __eq__(self, other: 'ShamanObject'):
-		return self.id == other.id
+	def __eq__(self, other: object):
+		if isinstance(other, ShamanObject):
+			return self.id == other.id
+		return NotImplemented
 
 	def __hash__(self):
 		return self.id
@@ -478,8 +484,10 @@ class OwnedShamanObject:
 		self.equiped: bool = equiped
 		self.colors: List[int] = colors
 
-	def __eq__(self, other: 'OwnedShamanObject'):
-		return self.id == other.id
+	def __eq__(self, other: object):
+		if isinstance(other, OwnedShamanObject):
+			return self.id == other.id
+		return NotImplemented
 
 	def __hash__(self):
 		return self.id

@@ -45,8 +45,10 @@ class InventoryItem:
 	def __repr__(self):
 		return f"<InventoryItem id={self.id} quantity={self.quantity}>"
 
-	def __eq__(self, other: 'InventoryItem'):
-		return self.id == other.id
+	def __eq__(self, other: object):
+		if isinstance(other, InventoryItem):
+			return self.id == other.id
+		return NotImplemented
 
 	@property
 	def image_url(self) -> str:
@@ -264,14 +266,14 @@ class Trade:
 
 	def __repr__(self):
 		return "<Trade state={} locked=[trader:{}, client:{}] trader={} pid={}>".format(
-
-	def __eq__(self, other: 'Trade'):
-		if other is None:
-			return False
-		if self.pid == -1 or other.pid == -1:
-			return self.trader.lower() == other.trader.lower()
-		return self.pid == other.pid
 			self.state.name, *self.locked, self.trader, self.pid)
+
+	def __eq__(self, other: object):
+		if isinstance(other, Trade):
+			if self.pid == -1 or other.pid == -1:
+				return self.trader.lower() == other.trader.lower()
+			return self.pid == other.pid
+		return NotImplemented
 
 	@property
 	def closed(self) -> bool:
