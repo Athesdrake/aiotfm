@@ -90,7 +90,7 @@ class CommunityPlatformError(AiotfmException):
 class TradeOnWrongState(AiotfmException):
 	"""Exception thrown when the client try an impossible action on trade due to its state."""
 	def __init__(self, action: str, state: TradeState):
-		super().__init__(f'Can not {action} when the trade is {TradeState[state]}.')
+		super().__init__(f'Can not {action} when the trade is {state}.')
 		self.action: str = action
 		self.state: TradeState = state
 

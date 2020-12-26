@@ -375,7 +375,7 @@ class Client:
 			# :desc: Called when an error occurred with a trade.
 			# :param trade: :class:`aiotfm.inventory.Trade` the trade that failed.
 			# :param error: :class:`aiotfm.enums.TradeError` the error.
-			self.dispatch('trade_error', trade, TradeError[error])
+			self.dispatch('trade_error', trade, TradeError(error))
 			trade._close()
 
 		elif CCC == (31, 7): # Trade start
@@ -638,7 +638,7 @@ class Client:
 			slot = packet.read8()
 			slot = None if slot == 0 else slot
 			item_id = packet.read16()
-			quantity = packet.read8()
+			quantity = packet.read16()
 
 			item = InventoryItem(item_id=item_id, quantity=quantity, slot=slot)
 			self.inventory[item_id] = item
