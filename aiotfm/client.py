@@ -1,15 +1,14 @@
 import asyncio
 import random
 import sys
-import time
 import traceback
 import warnings
-from typing import AnyStr, Callable, List, Optional, Union
+from typing import AnyStr, Callable, List, Optional, Union, ByteString
 
 from aiotfm.connection import Connection
 from aiotfm.enums import Community, GameMode, TradeError
 from aiotfm.errors import AiotfmException, AlreadyConnected, CommunityPlatformError, \
-	IncorrectPassword, InvalidEvent, LoginError, ServerUnreachable
+	IncorrectPassword, InvalidEvent, LoginError, ServerUnreachable, MaintenanceError
 from aiotfm.friend import Friend, FriendList
 from aiotfm.inventory import Inventory, InventoryItem, Trade
 from aiotfm.message import Channel, ChannelMessage, Message, Whisper
@@ -39,6 +38,8 @@ class Client:
 	loop: Optional[event loop]
 		The `event loop`_ to use for asynchronous operations. If ``None`` is passed (defaults),
 		the event loop used will be ``asyncio.get_event_loop()``.
+	max_retries: Optional[:class:`int`]
+		The maximum number of retries the client should attempt while connecting to the game.
 
 	Attributes
 	----------
@@ -65,7 +66,8 @@ class Client:
 		community: Community = Community.en,
 		auto_restart: bool = False,
 		bot_role: bool = False,
-		loop: Optional[asyncio.AbstractEventLoop] = None
+		loop: Optional[asyncio.AbstractEventLoop] = None,
+		max_retries: int = 6
 	):
 		self.loop: asyncio.AbstractEventLoop = loop or asyncio.get_event_loop()
 
@@ -73,11 +75,13 @@ class Client:
 		self.bulle: Connection = None
 
 		self._waiters: dict = {}
-		self._hb_task: asyncio.Future = None
-		self._close_event_loop: bool = False
+		self._close_event: asyncio.Future = None
 		self._sequenceId: int = 0
 		self._channels: List[Channel] = []
 		self._restarting: bool = False
+		self._closed: bool = False
+		self._logged: bool = False
+		self._max_retries: int = max_retries
 
 		self.room: Room = None
 		self.trade: Trade = None
@@ -97,6 +101,14 @@ class Client:
 		self.api_tfmid: int = None
 		self.api_token: str = None
 		self.bot_role: bool = bot_role
+
+	@property
+	def restarting(self) -> bool:
+		return self._restarting
+
+	@property
+	def closed(self) -> bool:
+		return self._closed
 
 	def data_received(self, data: bytes, connection: Connection):
 		"""|coro|
@@ -269,8 +281,7 @@ class Client:
 			language = packet.readUTF()
 			country = packet.readUTF()
 			self.authkey = packet.read32()
-
-			self._hb_task = self.loop.create_task(self._heartbeat_loop())
+			self._logged = False
 
 			await connection.send(Packet.new(176, 2).writeUTF(language))
 
@@ -286,6 +297,7 @@ class Client:
 			self.dispatch('login_ready', online_players, language, country)
 
 		elif CCC == (26, 12): # Login result
+			self._logged = False
 			# :desc: Called when the client failed logging.
 			# :param code: :class:`int` the error code.
 			# :param error1: :class:`str` error messages.
@@ -328,7 +340,7 @@ class Client:
 
 				# :desc: Called when the quantity of an item has been updated.
 				# :param item: :class:`aiotfm.inventory.InventoryItem` the new item.
-				# :param previous: :class:`aiotfm.inventory.InventoryItem` the previous item.
+				# :param previous: :class:`int` the previous quantity.
 				self.dispatch('item_update', item, previous)
 
 			else:
@@ -427,7 +439,7 @@ class Client:
 				self.bulle.close()
 
 			self.bulle = Connection('bulle', self, self.loop)
-			await self.bulle.connect(bulle_ip, random.choice(ports))
+			await self.bulle.connect(bulle_ip, int(random.choice(ports)))
 			await self.bulle.send(Packet.new(44, 1).write32(timestamp).write32(uid).write32(pid))
 
 		elif CCC == (44, 22): # Fingerprint offset changed
@@ -711,24 +723,6 @@ class Client:
 
 		return True
 
-	async def _heartbeat_loop(self):
-		"""|coro|
-		Send a packet every fifteen seconds to stay connected to the game.
-		"""
-		last_heartbeat = 0
-		while self.main.open:
-			if self.loop.time() - last_heartbeat >= 15:
-				t = time.perf_counter()
-				await self.main.send(Packet.new(26, 26))
-				if self.bulle is not None and self.bulle.open:
-					await self.bulle.send(Packet.new(26, 26))
-
-				# :desc: Called at each heartbeat.
-				# :param time: :class:`float` the time took to send the keep-alive packet.
-				self.dispatch('heartbeat', (time.perf_counter() - t) * 1000)
-				last_heartbeat = self.loop.time()
-			await asyncio.sleep(.5)
-
 	def get_channel(self, name: str) -> Optional[Channel]:
 		"""Returns a channel from it's name or None if not found.
 		:param name: :class:`str` the name of the channel.
@@ -905,16 +899,16 @@ class Client:
 			raise IncorrectPassword()
 		raise LoginError(code)
 
-	async def connect(self):
+	async def _connect(self):
 		"""|coro|
 		Creates a connection with the main server.
 		"""
-
-		ip = self.keys.server_ip
+		if self._close_event is None:
+			raise AiotfmException(f'{self._connect.__name__} should not be called directly. Use start() instead.')
 
 		for port in random.sample([13801, 11801, 12801, 14801], 4):
 			try:
-				await self.main.connect(ip, port)
+				await self.main.connect(self.keys.server_ip, port)
 			except Exception:
 				pass
 			else:
@@ -923,7 +917,7 @@ class Client:
 			raise ServerUnreachable('Unable to connect to the server.')
 
 		while not self.main.open:
-			await asyncio.sleep(.1)
+			await asyncio.sleep(0)
 
 	async def sendHandshake(self):
 		"""|coro|
@@ -943,65 +937,129 @@ class Client:
 
 		await self.main.send(packet)
 
-	async def start(self, api_tfmid: Optional[int] = None, api_token: Optional[str] = None, keys: Optional[Keys] = None):
+	async def start(
+		self,
+		api_tfmid: Optional[int] = None,
+		api_token: Optional[str] = None,
+		keys: Optional[Keys] = None,
+		**kwargs
+	):
 		"""|coro|
 		Starts the client.
 
 		:param api_tfmid: Optional[:class:`int`] your Transformice id.
 		:param api_token: Optional[:class:`str`] your token to access the API.
 		"""
-
 		if self.bot_role:
 			self.keys = Keys(version=666)
 		else:
-			if keys is not None:
-				self.keys = keys
-			else:
-				self.api_tfmid = api_tfmid
-				self.api_token = api_token
+			if self.auto_restart and api_tfmid is None or api_token is None:
+				warnings.warn("The api token were not provided. The Client won't be able to restart.")
+				self.auto_restart = False
+
+			self.keys = keys
+			if keys is None:
 				self.keys = await get_keys(api_tfmid, api_token)
 
-		await self.connect()
-		await self.sendHandshake()
-		await self.locale.load()
+		if 'username' in kwargs and 'password' in kwargs:
+			# Monkey patch the on_login_ready event
+			if hasattr(self, 'on_login_ready'):
+				event = self.on_login_ready
+				self.on_login_ready = lambda *a: asyncio.gather(self.login(**kwargs), event(*a))
+			else:
+				self.on_login_ready = lambda *a: self.login(**kwargs)
 
-	async def restart_soon(self, *args, delay: float = 5.0, **kwargs):
-		"""Restarts the client in several seconds.
+		retries = 0
+		on_started = None
+		keep_alive = Packet.new(26, 26)
+		while True:
+			self._close_event = asyncio.Future()
+			self._restarting = False
 
-		:param delay: :class:`int` the delay before restarting. Default is 5 seconds.
+			try:
+				logger.debug('Trying to connect')
+				await self._connect()
+				await self.sendHandshake()
+				await self.locale.load()
+				retries = 0 # Connection successful
+			except Exception as e:
+				logger.error('ouch')
+				if on_started is not None:
+					on_started.set_exception(e)
+				elif retries > self._max_retries:
+					raise e
+				else:
+					retries += 1
+					await asyncio.sleep(5 * retries)
+					continue
+			else:
+				if on_started is not None:
+					on_started.set_result(None)
+
+			while not self._close_event.done():
+				# Keep the connection alive
+				await asyncio.gather(*[c.send(keep_alive) for c in (self.main, self.bulle) if c])
+				await asyncio.wait((self._close_event,), timeout=15)
+
+			reason, delay, on_started = self._close_event.result()
+			if reason == 'stop' or not self.auto_restart:
+				break
+
+			await asyncio.sleep(delay)
+
+			# clean up
+			if self.bulle is not None:
+				self.bulle.close()
+			self.main.close()
+
+			# If we don't recreate the connection, we won't be able to connect.
+			self.main = Connection('main', self, self.loop)
+			self.bulle = None
+
+			# Fetch some fresh keys
+			if not self.bot_role:
+				for i in range(self._max_retries):
+					try:
+						self.keys = await get_keys(api_tfmid, api_token)
+						break
+					except MaintenanceError:
+						await asyncio.sleep(30)
+				else:
+					raise MaintenanceError('The game is under an intensive maintenance.')
+
+	async def restart_soon(self, delay: float = 5.0, **kwargs):
+		"""|coro|
+		Restarts the client in several seconds.
+
+		:param delay: :class:`float` the delay before restarting. Default is 5 seconds.
 		:param args: arguments to pass to the :meth:`Client.restart` method.
 		:param kwargs: keyword arguments to pass to the :meth:`Client.restart` method."""
+		await self.restart(delay, **kwargs)
+
+	async def restart(self, delay: float = 0, keys: Optional[Keys] = None):
+		"""|coro|
+		Restarts the client.
+
+		:param keys:"""
+		if not self.auto_restart or self._close_event is None:
+			raise AiotfmException(
+				'Unable to restart the Client. Either `auto_restart` is set to '
+				'False or you have not started the Client using `Client.start`.'
+			)
+
 		if self._restarting:
 			return
 
+		if keys is not None:
+			self.keys = keys
+
 		self._restarting = True
-		await asyncio.sleep(delay)
-		await self.restart(*args, **kwargs)
-		self._restarting = False
-
-	async def restart(self, keys: Optional[Keys] = None):
-		"""Restarts the client.
-
-		:param keys:"""
-
 		# :desc: Notify when the client restarts.
 		self.dispatch("restart")
 
-		self.close()
-
-		# If we don't recreate the connection, we won't be able to connect.
-		self.main = Connection('main', self, self.loop)
-		self.bulle = None
-
-		if not self.bot_role:
-			if keys is not None:
-				self.keys = keys
-			else:
-				self.keys = keys = await get_keys(self.api_tfmid, self.api_token)
-
-		await self.connect()
-		await self.sendHandshake()
-		await self.locale.load()
+		restarted = asyncio.Future()
+		self._close_event.set_result(('restart', delay, restarted))
+		await restarted
 
 	async def login(self, username: str, password: str, encrypted: bool = True, room: str = '*aiotfm'):
 		"""|coro|
@@ -1012,20 +1070,24 @@ class Client:
 		:param encrypted: Optional[:class:`bool`] whether the password is already encrypted or not.
 		:param room: Optional[:class:`str`] the room where the client will be logged in.
 		"""
+		if self._logged:
+			raise AiotfmException('You cannot log in twice.')
+
+		self._logged = True
 		if not encrypted:
 			password = shakikoo(password)
 
 		packet = Packet.new(26, 8).writeString(username).writeString(password)
-		packet.writeString("app:/TransformiceAIR.swf/[[DYNAMIC]]/2/[[DYNAMIC]]/4")
-		packet.writeString(room)
-		if not self.bot_role:
-			packet.write32(self.authkey ^ self.keys.auth)
-		packet.write8(0).writeString('')
-		if not self.bot_role:
-			packet.cipher(self.keys.identification)
-		packet.write8(0)
+		packet.writeString("app:/TransformiceAIR.swf/[[DYNAMIC]]/2/[[DYNAMIC]]/4").writeString(room)
 
-		await self.main.send(packet)
+		if self.bot_role:
+			packet.write8(0).writeString('')
+		else:
+			packet.write32(self.authkey ^ self.keys.auth)
+			packet.write8(0).writeString('')
+			packet.cipher(self.keys.identification)
+
+		await self.main.send(packet.write8(0))
 
 	def run(self, api_tfmid: int, api_token: str, username: str, password: str, **kwargs):
 		"""A blocking call that does the event loop initialization for you.
@@ -1039,38 +1101,19 @@ class Client:
 			loop.create_task(bot.start(api_id, api_token))
 			loop.run_forever()
 		"""
-		if self.auto_restart:
-			self.auto_restart = False
-			warnings.warn(
-				"The usage of Client.run and Client.auto_restart is not allowed. "
-				"Use Client.start method to enable automatic restart."
-			)
-
-		keys = kwargs.pop('keys', None)
-		asyncio.ensure_future(self.start(api_tfmid, api_token, keys=keys), loop=self.loop)
-		self.loop.run_until_complete(self.wait_for('on_login_ready'))
-		asyncio.ensure_future(self.login(username, password, **kwargs), loop=self.loop)
-
 		try:
-			self._close_event_loop = True
-			self.loop.run_forever()
+			self.loop.run_until_complete(self.start(api_tfmid, api_token, username=username, password=password, **kwargs))
 		finally:
 			self.loop.run_until_complete(self.loop.shutdown_asyncgens())
 			self.loop.close()
 
 	def close(self):
 		"""Closes the sockets."""
-		self.main.close()
-		if self.bulle is not None:
-			self.bulle.close()
+		if self._closed:
+			return
 
-		if self._hb_task is not None and not self._hb_task.done():
-			self._hb_task.cancel()
-
-		if not self.auto_restart and self.loop.is_running():
-			if self._close_event_loop:
-				# The process is not exited if the loop is still running in self.run
-				self.loop.stop()
+		self._closed = True
+		self._close_event.set_result(('stop', 0, None))
 
 	async def sendCP(self, code: int, data: bytes = b'') -> int:
 		"""|coro|

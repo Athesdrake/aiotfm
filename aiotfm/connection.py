@@ -1,7 +1,9 @@
-from asyncio import AbstractEventLoop, Protocol, Transport
+import asyncio
+from asyncio import AbstractEventLoop, Protocol, BaseTransport, Transport
 from typing import Optional, Tuple
 
 import aiotfm  # circular import, don't `import from`
+from aiotfm.errors import AiotfmException
 
 
 class TFMProtocol(Protocol):
@@ -46,10 +48,7 @@ class TFMProtocol(Protocol):
 			self.client.dispatch('connection_error', self.connection, exc)
 
 		if self.connection.name == "main":
-			if self.client.auto_restart:
-				self.client.loop.create_task(self.client.restart_soon())
-			else:
-				self.client.close()
+			self.client._close_event.set_result(('connection_lost', 10, None))
 
 
 class Connection:
@@ -68,6 +67,9 @@ class Connection:
 		self.fingerprint: int = 0
 		self.open: bool = False
 
+	def __bool__(self):
+		return self.open
+
 	def _factory(self):
 		return Connection.PROTOCOL(self)
 
@@ -76,7 +78,7 @@ class Connection:
 		Connect the client to the host:port
 		"""
 		self.address = (host, port)
-		self.transport, self.protocol = await self.loop.create_connection(self._factory, host, port)
+		self.transport, self.protocol = await asyncio.wait_for(self.loop.create_connection(self._factory, host, port), 3)
 
 	async def send(self, packet: 'aiotfm.Packet', cipher: bool = False):
 		"""|coro|
@@ -86,7 +88,7 @@ class Connection:
 		:param cipher: :class:`bool` whether or not the packet should be ciphered before sending it.
 		"""
 		if not self.open:
-			return
+			raise AiotfmException('Cannot send a packet to a closed Connection.')
 
 		if not self.client.bot_role and cipher:
 			packet.xor_cipher(self.client.keys.msg, self.fingerprint)

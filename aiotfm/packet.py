@@ -36,7 +36,6 @@ class Packet:
 		return bytes(self.buffer)
 
 	@classmethod
-	def new(cls, c: Union[int, list, tuple], cc: Optional[int] = None):
 		"""Create a new instance of Packet initialized by two bytes: c and cc."""
 		if isinstance(c, (tuple, list)):
 			c, cc = c
