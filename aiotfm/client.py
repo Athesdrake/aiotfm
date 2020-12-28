@@ -17,7 +17,7 @@ from aiotfm.player import Player, Profile
 from aiotfm.room import Room, RoomList
 from aiotfm.shop import Shop
 from aiotfm.tribe import Tribe
-from aiotfm.utils import Keys, Locale, get_keys, shakikoo
+from aiotfm.utils import Keys, Locale, get_ip, get_keys, shakikoo
 
 
 class Client:
@@ -906,7 +906,7 @@ class Client:
 		if self._close_event is None:
 			raise AiotfmException(f'{self._connect.__name__} should not be called directly. Use start() instead.')
 
-		for port in random.sample([13801, 11801, 12801, 14801], 4):
+		for port in random.sample(self.keys.server_ports, 4):
 			try:
 				await self.main.connect(self.keys.server_ip, port)
 			except Exception:
@@ -951,7 +951,7 @@ class Client:
 		:param api_token: Optional[:class:`str`] your token to access the API.
 		"""
 		if self.bot_role:
-			self.keys = Keys(version=666)
+			self.keys = await get_ip()
 		else:
 			if self.auto_restart and api_tfmid is None or api_token is None:
 				warnings.warn("The api token were not provided. The Client won't be able to restart.")

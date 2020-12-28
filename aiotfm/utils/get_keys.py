@@ -13,8 +13,33 @@ class Keys:
 		self.msg = [k & 0xff for k in keys.pop('msg_keys', [])]
 		self.packet = keys.pop('packet_keys', [])
 		self.version = keys.pop('version', 0)
-		self.server_ip = keys.pop('ip', '51.75.130.180')
+		self.server_ip = keys.pop('ip', '37.187.29.8')
+		self.server_ports = keys.pop('ports', [11801, 12801, 13801, 14801])
 		self.kwargs = keys
+
+
+async def get_ip():
+	"""|coro|
+	Fetch the game IP and ports, useful for bots with the official role.
+	"""
+	url = 'https://api.tocuto.tk/get_transformice_ip.php'
+	headers = {"User-Agent": f"Mozilla/5.0 aiotfm/{__version__}"}
+
+	async with aiohttp.ClientSession() as session:
+		async with session.get(url, headers=headers) as resp:
+			data = await resp.text()
+
+	if data == "unknown":
+		raise EndpointError("Can't get the game IP.")
+
+	ip, ports = data.split(":")
+	ports = list(map(int, ports.split("-")))
+
+	return Keys(
+		version=666,
+		ip=ip,
+		ports=ports
+	)
 
 
 async def get_keys(tfm_id, token):
