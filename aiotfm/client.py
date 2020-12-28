@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import random
 import sys
 import traceback
@@ -18,6 +19,8 @@ from aiotfm.room import Room, RoomList
 from aiotfm.shop import Shop
 from aiotfm.tribe import Tribe
 from aiotfm.utils import Keys, Locale, get_ip, get_keys, shakikoo
+
+logger = logging.getLogger('aiotfm')
 
 
 class Client:
