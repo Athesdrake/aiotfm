@@ -5,11 +5,13 @@ import sys
 import traceback
 import warnings
 from typing import AnyStr, Callable, List, Optional, Union, ByteString
+from typing import AnyStr, ByteString, Callable, List, Optional, Union
 
 from aiotfm.connection import Connection
 from aiotfm.enums import Community, GameMode, TradeError
 from aiotfm.errors import AiotfmException, AlreadyConnected, CommunityPlatformError, \
 	IncorrectPassword, InvalidEvent, LoginError, ServerUnreachable, MaintenanceError
+	IncorrectPassword, InvalidEvent, LoginError, MaintenanceError, ServerUnreachable
 from aiotfm.friend import Friend, FriendList
 from aiotfm.inventory import Inventory, InventoryItem, Trade
 from aiotfm.message import Channel, ChannelMessage, Message, Whisper
@@ -41,6 +43,7 @@ class Client:
 	loop: Optional[event loop]
 		The `event loop`_ to use for asynchronous operations. If ``None`` is passed (defaults),
 		the event loop used will be ``asyncio.get_event_loop()``.
+
 	max_retries: Optional[:class:`int`]
 		The maximum number of retries the client should attempt while connecting to the game.
 
@@ -112,6 +115,10 @@ class Client:
 	@property
 	def closed(self) -> bool:
 		return self._closed
+
+	def _backoff(self, n: int) -> float:
+		"""Returns the numbers of seconds to wait until the n-th connection attempt. Capped at 10 minutes."""
+		return random.uniform(0, 10 * 2 ** min(n, 6))
 
 	def data_received(self, data: bytes, connection: Connection):
 		"""|coro|
@@ -892,6 +899,7 @@ class Client:
 	async def on_connection_error(self, conn: Connection, error: Exception):
 		"""Default on_connection_error event handler. Prints the error."""
 		print('{0.__class__.__name__}: {0}'.format(error), file=sys.stderr)
+		logger.error('The %s connection has been closed.', conn.name, exc_info=error)
 
 	async def on_login_result(self, code: int, *args):
 		"""Default on_login_result handler. Raise an error and closes the connection."""
@@ -914,6 +922,7 @@ class Client:
 				await self.main.connect(self.keys.server_ip, port)
 			except Exception:
 				pass
+				logger.debug(f'Unable to connect to the server "{self.keys.server_ip}:{port}".')
 			else:
 				break
 		else:
@@ -981,10 +990,12 @@ class Client:
 
 			try:
 				logger.debug('Trying to connect')
+				logger.info('Connecting to the game.')
 				await self._connect()
 				await self.sendHandshake()
 				await self.locale.load()
 				retries = 0 # Connection successful
+				self._restarting = False
 			except Exception as e:
 				logger.error('ouch')
 				if on_started is not None:
@@ -994,6 +1005,9 @@ class Client:
 				else:
 					retries += 1
 					await asyncio.sleep(5 * retries)
+					backoff = self._backoff(retries)
+					logger.info('Attempt %d failed. Reconnecting in %.2fs', retries, backoff)
+					await asyncio.sleep(backoff)
 					continue
 			else:
 				if on_started is not None:
@@ -1005,6 +1019,8 @@ class Client:
 				await asyncio.wait((self._close_event,), timeout=15)
 
 			reason, delay, on_started = self._close_event.result()
+			logger.debug('[Close Event] Reason: %s, Delay: %d, Fut: %s', reason, delay, on_started)
+			logger.debug('Will auto restart: %s', self.auto_restart)
 			if reason == 'stop' or not self.auto_restart:
 				break
 
@@ -1021,14 +1037,19 @@ class Client:
 
 			# Fetch some fresh keys
 			if not self.bot_role:
+			if not self.bot_role and (reason != 'restart' or self.keys is None):
 				for i in range(self._max_retries):
 					try:
 						self.keys = await get_keys(api_tfmid, api_token)
 						break
 					except MaintenanceError:
+						if i == 0:
+							logger.info('The game is under maintenance.')
+
 						await asyncio.sleep(30)
 				else:
 					raise MaintenanceError('The game is under an intensive maintenance.')
+					raise MaintenanceError('The game is under heavy maintenance.')
 
 	async def restart_soon(self, delay: float = 5.0, **kwargs):
 		"""|coro|
@@ -1044,6 +1065,9 @@ class Client:
 		Restarts the client.
 
 		:param keys:"""
+		:param delay: the delay before restarting. By default, there is no delay.
+		:param keys:
+		"""
 		if not self.auto_restart or self._close_event is None:
 			raise AiotfmException(
 				'Unable to restart the Client. Either `auto_restart` is set to '
@@ -1056,6 +1080,7 @@ class Client:
 		if keys is not None:
 			self.keys = keys
 
+		self.keys = keys
 		self._restarting = True
 		# :desc: Notify when the client restarts.
 		self.dispatch("restart")
@@ -1127,6 +1152,7 @@ class Client:
 		:return: :class:`int` returns the sequence id.
 		"""
 		self._sequenceId = sid = (self._sequenceId + 1) % 0XFFFFFFFF
+		self._sequenceId = sid = (self._sequenceId + 1) % 0xFFFFFFFF
 
 		packet = Packet.new(60, 3).write16(code)
 		packet.write32(self._sequenceId).writeBytes(data)
