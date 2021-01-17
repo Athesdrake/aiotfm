@@ -642,16 +642,6 @@ class Client:
 					print(CCC, TC, bytes(packet.buffer)[4:])
 				return False
 
-		elif CCC == (100, 67): # New inventory item
-			slot = packet.read8()
-			slot = None if slot == 0 else slot
-			item_id = packet.read16()
-			quantity = packet.read16()
-
-			item = InventoryItem(item_id=item_id, quantity=quantity, slot=slot)
-			self.inventory[item_id] = item
-			self.dispatch('new_item', item)
-
 		elif CCC == (144, 1): # Set player list
 			before = self.room.players
 			self.room.players = {}
@@ -1371,7 +1361,7 @@ class Client:
 		Send a request to the server to get the shop list."""
 		await self.main.send(Packet.new(8, 20))
 
-	async def startTrade(self, player: Union[Player, str]):
+	async def startTrade(self, player: Union[Player, str]) -> Trade:
 		"""|coro|
 		Starts a trade with the given player.
 
