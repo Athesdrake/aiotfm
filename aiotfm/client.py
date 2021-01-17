@@ -291,8 +291,6 @@ class Client:
 			self.authkey = packet.read32()
 			self._logged = False
 
-			await connection.send(Packet.new(176, 2).writeUTF(language))
-
 			os_info = Packet.new(28, 17).writeString('en').writeString('Linux')
 			os_info.writeString('LNX 29,0,0,140').write8(0)
 
@@ -1092,6 +1090,7 @@ class Client:
 			packet.write8(0).writeString('')
 			packet.cipher(self.keys.identification)
 
+		await self.main.send(Packet.new(176, 1).writeUTF(self.community.name))
 		await self.main.send(packet.write8(0))
 
 	def run(self, api_tfmid: int, api_token: str, username: str, password: str, **kwargs):
