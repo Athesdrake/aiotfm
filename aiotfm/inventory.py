@@ -180,6 +180,9 @@ class TradeContainer:
 		self.trade: Trade = trade
 		self._content: List[InventoryItem] = []
 
+	def __iter__(self):
+		return iter(self._content)
+
 	def get(self, item_id: int, default: int = 0) -> int:
 		"""Returns the quantity of an item inside the TradeContainer.
 		:param item_id: :class:`int` the item's id.
