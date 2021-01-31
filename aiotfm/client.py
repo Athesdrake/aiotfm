@@ -1,8 +1,6 @@
 import asyncio
 import logging
 import random
-import sys
-import traceback
 import warnings
 from typing import AnyStr, ByteString, Callable, List, Optional, Union
 
@@ -132,10 +130,7 @@ class Client:
 		# the packet.
 		# :param packet: :class:`aiotfm.Packet` a copy of the packet.
 		self.dispatch('raw_socket', connection, Packet(data))
-		try:
-			self.loop.create_task(self.handle_packet(connection, Packet(data)))
-		except Exception:
-			traceback.print_exc()
+		self.loop.create_task(self.handle_packet(connection, Packet(data)))
 
 	async def handle_packet(self, connection: Connection, packet: Packet) -> bool:
 		"""|coro|
@@ -877,10 +872,7 @@ class Client:
 
 	async def on_error(self, event: str, err: Exception, *a, **kw):
 		"""Default on_error event handler. Prints the traceback of the error."""
-		message = '\nAn error occurred while dispatching the event "{0}":\n\n{2}'
-		tb = traceback.format_exc(limit=-3)
-		print(message.format(event, err, tb), file=sys.stderr)
-		return message.format(event, err, tb)
+		logger.error('An error occurred while dispatching the event "%s":', event, exc_info=-3)
 
 	async def on_connection_error(self, conn: Connection, error: Exception):
 		"""Default on_connection_error event handler. Prints the error."""
