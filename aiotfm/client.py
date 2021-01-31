@@ -820,11 +820,11 @@ class Client:
 				# except asyncio.CancelledError:
 				# 	raise
 				except Exception:
-					if not self.auto_restart:
-						self.close()
-				finally:
 					if self.auto_restart:
-						asyncio.ensure_future(self.restart_soon(), loop=self.loop)
+						await self.restart(5)
+					else:
+						self.close()
+
 		return False
 
 	def dispatch(self, event: str, *args, **kwargs):
