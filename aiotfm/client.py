@@ -770,7 +770,7 @@ class Client:
 			@client.event
 			async def on_room_message(author, message):
 				if message == 'id':
-					await client.sendCommand('profile '+author)
+					await client.sendCommand(f'profile {author.username}')
 					profile = await client.wait_for('on_profile', lambda p: p.username == author)
 					await client.sendRoomMessage('Your id: {}'.format(profile.id))
 
@@ -880,7 +880,7 @@ class Client:
 
 	async def on_login_result(self, code: int, *args):
 		"""Default on_login_result handler. Raise an error and closes the connection."""
-		self.loop.call_later(5, self.close)
+		self.loop.call_later(3, self.close)
 		if code == 1:
 			raise AlreadyConnected()
 		if code == 2:
@@ -962,7 +962,6 @@ class Client:
 		keep_alive = Packet.new(26, 26)
 		while True:
 			self._close_event = asyncio.Future()
-
 			try:
 				logger.info('Connecting to the game.')
 				await self._connect()
@@ -971,7 +970,7 @@ class Client:
 				retries = 0 # Connection successful
 				self._restarting = False
 			except Exception as e:
-				logger.error('ouch')
+				logger.error('Connection to the server failed.', exc_info=e)
 				if on_started is not None:
 					on_started.set_exception(e)
 				elif retries > self._max_retries:
@@ -987,22 +986,25 @@ class Client:
 					on_started.set_result(None)
 
 			while not self._close_event.done():
-				# Keep the connection alive
+				# Keep the connection(s) alive
 				await asyncio.gather(*[c.send(keep_alive) for c in (self.main, self.bulle) if c])
 				await asyncio.wait((self._close_event,), timeout=15)
 
 			reason, delay, on_started = self._close_event.result()
-			logger.debug('[Close Event] Reason: %s, Delay: %d, Fut: %s', reason, delay, on_started)
-			logger.debug('Will auto restart: %s', self.auto_restart)
+			self._close_event = asyncio.Future()
+
+			logger.debug('[Close Event] Reason: %s, Delay: %d, Callback: %s', reason, delay, on_started)
+			logger.debug('Will restart: %s', reason != 'stop' and self.auto_restart)
+
+			# clean up
+			for conn in (self.main, self.bulle):
+				if conn is not None:
+					conn.close()
+
 			if reason == 'stop' or not self.auto_restart:
 				break
 
 			await asyncio.sleep(delay)
-
-			# clean up
-			if self.bulle is not None:
-				self.bulle.close()
-			self.main.close()
 
 			# If we don't recreate the connection, we won't be able to connect.
 			self.main = Connection('main', self, self.loop)
@@ -1044,7 +1046,7 @@ class Client:
 				'False or you have not started the Client using `Client.start`.'
 			)
 
-		if self._restarting:
+		if self._restarting or self._close_event.done():
 			return
 
 		self.keys = keys

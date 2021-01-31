@@ -53,7 +53,7 @@ class TFMProtocol(Protocol):
 			# :param exception: :class:`Exception` the error which occurred.
 			self.client.dispatch('connection_error', self.connection, exc)
 
-		if self.connection.name == "main":
+		if self.connection.name == "main" and not self.client._close_event.done():
 			self.client._close_event.set_result(('connection_lost', 10, None))
 
 
