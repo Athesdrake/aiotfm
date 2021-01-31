@@ -116,7 +116,7 @@ class Client:
 
 	def _backoff(self, n: int) -> float:
 		"""Returns the numbers of seconds to wait until the n-th connection attempt. Capped at 10 minutes."""
-		return random.uniform(0, 10 * 2 ** min(n, 6))
+		return random.uniform(20, 30 * 2 ** min(n, 5))
 
 	def data_received(self, data: bytes, connection: Connection):
 		"""|coro|
