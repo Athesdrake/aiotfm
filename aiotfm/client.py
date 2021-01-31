@@ -918,7 +918,7 @@ class Client:
 		packet.writeString('Desktop').writeString('-').write32(0x1fbd).writeString('')
 		packet.writeString('74696720697320676f6e6e61206b696c6c206d7920626f742e20736f20736164')
 		packet.writeString(
-			"A=t&SA=t&SV=t&EV=t&MP3=t&AE=t&VE=t&ACC=t&PR=t&SP=f&SB=f&DEB=f&V=LNX 29,0,0,140&M=Adobe"
+			"A=t&SA=t&SV=t&EV=t&MP3=t&AE=t&VE=t&ACC=t&PR=t&SP=f&SB=f&DEB=f&V=LNX 32,0,0,182&M=Adobe"
 			" Linux&R=1920x1080&COL=color&AR=1.0&OS=Linux&ARCH=x86&L=en&IME=t&PR32=t&PR64=t&LS=en-U"
 			"S&PT=Desktop&AVD=f&LFD=f&WD=f&TLS=t&ML=5.1&DP=72")
 		packet.write32(0).write32(0x6257).writeString('')
