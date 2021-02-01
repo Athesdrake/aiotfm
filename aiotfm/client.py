@@ -1031,6 +1031,7 @@ class Client:
 		:param delay: :class:`float` the delay before restarting. Default is 5 seconds.
 		:param args: arguments to pass to the :meth:`Client.restart` method.
 		:param kwargs: keyword arguments to pass to the :meth:`Client.restart` method."""
+		warnings.warn('`Client.restart_soon` is deprecated, use `Client.restart` instead.', DeprecationWarning)
 		await self.restart(delay, **kwargs)
 
 	async def restart(self, delay: float = 0, keys: Optional[Keys] = None):
