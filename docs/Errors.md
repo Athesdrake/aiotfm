@@ -57,3 +57,12 @@
 ## TradeOnWrongState
 **Exception thrown when the client try an impossible action on trade due to its state.**
 
+## InvalidAccountError
+**Exception thrown when a server action does not find a user.**
+
+## FriendLimitError
+**Exception thrown when your friend list is full.**
+
+## CantFriendPlayerError
+**Exception thrown when the server does not let you friend a player.**
+

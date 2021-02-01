@@ -19,6 +19,7 @@ Two argument can be passed to the [`Client`](#Client).**
 | trades | `list` | ✕ |  All the trades that the bot participates. Most of them might be invitations only. |
 | inventory | [`Inventory`](Inventory.md#Inventory) | ✔ |  The bot's inventory. Might be None if the bot didn't log in yet or it didn't receive anything. |
 | locale | [`Locale`](Locale.md#Locale) | ✕ |  The bot's locale (translations). |
+| friends | [`FriendList`](Friends.md#FriendList) | ✔ |  The bot's friend list |
 
 
 ### Methods
@@ -295,13 +296,6 @@ _coroutine_ Client.**whisper**(_self, username, message, overflow_) <a id="Clien
 > * **username** - `str` the player to whisper.
 > * **message** - `str` the content of the whisper.
 > * **overflow** - `bool` will send the complete message if True, splitted
-
----
-
-_coroutine_ Client.**getFriendList**(_self_) <a id="Client.getFriendList" href="#Client.getFriendList">¶</a>
->
->Get the client's friend list>
->__Returns:__ List[[`Friend`](Friend.md)]  List of friends
 
 ---
 

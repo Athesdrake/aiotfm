@@ -146,3 +146,17 @@
 
 ---
 
+## Game
+**Enumerates the different Atelier801 games.**
+
+| Item | Value |
+|:---- |:-----:|
+| INVALID | *`0`* |
+| TRANSFORMICE | *`4`* |
+| FORTORESSE | *`6`* |
+| BOUBOUM | *`7`* |
+| NEKODANCER | *`15`* |
+| DEADMAZE | *`17`* |
+
+---
+

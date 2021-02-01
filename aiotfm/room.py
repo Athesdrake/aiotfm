@@ -1,5 +1,9 @@
-from aiotfm.errors import AiotfmException
+from typing import Any, Callable, List, Optional, Union
+
 from aiotfm.enums import GameMode
+from aiotfm.errors import AiotfmException
+from aiotfm.packet import Packet
+from aiotfm.player import Player
 
 
 class Room:
@@ -14,29 +18,29 @@ class Room:
 	players: `list[:class:`aiotfm.Player`]`
 		The list containing all the players of the room.
 	"""
-	def __init__(self, name, official=False):
-		self.name = name
-		self.official = official
-		self.players = {}
+	def __init__(self, name: str, official: bool = False):
+		self.name: str = name
+		self.official: bool = official
+		self.players: dict = {}
 
 	def __repr__(self):
 		return "<Room name={} official={}>".format(self.name, self.official)
 
 	@property
-	def community(self):
+	def community(self) -> str:
 		"""Returns the room's community."""
 		if self.name.startswith('*'):
 			return 'xx'
 		return self.name.split('-', 1)[0]
 
 	@property
-	def is_tribe(self):
+	def is_tribe(self) -> bool:
 		"""Returns true if it's a tribe house."""
 		return self.name.startswith('*\x03')
 
 	@property
-	def display_name(self):
-		"""Return the display name of the room.
+	def display_name(self) -> str:
+		r"""Return the display name of the room.
 		It removes the \x03 char from the tribe house and the community from the public rooms."""
 		if self.is_tribe:
 			return self.name.replace('\x03', '')
@@ -44,7 +48,7 @@ class Room:
 			return self.name
 		return self.name.split('-', 1)[1]
 
-	def get_players(self, predicate, max_=None):
+	def get_players(self, predicate: Callable, max_: Optional[int] = None) -> List[Player]:
 		"""Filters players from the room.
 
 		:param predicate: A function that returns a boolean-like result to filter through
@@ -53,7 +57,7 @@ class Room:
 		:return: `Iterable` The filtered players."""
 		return [p for p in self.players.values() if predicate(p)][:max_]
 
-	def get_player(self, default=None, **kwargs):
+	def get_player(self, default: Optional[Any] = None, **kwargs) -> Union[Player, Any]:
 		"""Gets one player in the room with an identifier.
 
 		:param kwargs: Which identifier to use. Can be either name, username, id or pid.
@@ -91,19 +95,19 @@ class RoomEntry:
 	)
 
 	def __init__(
-		self, name, language, country, player_count,
-		limit=0, is_funcorp=False, is_pinned=False,
-		command='', args=''
+		self, name: str, language: str, country: str, player_count: int,
+		limit: int = 0, is_funcorp: bool = False, is_pinned: bool = False,
+		command: str = '', args: str = ''
 	):
-		self.name = name
-		self.language = language
-		self.country = country
-		self.player_count = player_count
-		self.limit = limit
-		self.is_funcorp = is_funcorp
-		self.is_pinned = is_pinned
-		self.command = command
-		self.args = args
+		self.name: str = name
+		self.language: str = language
+		self.country: str = country
+		self.player_count: int = player_count
+		self.limit: int = limit
+		self.is_funcorp: bool = is_funcorp
+		self.is_pinned: bool = is_pinned
+		self.command: str = command
+		self.args: str = args
 
 	def __repr__(self):
 		return '<{} {}>'.format(
@@ -134,18 +138,21 @@ class RoomList:
 	gamemodes: List[:class:`aiotfm.enums.GameMode`]
 		The list of gamemodes available.
 	"""
-	def __init__(self, gamemode, rooms, pinned_rooms, gamemodes):
-		self.gamemode = gamemode
-		self.rooms = rooms
-		self.pinned_rooms = pinned_rooms
-		self.gamemodes = gamemodes
+	def __init__(
+		self, gamemode: GameMode, rooms: List[RoomEntry],
+		pinned_rooms: List[RoomEntry], gamemodes: List[GameMode]
+	):
+		self.gamemode: GameMode = gamemode
+		self.rooms: List[RoomEntry] = rooms
+		self.pinned_rooms: List[RoomEntry] = pinned_rooms
+		self.gamemodes: List[GameMode] = gamemodes
 
 	@classmethod
-	def from_packet(cls, packet):
+	def from_packet(cls, packet: Packet):
 		gamemodes = [GameMode(packet.read8()) for _ in range(packet.read8())]
 		gamemode = GameMode(packet.read8())
-		rooms = []
-		pinned = []
+		rooms: List[RoomEntry] = []
+		pinned: List[RoomEntry] = []
 
 		while packet.pos < len(packet.buffer):
 			is_pinned = packet.readBool()
@@ -162,7 +169,7 @@ class RoomList:
 					player_count = int(player_count)
 
 				if command == 'lm':
-					entries = []
+					entries: List[RoomEntry] = []
 					room = DropdownRoomEntry(entries, name, language, country, player_count)
 
 					for mode in args.split('&~'):

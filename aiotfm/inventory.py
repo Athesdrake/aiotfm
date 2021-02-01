@@ -1,11 +1,12 @@
 import asyncio
-
 from functools import cmp_to_key
+from typing import List, Optional, Union
 
-from aiotfm.packet import Packet
-from aiotfm.player import Player
+import aiotfm
 from aiotfm.enums import TradeState
 from aiotfm.errors import TradeOnWrongState
+from aiotfm.packet import Packet
+from aiotfm.player import Player
 
 
 class InventoryItem:
@@ -30,41 +31,42 @@ class InventoryItem:
 	slot: `int`
 		Define the equipped slot with this item. If slot is 0 then the item is not equipped.
 	"""
-	def __init__(self, item_id, **kwargs):
-		self.id = item_id
-		self.quantity = kwargs.get("quantity", 0)
-		self.inventory = kwargs.get("inventory", None)
+	def __init__(self, item_id: int, **kwargs):
+		self.id: int = item_id
+		self.quantity: int = kwargs.get("quantity", 0)
+		self.inventory: Optional[Inventory] = kwargs.get("inventory", None)
 
-		self.can_use = kwargs.get("can_use", True)
-		self.category = kwargs.get("category", 0)
-		self.img_id = kwargs.get("img_id", str(self.id))
-		self.is_event = kwargs.get("is_event", False)
-		self.slot = kwargs.get("slot", 0)
+		self.can_use: bool = kwargs.get("can_use", True)
+		self.category: int = kwargs.get("category", 0)
+		self.img_id: str = kwargs.get("img_id", str(self.id))
+		self.is_event: bool = kwargs.get("is_event", False)
+		self.slot: int = kwargs.get("slot", 0)
 
 	def __repr__(self):
-		return "<InventoryItem id={} quantity={}>".format(self.id, self.quantity)
+		return f"<InventoryItem id={self.id} quantity={self.quantity}>"
 
-	def __eq__(self, other):
-		return self.id == other.id
+	def __eq__(self, other: object):
+		if isinstance(other, InventoryItem):
+			return self.id == other.id
+		return NotImplemented
 
 	@property
-	def image_url(self):
+	def image_url(self) -> str:
 		"""The image's url of the item."""
-		url = 'https://www.transformice.com/images/x_transformice/x_inventaire/{.img_id}.jpg'
-		return url.format(self)
+		return f'https://www.transformice.com/images/x_transformice/x_inventaire/{self.img_id}.jpg'
 
 	@property
-	def is_currency(self):
+	def is_currency(self) -> bool:
 		"""Return True if the item is a currency."""
 		return self.id in (800, 801, 2253, 2254, 2257, 2260, 2261)
 
 	@property
-	def is_equipped(self):
+	def is_equipped(self) -> bool:
 		"""Return True if the item is equipped"""
 		return self.slot > 0
 
 	@classmethod
-	def from_packet(cls, packet):
+	def from_packet(cls, packet: Packet):
 		"""Read an item from a packet.
 		:param packet: :class:`aiotfm.Packet` the packet.
 		:return: :class:`aiotfm.inventory.InventoryItem` the item.
@@ -91,7 +93,7 @@ class InventoryItem:
 		"""|coro|
 		Uses this item."""
 		if self.inventory is None or self.inventory.client is None:
-			message = "InventoryItem doesn't have the inventory variable ""or Inventory doesn't \
+			message = "InventoryItem doesn't have the inventory variable or Inventory doesn't \
 				have the client variable."
 			raise TypeError(message)
 		await self.inventory.client.main.send(Packet.new(31, 3).write16(self.id))
@@ -108,31 +110,31 @@ class Inventory:
 	client: `aiotfm.client.Client`
 		The client that this inventory belongs to.
 	"""
-	def __init__(self, client=None, items=None):
-		self.items = items or {}
-		self.client = client
+	def __init__(self, client: 'aiotfm.Client' = None, items: dict = None):
+		self.items: dict = items or {}
+		self.client: aiotfm.Client = client
 
 		for item in self:
 			item.inventory = self
 
 	def __repr__(self):
-		return "<Inventory client={!r}>".format(self.client)
+		return f"<Inventory client={self.client!r}>"
 
 	def __iter__(self):
 		return iter(self.items.values())
 
-	def __getitem__(self, index):
+	def __getitem__(self, index: int):
 		if not isinstance(index, int):
-			raise TypeError("Index must be int, not {}".format(type(index)))
+			raise TypeError(f"Index must be int, not {type(index)}")
 		return self.items[index]
 
-	def __setitem__(self, index, value):
+	def __setitem__(self, index: int, value: InventoryItem):
 		if not isinstance(index, int):
-			raise TypeError("Index must be int, not {}".format(type(index)))
+			raise TypeError(f"Index must be int, not {type(index)}")
 		self.items[index] = value
 
 	@classmethod
-	def from_packet(cls, packet):
+	def from_packet(cls, packet: Packet):
 		"""Read the inventory from a packet.
 		:param packet: :class:`aiotfm.Packet` the packet.
 		:return: :class:`aiotfm.inventory.Inventory` the inventory.
@@ -145,18 +147,18 @@ class Inventory:
 
 		return cls(items=items)
 
-	def get(self, item_id):
+	def get(self, item_id: int) -> InventoryItem:
 		"""Gets an item from this :class:`aiotfm.inventory.Inventory`.
 		Shorthand for :class:`aiotfm.inventory.Inventory`.items.get"""
 		return self.items.get(item_id, InventoryItem(item_id))
 
-	def getEquipped(self):
+	def getEquipped(self) -> List[InventoryItem]:
 		"""Return all equipped items. Items are sorted.
 		:return: List[:class:`aiotfm.inventory.InventoryItem`]
 		"""
 		return sorted((i for i in self.items.values() if i.is_equipped), key=lambda i: i.slot)
 
-	def sort(self):
+	def sort(self) -> List[InventoryItem]:
 		"""Sort the inventory the same way the client does.
 		:return: List[:class:`aiotfm.inventory.InventoryItem`]
 		"""
@@ -174,11 +176,14 @@ class Inventory:
 
 class TradeContainer:
 	"""Represents the content of a Trade."""
-	def __init__(self, trade):
-		self.trade = trade
-		self._content = []
+	def __init__(self, trade: 'Trade'):
+		self.trade: Trade = trade
+		self._content: List[InventoryItem] = []
 
-	def get(self, item_id, default=0):
+	def __iter__(self):
+		return iter(self._content)
+
+	def get(self, item_id: int, default: int = 0) -> int:
 		"""Returns the quantity of an item inside the TradeContainer.
 		:param item_id: :class:`int` the item's id.
 		:param default: Optional[:class:`int`] the default value if the item is not present.
@@ -187,16 +192,17 @@ class TradeContainer:
 		for item in self._content:
 			if item.id == item_id:
 				return item.quantity
+
 		return default
 
-	def getSlot(self, index):
+	def getSlot(self, index: int) -> InventoryItem:
 		"""Returns the item inside a certain slot.
 		:param index: :class:`int` the index.
 		:return: :class:`aiotfm.inventory.InventoryItem` the item.
 		"""
 		return self._content[index]
 
-	def add(self, item_id, quantity):
+	def add(self, item_id: int, quantity: int):
 		"""Add a quantity of an item inside the container.
 		:param item_id: :class:`int` the item's id.
 		:param quantity: :class:`int` the quantity to add. Can be negative.
@@ -233,16 +239,16 @@ class Trade:
 			TRADING:   the only state of the trade where you are able to add items.
 			CANCELLED: the trade has been cancelled by one of the parties.
 			SUCCESS:   the trade finished successfully."""
-	def __init__(self, client, trader):
-		self.client = client
-		self.trader = trader
-		self.locked = [False, False] # 0: trader, 1: client
+	def __init__(self, client: 'aiotfm.Client', trader: Union[Player, str]):
+		self.client: aiotfm.Client = client
+		self.trader: str = trader
+		self.locked: List[bool] = [False, False] # 0: trader, 1: client
 
-		self.imports = TradeContainer(self)
-		self.exports = TradeContainer(self)
+		self.imports: TradeContainer = TradeContainer(self)
+		self.exports: TradeContainer = TradeContainer(self)
 
-		self.state = TradeState.ON_INVITE
-		self.pid = -1
+		self.state: TradeState = TradeState.ON_INVITE
+		self.pid: int = -1
 
 		if isinstance(trader, str):
 			trader = client.room.get_player(name=trader)
@@ -263,17 +269,17 @@ class Trade:
 
 	def __repr__(self):
 		return "<Trade state={} locked=[trader:{}, client:{}] trader={} pid={}>".format(
-			TradeState[self.state], *self.locked, self.trader, self.pid)
+			self.state.name, *self.locked, self.trader, self.pid)
 
-	def __eq__(self, other):
-		if other is None:
-			return False
-		if self.pid == -1 or other.pid == -1:
-			return self.trader.lower() == other.trader.lower()
-		return self.pid == other.pid
+	def __eq__(self, other: object):
+		if isinstance(other, Trade):
+			if self.pid == -1 or other.pid == -1:
+				return self.trader.lower() == other.trader.lower()
+			return self.pid == other.pid
+		return NotImplemented
 
 	@property
-	def closed(self):
+	def closed(self) -> bool:
 		"""Returns True if the trade is closed."""
 		return self.state in (TradeState.SUCCESS, TradeState.CANCELLED)
 
@@ -281,7 +287,7 @@ class Trade:
 		"""Set the state of the trade as TRADING."""
 		self.state = TradeState.TRADING
 
-	def _close(self, succeed=False):
+	def _close(self, succeed: bool = False):
 		"""Closes the trade."""
 		self.state = TradeState.SUCCESS if succeed else TradeState.CANCELLED
 		if self.client.trade == self:
@@ -310,7 +316,7 @@ class Trade:
 		self.state = TradeState.ACCEPTING
 		await self.client.main.send(Packet.new(31, 5).writeString(self.trader))
 
-	async def addItem(self, item_id, quantity):
+	async def addItem(self, item_id: int, quantity: int):
 		"""|coro|
 		Adds an item to the trade.
 
@@ -332,7 +338,7 @@ class Trade:
 			await self.client.main.send(Packet(unit))
 			await asyncio.sleep(.05)
 
-	async def removeItem(self, item_id, quantity):
+	async def removeItem(self, item_id: int, quantity: int):
 		"""|coro|
 		Removes an item from the trade.
 

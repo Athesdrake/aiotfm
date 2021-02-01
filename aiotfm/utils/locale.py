@@ -1,5 +1,6 @@
 import re
 import zlib
+
 import aiohttp
 
 from aiotfm.errors import InvalidLocale
