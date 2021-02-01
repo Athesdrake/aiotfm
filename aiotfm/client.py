@@ -952,7 +952,7 @@ class Client:
 		if 'username' in kwargs and 'password' in kwargs:
 			# Monkey patch the on_login_ready event
 			if hasattr(self, 'on_login_ready'):
-				event = self.on_login_ready
+				event = getattr(self, 'on_login_ready')
 				self.on_login_ready = lambda *a: asyncio.gather(self.login(**kwargs), event(*a))
 			else:
 				self.on_login_ready = lambda *a: self.login(**kwargs)
