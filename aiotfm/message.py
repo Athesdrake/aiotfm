@@ -130,7 +130,7 @@ class ChannelMessage(Message):
 	def __init__(self, author: Player, community: ChatCommunity, content: str, channel: Channel):
 		super().__init__(author, content, channel._client)
 		self.channel: Channel = channel
-		self.community: ChatCommunity = ChatCommunity(community)
+		self.community: ChatCommunity = ChatCommunity(community
 
 	async def reply(self, message: str):
 		"""|coro|
