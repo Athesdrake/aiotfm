@@ -65,7 +65,7 @@ class Client:
 
 	def __init__(
 		self,
-		community: Community = Community.en,
+		community: int = Community.en,
 		auto_restart: bool = False,
 		bot_role: bool = False,
 		loop: Optional[asyncio.AbstractEventLoop] = None,
