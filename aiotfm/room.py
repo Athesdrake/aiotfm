@@ -192,7 +192,7 @@ class RoomList:
 				player_count = packet.read16()
 				limit = packet.read8()
 				is_funcorp = packet.readBool()
-
+				packet.readBool()
 				rooms.append(RoomEntry(
 					name, language, country, player_count,
 					limit=limit, is_funcorp=is_funcorp
