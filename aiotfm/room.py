@@ -122,7 +122,6 @@ class RoomEntry:
 		self.mice_mass: int = mice_mass
 		self.map_rotation: list = map_rotation
 
-
 	def __repr__(self):
 		return '<{} {}>'.format(
 			self.__class__.__name__,
