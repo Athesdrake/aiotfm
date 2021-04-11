@@ -91,13 +91,17 @@ class Room:
 class RoomEntry:
 	__slots__ = (
 		'name', 'language', 'country', 'player_count', 'limit',
-		'is_funcorp', 'is_pinned', 'command', 'args'
+		'is_funcorp', 'is_pinned', 'command', 'args', 'is_modified',
+		'shaman_skills', 'consumables', 'adventure', 'collision',
+		'aie', 'map_duration', 'mice_mass', 'map_rotation'
 	)
 
 	def __init__(
 		self, name: str, language: str, country: str, player_count: int,
 		limit: int = 0, is_funcorp: bool = False, is_pinned: bool = False,
-		command: str = '', args: str = ''
+		command: str = '', args: str = '', is_modified: bool = False, shaman_skills: bool = True,
+		consumables: bool = True, adventure: bool = True, collision: bool = False, aie: bool = False,
+		map_duration: int = 100, mice_mass: int = 100, map_rotation: list = []
 	):
 		self.name: str = name
 		self.language: str = language
@@ -108,6 +112,15 @@ class RoomEntry:
 		self.is_pinned: bool = is_pinned
 		self.command: str = command
 		self.args: str = args
+		self.is_modified: bool = is_modified
+		self.shaman_skills: bool = shaman_skills
+		self.consumables: bool = consumables
+		self.adventure: bool = adventure
+		self.collision: bool = collision
+		self.aie: bool = aie
+		self.map_duration: int = map_duration
+		self.mice_mass: int = mice_mass
+		self.map_rotation: list = map_rotation
 
 	def __repr__(self):
 		return '<{} {}>'.format(
@@ -192,10 +205,43 @@ class RoomList:
 				player_count = packet.read16()
 				limit = packet.read8()
 				is_funcorp = packet.readBool()
+				is_modified = packet.readBool()
+
+				kwargs = {
+					"limit": limit,
+					"is_funcorp": is_funcorp,
+				}
+
+				# Read the modified properties
+				if is_modified:
+					shaman_skills = not packet.readBool()
+					consumables = not packet.readBool()
+					adventure = not packet.readBool()
+					collision = packet.readBool()
+					aie = packet.readBool()
+					map_duration = packet.read8()
+					mice_mass = packet.read32()
+					map_rotation = []
+
+					for i in range(0, packet.read8()):
+						map_rotation.append(packet.read8())
+
+					# Append the room's specific properties
+					kwargs.update({
+						"is_modified": is_modified,
+						"shaman_skills": shaman_skills,
+						"consumables": consumables,
+						"adventure": adventure,
+						"collision": collision,
+						"aie": aie,
+						"map_duration": map_duration,
+						"mice_mass": mice_mass,
+						"map_rotation": map_rotation
+					})
 
 				rooms.append(RoomEntry(
 					name, language, country, player_count,
-					limit=limit, is_funcorp=is_funcorp
+					**kwargs
 				))
 
 		return cls(gamemode, rooms, pinned, gamemodes)
