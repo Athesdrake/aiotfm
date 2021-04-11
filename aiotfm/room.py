@@ -206,7 +206,6 @@ class RoomList:
 				limit = packet.read8()
 				is_funcorp = packet.readBool()
 				is_modified = packet.readBool()
-				print(is_modified)
 
 				kwargs = {
 					"limit": limit,
@@ -230,12 +229,12 @@ class RoomList:
 					# Append the room's specific properties
 					kwargs.update({
 						"is_modified": is_modified,
-				  		"shaman_skills": shaman_skills,
+						"shaman_skills": shaman_skills,
 						"consumables": consumables,
-				   		"adventure": adventure,
+						"adventure": adventure,
 						"collision": collision,
 						"aie": aie,
-				   		"map_duration": map_duration,
+						"map_duration": map_duration,
 						"mice_mass": mice_mass,
 						"map_rotation": map_rotation
 					})
