@@ -206,6 +206,12 @@ class RoomList:
 				limit = packet.read8()
 				is_funcorp = packet.readBool()
 				is_modified = packet.readBool()
+				print(is_modified)
+
+				kwargs = {
+					"limit": limit,
+					"is_funcorp": is_funcorp,
+				}
 
 				# Read the modified properties
 				if is_modified:
@@ -217,21 +223,26 @@ class RoomList:
 					map_duration = packet.read8()
 					mice_mass = packet.read32()
 					map_rotation = []
+
 					for i in range(0, packet.read8()):
 						map_rotation.append(packet.read8())
 
-					rooms.append(RoomEntry(
-						name, language, country, player_count,
-						limit=limit, is_funcorp=is_funcorp, is_modified=is_modified,
-						shaman_skills=shaman_skills, consumables=consumables,
-						adventure=adventure, collision=collision, aie=aie,
-						map_duration=map_duration, mice_mass=mice_mass,
-						map_rotation=map_rotation
-					))
-				else:
-					rooms.append(RoomEntry(
-						name, language, country, player_count,
-						limit=limit, is_funcorp=is_funcorp
-					))
+					# Append the room's specific properties
+					kwargs.update({
+						"is_modified": is_modified,
+				  		"shaman_skills": shaman_skills,
+						"consumables": consumables,
+				   		"adventure": adventure,
+						"collision": collision,
+						"aie": aie,
+				   		"map_duration": map_duration,
+						"mice_mass": mice_mass,
+						"map_rotation": map_rotation
+					})
+
+				rooms.append(RoomEntry(
+					name, language, country, player_count,
+					**kwargs
+				))
 
 		return cls(gamemode, rooms, pinned, gamemodes)
