@@ -1079,7 +1079,7 @@ class Client:
 		packet.writeString("app:/TransformiceAIR.swf/[[DYNAMIC]]/2/[[DYNAMIC]]/4").writeString(room)
 
 		if self.bot_role:
-			packet.write8(0).writeString('')
+			packet.write16(0).write8(0).writeString('')
 		else:
 			packet.write32(self.authkey ^ self.keys.auth)
 			packet.write8(0).writeString('')
