@@ -43,7 +43,11 @@ python3 -m pip install .
 
 ### Requirements
 
-aiotfm require python 3.6 or higher and [aiohttp](https://github.com/aio-libs/aiohttp).
+aiotfm require python 3.7 or higher and [aiohttp](https://github.com/aio-libs/aiohttp).
+
+### Python 3.6
+
+Python 3.6 support is not guaranteed since [v1.4.3](https://github.com/Athesdrake/aiotfm/releases/tag/v1.4.3) as Python 3.6 has reached EOF.
 
 #### Python 3.5
 
