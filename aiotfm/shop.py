@@ -276,7 +276,7 @@ class ShopItem(Item):
 		"""
 		return cls(
 			packet.read16(), packet.read16(), packet.read8(), packet.readBool(),
-			packet.read8(), packet.read32(), packet.read32(), packet.read16()
+			packet.read8(), packet.read32(), packet.read32(), packet.read32() if packet.readBool() else 0
 		)
 
 
