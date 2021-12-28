@@ -29,7 +29,6 @@ jobs:
       - name: Check errors with flake8
         run: flake8 aiotfm --count --select F6,F7,F82,E9
       - name: Check errors with pylint
-        if: ${{ matrix.python-version != '3.9' }} # https://github.com/PyCQA/pylint/issues/3882
         run: pylint aiotfm --disable=all --enable=E
   deploy:
     needs: lint
