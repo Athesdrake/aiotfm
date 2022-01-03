@@ -22,7 +22,7 @@ async def get_ip():
 	"""|coro|
 	Fetch the game IP and ports, useful for bots with the official role.
 	"""
-	url = 'https://api.tocuto.tk/tfm/get/ip'
+	url = 'https://cheese.formice.com/api/tfm/ip'
 	headers = {"User-Agent": f"Mozilla/5.0 aiotfm/{__version__}"}
 
 	async with aiohttp.ClientSession() as session:
