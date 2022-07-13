@@ -20,8 +20,8 @@ class Player:
 		The player's title id. 0 if unknown
 	title_stars: :class:`int`
 		The player's title's stars.
-	hasCheese: :class:`bool`
-		True if the player has the cheese.
+	cheeses: :class:`int`
+		Amount of cheese the player has.
 	isDead: :class:`bool`
 		True if the player is dead.
 	isShaman: :class:`bool`
@@ -64,7 +64,7 @@ class Player:
 		self.title_stars = kwargs.get('title_stars', 0)
 		self.username = username
 
-		self.hasCheese = kwargs.get('hasCheese', False)
+		self.cheeses = kwargs.get('cheeses', 0)
 		self.isDead = kwargs.get('isDead', False)
 		self.isShaman = kwargs.get('isShaman', False)
 		self.isVampire = kwargs.get('isVampire', False)
@@ -101,9 +101,9 @@ class Player:
 		pid = packet.read32()
 		kwargs = {
 			'isShaman': packet.readBool(),
-			'isDead': packet.readBool(),
+			'isDead': packet.read8() > 0, # may be bigger than 1?
 			'score': packet.read16(),
-			'hasCheese': packet.readBool(),
+			'cheeses': packet.read8(),
 			'title': packet.read16(),
 			'title_stars': packet.read8() - 1,
 			'gender': packet.read8(),
@@ -116,6 +116,7 @@ class Player:
 		shamanColor = packet.read32()
 		packet.read32() # ???
 		color = packet.read32()
+		packet.read8() # respawn id?
 		nameColor = -1 if color == 0xFFFFFFFF else color
 
 		kwargs.update({
@@ -144,6 +145,11 @@ class Player:
 	def isGuest(self):
 		"""Return True if the player is a guest (Souris)"""
 		return self.username.startswith('*')
+
+	@property
+	def hasCheese(self):
+		"""Return True if the player has cheese."""
+		return self.cheeses > 0
 
 
 class Profile:
