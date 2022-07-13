@@ -18,20 +18,38 @@ class Keys:
 		self.kwargs = keys
 
 
+async def request_api(url):
+	"""|coro|
+	Sends a GET request to the specified URL, expecting a JSON response.
+	If the client is unable to receive a proper JSON response,
+	an empty dictionary is returned.
+
+	:param url: :class:`str` The URL to send the request to.
+	"""
+	headers = {"User-Agent": f"Mozilla/5.0 aiotfm/{__version__}"}
+
+	try:
+		async with aiohttp.ClientSession() as session:
+			async with session.get(url, headers=headers) as resp:
+				return await resp.json()
+	except aiohttp.ClientError:
+		return {}
+
+
 async def get_ip():
 	"""|coro|
 	Fetch the game IP and ports, useful for bots with the official role.
 	"""
 	url = 'https://cheese.formice.com/api/tfm/ip'
-	headers = {"User-Agent": f"Mozilla/5.0 aiotfm/{__version__}"}
+	data = await request_api(url)
 
-	async with aiohttp.ClientSession() as session:
-		async with session.get(url, headers=headers) as resp:
-			data = await resp.json()
-
-	success = data.pop('success', False)
-	error = data.pop('error', '').capitalize()
-	description = data.pop('description', 'No description were provided.')
+	if not len(data):
+		# Empty dictionary, request failed, let's use default server IP
+		success = True
+	else:
+		success = data.pop('success', False)
+		error = data.pop('error', '').capitalize()
+		description = data.pop('description', 'No description was provided.')
 
 	if not success:
 		if error == 'Maintenance':
@@ -53,15 +71,11 @@ async def get_keys(tfm_id, token):
 	:param token: :class:`str` your api token.
 	"""
 	url = f'https://api.tocuto.tk/tfm/get/keys/{tfm_id}/{token}'
-	headers = {"User-Agent": f"Mozilla/5.0 aiotfm/{__version__}"}
-
-	async with aiohttp.ClientSession() as session:
-		async with session.get(url, headers=headers) as resp:
-			data = await resp.json()
+	data = await request_api(url)
 
 	success = data.pop('success', False)
 	error = data.pop('error', '').capitalize()
-	description = data.pop('description', 'No description were provided.')
+	description = data.pop('description', 'No description was provided.')
 
 	if not success:
 		if error == 'Maintenance':
