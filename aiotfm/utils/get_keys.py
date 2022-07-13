@@ -13,7 +13,7 @@ class Keys:
 		self.msg = [k & 0xff for k in keys.pop('msg', [])]
 		self.packet = keys.pop('packet', [])
 		self.version = keys.pop('version', 0)
-		self.server_ip = keys.pop('ip', '37.187.29.8')
+		self.server_ip = keys.pop('ip', '193.70.81.30')
 		self.server_ports = keys.pop('ports', [11801, 12801, 13801, 14801])
 		self.kwargs = keys
 
