@@ -62,7 +62,7 @@ class Locale:
 	locale: :class:`str`
 		The locale name.
 	"""
-	BASE_URL = 'http://transformice.com/langues/tfz_{}'
+	BASE_URL = 'http://transformice.com/langues/tfm-{}.gz'
 
 	def __init__(self, locale='en'):
 		self._locale = locale
