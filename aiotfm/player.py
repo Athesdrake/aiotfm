@@ -258,6 +258,12 @@ class Stats:
 	modeStats: `list`
 		A list of tuples that represents the stats in different mode.
 		(id, progress, progressLimit, imageId)
+	noSkillNormalModeSaves: `int`
+		Number of shaman saves in normal mode without skills.
+	noSkillHardModeSaves: `int`
+		Number of shaman saves in hard mode without skills.
+	noSkillDivineModeSaves: `int`
+		Number of shaman saves in divine mode without skills.
 	"""
 	def __init__(self, stats, modeStats):
 		self.normalModeSaves = stats[0]
@@ -267,8 +273,8 @@ class Stats:
 		self.firsts = stats[2]
 		self.gatheredCheese = stats[3]
 		self.bootcamps = stats[5]
-		self.noSkillNormalModeSaves[7]
-		self.noSkillHardModeSaves[8]
-		self.noSkillDivineModeSaves[9]
+		self.noSkillNormalModeSaves = stats[7]
+		self.noSkillHardModeSaves = stats[8]
+		self.noSkillDivineModeSaves = stats[9]
 
 		self.modeStats = modeStats # id, progress, progressLimit, imageId
