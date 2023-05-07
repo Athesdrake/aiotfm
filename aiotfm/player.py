@@ -201,7 +201,7 @@ class Profile:
 		self.gender = packet.read8()
 		self.tribe = packet.readUTF() or None
 		self.soulmate = packet.readUTF() or None
-		stats = [packet.read32() for i in range(7)]
+		stats = [packet.read32() for i in range(10)]
 		self.title = packet.read16()
 
 		self.titles = set()
@@ -230,7 +230,7 @@ class Profile:
 		for _ in range(packet.read8()):
 			self.orbs.add(packet.read8())
 
-		packet.readBool()
+		self.isOnline = packet.readBool()
 		self.adventurePoints = packet.read32()
 
 
@@ -265,5 +265,8 @@ class Stats:
 		self.firsts = stats[2]
 		self.gatheredCheese = stats[3]
 		self.bootcamps = stats[5]
+		self.noSkillNormalModeSaves[7]
+		self.noSkillHardModeSaves[8]
+		self.noSkillDivineModeSaves[9]
 
 		self.modeStats = modeStats # id, progress, progressLimit, imageId
