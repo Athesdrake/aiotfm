@@ -93,4 +93,7 @@ Player.**hasCheese**(_self_) <a id="Player.hasCheese" href="#Player.hasCheese">�
 | gatheredCheese | `int` | ✕ |  Total number of gathered cheese. |
 | bootcamps | `int` | ✕ |  Number of bootcamp. |
 | modeStats | `list` | ✕ |  A list of tuples that represents the stats in different mode. (id, progress, progressLimit, imageId) |
+| noSkillNormalModeSaves | `int` | ✕ |  Number of shaman saves in normal mode without skills. |
+| noSkillHardModeSaves | `int` | ✕ |  Number of shaman saves in hard mode without skills. |
+| noSkillDivineModeSaves | `int` | ✕ |  Number of shaman saves in divine mode without skills. |
 
