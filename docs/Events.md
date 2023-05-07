@@ -1,5 +1,20 @@
 # Events' Documentation
 
+## on_connection_made(_connection_)
+Called when a connection has been successfully made with the server.
+>__Parameters:__
+> * **connection** - [`Connection`](#Connection) the connection that has been made.
+
+---
+
+## on_connection_error(_connection, exception_)
+Called when a connection has been lost due to an error.
+>__Parameters:__
+> * **connection** - [`Connection`](#Connection) the connection that has been lost.
+> * **exception** - `Exception` the error which occurred.
+
+---
+
 ## on_raw_socket(_connection, packet_)
 Called when a socket receives a packet. Does not interfere with [`handle_packet`](#Client.handle_packet).
 >__Parameters:__
@@ -158,7 +173,7 @@ Called when the client receives its inventory's content.
 Called when the quantity of an item has been updated.
 >__Parameters:__
 > * **item** - [`InventoryItem`](Inventory.md#InventoryItem) the new item.
-> * **previous** - [`InventoryItem`](Inventory.md#InventoryItem) the previous item.
+> * **previous** - `int` the previous quantity.
 
 ---
 
@@ -374,30 +389,8 @@ Called when a player leaves the room.
 
 ---
 
-## on_heartbeat(_time_)
-Called at each heartbeat.
->__Parameters:__
-> * **time** - `float` the time took to send the keep-alive packet.
-
----
-
 ## on_restart()
 Notify when the client restarts.
-
----
-
-## on_connection_made(_connection_)
-Called when a connection has been successfully made with the server.
->__Parameters:__
-> * **connection** - [`Connection`](#Connection) the connection that has been made.
-
----
-
-## on_connection_error(_connection, exception_)
-Called when a connection has been lost due to an error.
->__Parameters:__
-> * **connection** - [`Connection`](#Connection) the connection that has been lost.
-> * **exception** - `Exception` the error which occurred.
 
 ---
 

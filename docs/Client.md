@@ -23,6 +23,23 @@ Two argument can be passed to the [`Client`](#Client).**
 
 
 ### Methods
+@*property*<br>
+Client.**restarting**(_self_) <a id="Client.restarting" href="#Client.restarting">¶</a>
+>
+>
+---
+
+@*property*<br>
+Client.**closed**(_self_) <a id="Client.closed" href="#Client.closed">¶</a>
+>
+>
+---
+
+Client.**\_backoff**(_self, n_) <a id="Client._backoff" href="#Client._backoff">¶</a>
+>
+>Returns the numbers of seconds to wait until the n-th connection attempt. Capped at 10 minutes.
+---
+
 Client.**data\_received**(_self, data, connection_) <a id="Client.data_received" href="#Client.data_received">¶</a>
 >
 >Dispatches the received data.
@@ -82,11 +99,6 @@ _coroutine_ Client.**handle\_old\_packet**(_self, connection, oldCCC, data_) <a 
 
 ---
 
-_coroutine_ Client.**\_heartbeat\_loop**(_self_) <a id="Client._heartbeat_loop" href="#Client._heartbeat_loop">¶</a>
->
->Send a packet every fifteen seconds to stay connected to the game.
----
-
 Client.**get\_channel**(_self, name_) <a id="Client.get_channel" href="#Client.get_channel">¶</a>
 >
 >Returns a channel from it's name or None if not found.
@@ -125,7 +137,7 @@ Client.**wait\_for**(_self, event, condition, timeout, stopPropagation_) <a id="
 >@client.event
 >async def on_room_message(author, message):
 >	if message == 'id':
->		await client.sendCommand('profile '+author)
+>		await client.sendCommand(f'profile {author.username}')
 >		profile = await client.wait_for('on_profile', lambda p: p.username == author)
 >		await client.sendRoomMessage('Your id: {}'.format(profile.id))
 >```
@@ -133,7 +145,7 @@ Client.**wait\_for**(_self, event, condition, timeout, stopPropagation_) <a id="
 >__Parameters:__
 > * **event** - `str` the event name.
 > * **condition** - Optionnal[`function`] A predicate to check what to wait for.
-> * **timeout** - Optionnal[`int`] the number of seconds before
+> * **timeout** - Optionnal[`float`] the number of seconds before
 >
 >__Returns:__ [`asyncio.Future`](https://docs.python.org/3/library/asyncio-future.html#asyncio.Future)
 
@@ -181,7 +193,7 @@ _coroutine_ Client.**on\_login\_result**(_self, code, \*args_) <a id="Client.on_
 >Default on_login_result handler. Raise an error and closes the connection.
 ---
 
-_coroutine_ Client.**connect**(_self_) <a id="Client.connect" href="#Client.connect">¶</a>
+_coroutine_ Client.**\_connect**(_self_) <a id="Client._connect" href="#Client._connect">¶</a>
 >
 >Creates a connection with the main server.
 ---
@@ -191,7 +203,7 @@ _coroutine_ Client.**sendHandshake**(_self_) <a id="Client.sendHandshake" href="
 >Sends the handshake packet so the server recognizes this socket as a player.
 ---
 
-_coroutine_ Client.**start**(_self, api_tfmid, api_token, keys_) <a id="Client.start" href="#Client.start">¶</a>
+_coroutine_ Client.**start**(_self, api_tfmid, api_token, keys, \*\*kwargs_) <a id="Client.start" href="#Client.start">¶</a>
 >
 >Starts the client.
 >
@@ -201,20 +213,24 @@ _coroutine_ Client.**start**(_self, api_tfmid, api_token, keys_) <a id="Client.s
 
 ---
 
-_coroutine_ Client.**restart\_soon**(_self, \*args, delay=5.0, \*\*kwargs_) <a id="Client.restart_soon" href="#Client.restart_soon">¶</a>
+_coroutine_ Client.**restart\_soon**(_self, delay, \*\*kwargs_) <a id="Client.restart_soon" href="#Client.restart_soon">¶</a>
 >
 >Restarts the client in several seconds.
 >
 >__Parameters:__
-> * **delay** - `int` the delay before restarting. Default is 5 seconds.
+> * **delay** - `float` the delay before restarting. Default is 5 seconds.
 > * **args** - arguments to pass to the [`restart`](#Client.restart) method.
 > * **kwargs** - keyword arguments to pass to the [`restart`](#Client.restart) method.
 
 ---
 
-_coroutine_ Client.**restart**(_self, keys_) <a id="Client.restart" href="#Client.restart">¶</a>
+_coroutine_ Client.**restart**(_self, delay, keys_) <a id="Client.restart" href="#Client.restart">¶</a>
 >
 >Restarts the client.
+>
+>__Parameters:__
+> * **delay** - the delay before restarting. By default, there is no delay.
+
 ---
 
 _coroutine_ Client.**login**(_self, username, password, encrypted, room_) <a id="Client.login" href="#Client.login">¶</a>
@@ -257,6 +273,8 @@ _coroutine_ Client.**sendCP**(_self, code, data_) <a id="Client.sendCP" href="#C
 >__Parameters:__
 > * **code** - `int` the community platform code.
 > * **data** - [`Packet`](Packet.md) or `bytes` the data.
+>
+>__Returns:__ `int` returns the sequence id.
 
 ---
 
@@ -378,12 +396,12 @@ _coroutine_ Client.**enterInvTribeHouse**(_self, author_) <a id="Client.enterInv
 
 ---
 
-_coroutine_ Client.**recruit**(_self, player_) <a id="Client.recruit" href="#Client.recruit">¶</a>
+_coroutine_ Client.**recruit**(_self, username_) <a id="Client.recruit" href="#Client.recruit">¶</a>
 >
 >Send a recruit request to a player.
 >
 >__Parameters:__
-> * **player** - `str` the player's username you want to recruit.
+> * **username** - `str` the player's username you want to recruit.
 
 ---
 

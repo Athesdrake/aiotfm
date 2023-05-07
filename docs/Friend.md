@@ -57,6 +57,14 @@ _coroutine_ FriendList.**add**(_self, name_) <a id="FriendList.add" href="#Frien
 | roomName | `str` | ✕ |  The player's room name, empty string if isAddedBack is False |
 | lastConnection | [`Date`](#date) | ✕ |  The last connection of the player |
 
+
+### Methods
+@*property*<br>
+Friend.**avatar**(_self_) <a id="Friend.avatar" href="#Friend.avatar">¶</a>
+>
+>Return the player's avatar's url.
+---
+
 Friend.**remove**(_self_) <a id="Friend.remove" href="#Friend.remove">¶</a>
 >
 >Remove this friend. If they're your soulmate, divorce them.

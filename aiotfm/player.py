@@ -189,6 +189,8 @@ class Profile:
 		The equipped orb of the player.
 	orbs: `set`
 		The list of unlocked orbs.
+	isOnline: `bool`
+		Whether or not the player is online. See [#31](https://github.com/Athesdrake/aiotfm/pull/31#issuecomment-1537433271).
 	adventurePoints: `int`
 		Number of adventure points the player has.
 	"""

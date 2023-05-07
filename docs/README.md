@@ -4,10 +4,10 @@ You can find here all documentation on `aiotfm`.
 ## API Reference
 * [Client.md](Client.md)
   * [Client](Client.md#Client)
-    * [Client.\_heartbeat\_loop](Client.md#Client._heartbeat_loop)
+    * [Client.\_backoff](Client.md#Client._backoff)
+    * [Client.\_connect](Client.md#Client._connect)
     * [Client.\_run\_event](Client.md#Client._run_event)
     * [Client.close](Client.md#Client.close)
-    * [Client.connect](Client.md#Client.connect)
     * [Client.data\_received](Client.md#Client.data_received)
     * [Client.dispatch](Client.md#Client.dispatch)
     * [Client.enterInvTribeHouse](Client.md#Client.enterInvTribeHouse)

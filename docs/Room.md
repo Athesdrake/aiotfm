@@ -27,7 +27,7 @@ Room.**is\_tribe**(_self_) <a id="Room.is_tribe" href="#Room.is_tribe">¶</a>
 Room.**display\_name**(_self_) <a id="Room.display_name" href="#Room.display_name">¶</a>
 >
 >Return the display name of the room.
->It removes the  char from the tribe house and the community from the public rooms.
+>It removes the \x03 char from the tribe house and the community from the public rooms.
 ---
 
 Room.**get\_players**(_self, predicate, max__) <a id="Room.get_players" href="#Room.get_players">¶</a>

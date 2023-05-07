@@ -49,6 +49,12 @@ Member.**rank**(_self_) <a id="Member.rank" href="#Member.rank">¶</a>
 ---
 
 @*property*<br>
+Member.**avatar**(_self_) <a id="Member.avatar" href="#Member.avatar">¶</a>
+>
+>Return the player's avatar's url.
+---
+
+@*property*<br>
 Member.**online**(_self_) <a id="Member.online" href="#Member.online">¶</a>
 >
 >return True if the member is online.

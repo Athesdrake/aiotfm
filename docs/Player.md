@@ -12,7 +12,7 @@
 | gender | `int` | ✕ |  The player's gender. |
 | title | `int` | ✕ |  The player's title id. 0 if unknown |
 | title_stars | `int` | ✕ |  The player's title's stars. |
-| hasCheese | `bool` | ✕ |  True if the player has the cheese. |
+| cheeses | `int` | ✕ |  Amount of cheese the player has. |
 | isDead | `bool` | ✕ |  True if the player is dead. |
 | isShaman | `bool` | ✕ |  True if the player is shaman. |
 | isVampire | `bool` | ✕ |  True if the player is vampire. |
@@ -50,6 +50,12 @@ Player.**isGuest**(_self_) <a id="Player.isGuest" href="#Player.isGuest">¶</a>
 >Return True if the player is a guest (Souris)
 ---
 
+@*property*<br>
+Player.**hasCheese**(_self_) <a id="Player.hasCheese" href="#Player.hasCheese">¶</a>
+>
+>Return True if the player has cheese.
+---
+
 ## Profile
 **Represents a player's profile.**
 
@@ -71,6 +77,7 @@ Player.**isGuest**(_self_) <a id="Player.isGuest" href="#Player.isGuest">¶</a>
 | stats | `Stats` | ✕ |  The player's stats. |
 | equippedOrb | `int` | ✕ |  The equipped orb of the player. |
 | orbs | `set` | ✕ |  The list of unlocked orbs. |
+| isOnline | `bool` | ✕ |  Whether or not the player is online. See [#31](https://github.com/Athesdrake/aiotfm/pull/31#issuecomment-1537433271). |
 | adventurePoints | `int` | ✕ |  Number of adventure points the player has. |
 
 ## Stats

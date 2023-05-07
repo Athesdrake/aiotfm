@@ -132,7 +132,7 @@
 | VANILLA | *`3`* |
 | SURVIVOR | *`8`* |
 | RACING | *`9`* |
-| DEFILENTE | *`10`* |
+| DEFILANTE | *`10`* |
 | MUSIC | *`11`* |
 | SHAMAN | *`13`* |
 | VILLAGE | *`16`* |

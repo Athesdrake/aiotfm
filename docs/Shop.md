@@ -113,7 +113,7 @@ Item.**parse**(_cls, cat, string_) <a id="Item.parse" href="#Item.parse">¶</a>
 | id_ | `int` | ✔ |  The item's id. |
 | colors | `int` | ✔ |  The item's colors. |
 | is_new | `bool` | ✔ |  True if it's a new item. |
-| flag | `int` | ✔ |  Contains the item's metadata. |
+| flags | `int` | ✔ |  Contains the item's metadata. |
 | cheese | `int` | ✔ |  The item's price in cheese. |
 | fraise | `int` | ✔ |  The item's price in fraise. |
 | special | `int` | ✔ |  The item's special data. |
@@ -126,7 +126,7 @@ Item.**parse**(_cls, cat, string_) <a id="Item.parse" href="#Item.parse">¶</a>
 | colors | `int` | ✕ |  The item's colors. |
 | nbr_colors | `int` | ✕ |  The number of customizable colors the item has. |
 | is_new | `bool` | ✕ |  True if it's a new item. |
-| flag | `int` | ✕ |  Contains the item's metadata. |
+| flags | `int` | ✕ |  Contains the item's metadata. |
 | cheese | `int` | ✕ |  The item's price in cheese. |
 | fraise | `int` | ✕ |  The item's price in fraise. |
 | special | `int` | ✕ |  The item's special data. |
@@ -159,13 +159,13 @@ ShopItem.**from\_packet**(_cls, packet_) <a id="ShopItem.from_packet" href="#Sho
 | :-: | :-: | :-: | :-- |
 | look | `str` | ✔ |  The outfit's look. |
 | id_ | `int` | ✕ |  The outfit's id. |
-| flag | `int` | ✔ |  Contains the outfit's metadata. |
+| flags | `int` | ✔ |  Contains the outfit's metadata. |
 
 | Attributes | Type | Can be None | Description |
 | :-: | :-: | :-: | :-- |
 | look | `str` | ✕ |  The outfit's look. |
 | id | `int` | ✕ |  The outfit's id. |
-| flag | `int` | ✕ |  Contains the outfit's metadata. |
+| flags | `int` | ✕ |  Contains the outfit's metadata. |
 
 
 ### Methods
@@ -267,7 +267,7 @@ Outfit.**hands**(_self_) <a id="Outfit.hands" href="#Outfit.hands">¶</a>
 | id_ | `int` | ✔ |  The object's id. |
 | colors | `int` | ✔ |  The number of customizable colors the object has. |
 | is_new | `bool` | ✔ |  The object's metadata. |
-| flag | `int` | ✔ |  Contains the object's metadata. |
+| flags | `int` | ✔ |  Contains the object's metadata. |
 | cheese | `int` | ✔ |  The obect's pricein cheese. |
 | fraise | `int` | ✔ |  The obect's pricein fraise. |
 
@@ -276,7 +276,7 @@ Outfit.**hands**(_self_) <a id="Outfit.hands" href="#Outfit.hands">¶</a>
 | id | `int` | ✕ |  The object's id. |
 | colors | `int` | ✕ |  The number of customizable colors the object has. |
 | is_new | `bool` | ✕ |  The object's metadata. |
-| flag | `int` | ✕ |  Contains the object's metadata. |
+| flags | `int` | ✕ |  Contains the object's metadata. |
 | cheese | `int` | ✕ |  The obect's pricein cheese. |
 | fraise | `int` | ✕ |  The obect's pricein fraise. |
 
