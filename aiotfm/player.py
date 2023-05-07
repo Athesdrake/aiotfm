@@ -230,7 +230,7 @@ class Profile:
 		for _ in range(packet.read8()):
 			self.orbs.add(packet.read8())
 
-		self.isonline = packet.readBool()
+		self.isOnline = packet.readBool()
 		self.adventurePoints = packet.read32()
 
 
