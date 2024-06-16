@@ -36,3 +36,16 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.dynamic]
 version = { attr = "aiotfm.__version__.__version__" }
 readme = { file = ["README.md"] }
+
+[tool.ruff]
+target-version = "py38"
+line-length = 120
+exclude = ["docs", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "G", "ISC", "I", "W", "UP", "TCH", "PT"]
+ignore = ["ISC001", "W191"]
+
+[tool.ruff.format]
+indent-style = "tab"
+docstring-code-format = true
