@@ -20,19 +20,19 @@ class Message:
 	content: `str`
 		The actual content of the message.
 	"""
+
 	def __init__(self, author: Player, content: str, client: Client):
 		self.author: Player = author
 		self.content: str = content
 		self._client: Client = client
 
 	def __str__(self):
-		return f'[{self.author}] {self.content}'
+		return f"[{self.author}] {self.content}"
 
 	def __repr__(self):
-		return '<{.__class__.__name__} {}>'.format(self, ' '.join(
-			'='.join((k, repr(v)[:32])) for k, v in vars(self).items()
-			if not k.startswith('_')
-		))
+		return "<{.__class__.__name__} {}>".format(
+			self, " ".join("=".join((k, repr(v)[:32])) for k, v in vars(self).items() if not k.startswith("_"))
+		)
 
 
 class Whisper(Message):
@@ -52,6 +52,7 @@ class Whisper(Message):
 	sent: `bool`
 		True if the author is the client.
 	"""
+
 	def __init__(self, author: Player, community: ChatCommunity, receiver: Player, content: str, client: Client):
 		super().__init__(author, content, client)
 		self.receiver: Player = receiver
@@ -59,10 +60,10 @@ class Whisper(Message):
 		self.sent: bool = self.author == client.username
 
 	def __str__(self):
-		direction = '<' if self.sent else '>'
+		direction = "<" if self.sent else ">"
 		author = self.receiver if self.sent else self.author
-		commu = '' if self.sent else f'[{self.community.name}] '
-		return f'{direction} {commu}[{author}] {self.content}'
+		commu = "" if self.sent else f"[{self.community.name}] "
+		return f"{direction} {commu}[{author}] {self.content}"
 
 	async def reply(self, msg: str):
 		"""|coro|
@@ -79,12 +80,13 @@ class Channel:
 	name: `str`
 		The actual channel's name.
 	"""
+
 	def __init__(self, name: str, client: Client):
 		self.name: str = name
 		self._client: Client = client
 
 	def __repr__(self):
-		return f'<Channel name={self.name}>'
+		return f"<Channel name={self.name}>"
 
 	def __eq__(self, other):
 		if isinstance(other, str):
@@ -109,11 +111,12 @@ class Channel:
 
 		:throws: :class:`asyncio.TimeoutError`
 		:return: List[:class:`aiotfm.Player`]"""
+
 		def check(idseq, players):
 			return idseq == idSequence
 
 		idSequence = await self._client.sendCP(58, Packet().writeString(self.name))
-		_, players = await self._client.wait_for('on_channel_who', check, timeout=3)
+		_, players = await self._client.wait_for("on_channel_who", check, timeout=3)
 		return players
 
 
@@ -130,6 +133,7 @@ class ChannelMessage(Message):
 		The author's community. Note: the community isn't the author's language!
 	content: `str`
 		The actual content of the message."""
+
 	def __init__(self, author: Player, community: ChatCommunity, content: str, channel: Channel):
 		super().__init__(author, content, channel._client)
 		self.channel: Channel = channel
@@ -143,4 +147,4 @@ class ChannelMessage(Message):
 		await self.channel.send(message)
 
 	def __str__(self):
-		return f'(#{self.channel.name}) [{self.community.value}] [{self.author}] {self.content}'
+		return f"(#{self.channel.name}) [{self.community.value}] [{self.author}] {self.content}"

@@ -35,6 +35,7 @@ class InventoryItem:
 	slot: `int`
 		Define the equipped slot with this item. If slot is 0 then the item is not equipped.
 	"""
+
 	def __init__(self, item_id: int, **kwargs):
 		self.id: int = item_id
 		self.quantity: int = kwargs.get("quantity", 0)
@@ -57,7 +58,7 @@ class InventoryItem:
 	@property
 	def image_url(self) -> str:
 		"""The image's url of the item."""
-		return f'https://www.transformice.com/images/x_transformice/x_inventaire/{self.img_id}.jpg'
+		return f"https://www.transformice.com/images/x_transformice/x_inventaire/{self.img_id}.jpg"
 
 	@property
 	def is_currency(self) -> bool:
@@ -77,20 +78,20 @@ class InventoryItem:
 		"""
 		item_id = packet.read16()
 		kwargs = {
-			'quantity': packet.read8(),
-			'category': packet.read8(),
-			'is_event': packet.readBool(),
-			'can_use': packet.readBool()
+			"quantity": packet.read8(),
+			"category": packet.read8(),
+			"is_event": packet.readBool(),
+			"can_use": packet.readBool(),
 		}
-		packet.readBool() # similar to `can_use`
-		packet.readBool() # similar to `can_use`
+		packet.readBool()  # similar to `can_use`
+		packet.readBool()  # similar to `can_use`
 		packet.readBool()
 		packet.readBool()
 		if packet.readBool():
-			kwargs['img_id'] = packet.readUTF()
+			kwargs["img_id"] = packet.readUTF()
 
 		# if equipped, this is the slot (1, 2, 3); otherwise this is 0
-		kwargs['slot'] = packet.read8()
+		kwargs["slot"] = packet.read8()
 		return cls(item_id, **kwargs)
 
 	async def use(self):
@@ -114,6 +115,7 @@ class Inventory:
 	client: `aiotfm.client.Client`
 		The client that this inventory belongs to.
 	"""
+
 	def __init__(self, client: Client = None, items: dict = None):
 		self.items: dict = items or {}
 		self.client: Client = client
@@ -166,20 +168,22 @@ class Inventory:
 		"""Sort the inventory the same way the client does.
 		:return: List[:class:`aiotfm.inventory.InventoryItem`]
 		"""
+
 		def cmp(a, b):
 			if (a.is_currency or b.is_currency) and not (a.is_currency and b.is_currency):
-				return -1 if a.is_currency else 1 # Currency are always on the top
+				return -1 if a.is_currency else 1  # Currency are always on the top
 			if (a.is_event or b.is_event) and not (a.is_event and b.is_event):
-				return -1 if a.is_event else 1 # Event items comes always after the currency
+				return -1 if a.is_event else 1  # Event items comes always after the currency
 			if a.category != b.category:
-				return b.category - a.category # Higher means first
-			return a.id - b.id # Lastly the items are sorted by their ids
+				return b.category - a.category  # Higher means first
+			return a.id - b.id  # Lastly the items are sorted by their ids
 
 		return sorted(iter(self), key=cmp_to_key(cmp))
 
 
 class TradeContainer:
 	"""Represents the content of a Trade."""
+
 	def __init__(self, trade: Trade):
 		self.trade: Trade = trade
 		self._content: list[InventoryItem] = []
@@ -243,10 +247,11 @@ class Trade:
 			TRADING:   the only state of the trade where you are able to add items.
 			CANCELLED: the trade has been cancelled by one of the parties.
 			SUCCESS:   the trade finished successfully."""
+
 	def __init__(self, client: Client, trader: Player | str):
 		self.client: Client = client
 		self.trader: str = trader
-		self.locked: list[bool] = [False, False] # 0: trader, 1: client
+		self.locked: list[bool] = [False, False]  # 0: trader, 1: client
 
 		self.imports: TradeContainer = TradeContainer(self)
 		self.exports: TradeContainer = TradeContainer(self)
@@ -273,7 +278,8 @@ class Trade:
 
 	def __repr__(self):
 		return "<Trade state={} locked=[trader:{}, client:{}] trader={} pid={}>".format(
-			self.state.name, *self.locked, self.trader, self.pid)
+			self.state.name, *self.locked, self.trader, self.pid
+		)
 
 	def __eq__(self, other: object):
 		if isinstance(other, Trade):
@@ -301,13 +307,13 @@ class Trade:
 		# :param trade: :class:`aiotfm.inventory.Trade` the trade object.
 		# :param succed: :class:`bool` whether or not the trade is successful.
 		self.client.trades.pop(self.pid, None)
-		self.client.dispatch('trade_close', self, succeed)
+		self.client.dispatch("trade_close", self, succeed)
 
 	async def cancel(self):
 		"""|coro|
 		Cancels the trade."""
 		if self.state != TradeState.TRADING:
-			raise TradeOnWrongState('cancel', self.state)
+			raise TradeOnWrongState("cancel", self.state)
 
 		await self.client.main.send(Packet.new(31, 6).writeString(self.trader).write8(2))
 
@@ -315,7 +321,7 @@ class Trade:
 		"""|coro|
 		Accepts the trade."""
 		if self.state != TradeState.ON_INVITE:
-			raise TradeOnWrongState('accept', self.state)
+			raise TradeOnWrongState("accept", self.state)
 
 		self.state = TradeState.ACCEPTING
 		await self.client.main.send(Packet.new(31, 5).writeString(self.trader))
@@ -327,20 +333,20 @@ class Trade:
 		:param item_id: :class:`int` The item id.
 		:param quantity: :class:`int` The quantity of item to add."""
 		if self.state != TradeState.TRADING:
-			raise TradeOnWrongState('addItem', self.state)
+			raise TradeOnWrongState("addItem", self.state)
 
 		quantity = min(max(quantity, 0), 200)
 		packet = Packet.new(31, 8).write16(item_id).writeBool(True).buffer
 
-		ten = packet + b'\x01'
+		ten = packet + b"\x01"
 		for _ in range(quantity // 10):
 			await self.client.main.send(Packet(ten))
-			await asyncio.sleep(.05)
+			await asyncio.sleep(0.05)
 
-		unit = packet + b'\x00'
+		unit = packet + b"\x00"
 		for _ in range(quantity % 10):
 			await self.client.main.send(Packet(unit))
-			await asyncio.sleep(.05)
+			await asyncio.sleep(0.05)
 
 	async def removeItem(self, item_id: int, quantity: int):
 		"""|coro|
@@ -349,26 +355,26 @@ class Trade:
 		:param item_id: :class:`int` The item id.
 		:param quantity: :class:`int` The quantity of item to remove."""
 		if self.state != TradeState.TRADING:
-			raise TradeOnWrongState('removeItem', self.state)
+			raise TradeOnWrongState("removeItem", self.state)
 
 		quantity = min(max(quantity, 0), 200)
 		packet = Packet.new(31, 8).write16(item_id).writeBool(False).buffer
 
-		ten = packet + b'\x01'
+		ten = packet + b"\x01"
 		for _ in range(quantity // 10):
 			await self.client.main.send(Packet(ten))
-			await asyncio.sleep(.05)
+			await asyncio.sleep(0.05)
 
-		unit = packet + b'\x00'
+		unit = packet + b"\x00"
 		for _ in range(quantity % 10):
 			await self.client.main.send(Packet(unit))
-			await asyncio.sleep(.05)
+			await asyncio.sleep(0.05)
 
 	async def lock(self):
 		"""|coro|
 		Locks (confirms) the trade."""
 		if self.state != TradeState.TRADING:
-			raise TradeOnWrongState('lock', self.state)
+			raise TradeOnWrongState("lock", self.state)
 		if self.locked[1]:
 			raise TypeError("Can not lock a trade that is already locked by the client.")
 
@@ -378,7 +384,7 @@ class Trade:
 		"""|coro|
 		Unlocks (cancels the confirmation) the trade."""
 		if self.state != TradeState.TRADING:
-			raise TradeOnWrongState('lock', self.state)
+			raise TradeOnWrongState("lock", self.state)
 		if not self.locked[1]:
 			raise TypeError("Can not unlock a trade that is not locked by the client.")
 

@@ -7,19 +7,22 @@ class AiotfmException(Exception):
 
 class LoginError(AiotfmException):
 	"""Exception thrown when the login failed."""
+
 	def __init__(self, code: int):
 		self.code = code
-		super().__init__(f'Login Failed ! Error code: {self.code}.')
+		super().__init__(f"Login Failed ! Error code: {self.code}.")
 
 
 class AlreadyConnected(LoginError):
 	"""Exception thrown when the account provided is already connected."""
+
 	def __init__(self):
 		super().__init__(1)
 
 
 class IncorrectPassword(LoginError):
 	"""Exception thrown when trying to connect with a wrong password."""
+
 	def __init__(self):
 		super().__init__(2)
 
@@ -81,35 +84,40 @@ class XXTEAInvalidKeys(XXTEAError):
 
 class CommunityPlatformError(AiotfmException):
 	"""Exception thrown when the community platform send an error code."""
+
 	def __init__(self, category: int, code: int):
-		super().__init__(f'Internal error: {category}-{code}')
+		super().__init__(f"Internal error: {category}-{code}")
 		self.category = category
 		self.code = code
 
 
 class TradeOnWrongState(AiotfmException):
 	"""Exception thrown when the client try an impossible action on trade due to its state."""
+
 	def __init__(self, action: str, state: TradeState):
-		super().__init__(f'Can not {action} when the trade is {state}.')
+		super().__init__(f"Can not {action} when the trade is {state}.")
 		self.action: str = action
 		self.state: TradeState = state
 
 
 class InvalidAccountError(AiotfmException):
 	"""Exception thrown when a server action does not find a user."""
+
 	def __init__(self, player: str):
-		super().__init__(f'The account {player} does not exist.')
+		super().__init__(f"The account {player} does not exist.")
 		self.player: str = player
 
 
 class FriendLimitError(AiotfmException):
 	"""Exception thrown when your friend list is full."""
+
 	def __init__(self):
-		super().__init__('You can\'t add more friends.')
+		super().__init__("You can't add more friends.")
 
 
 class CantFriendPlayerError(AiotfmException):
 	"""Exception thrown when the server does not let you friend a player."""
+
 	def __init__(self, player: str):
-		super().__init__(f'You can\'t friend the player {player}')
+		super().__init__(f"You can't friend the player {player}")
 		self.player: str = player

@@ -24,6 +24,7 @@ class Tribe:
 	ranks: :class:`list`
 		The ranks' list of the tribe.
 	"""
+
 	def __init__(self, packet: Packet):
 		self.id: int = packet.read32()
 		self.name: str = packet.readUTF()
@@ -38,7 +39,7 @@ class Tribe:
 		for i in range(packet.read16()):
 			self.ranks.append(Rank.from_packet(i, packet))
 
-	def get_member(self, name: Union[Player, str]) -> Optional['Member']:
+	def get_member(self, name: Union[Player, str]) -> Optional["Member"]:
 		"""Returns a member from it's name or None if not found.
 		:param name: :class:`str` or :class:`aiotfm.Player` the name of the member.
 		:return: :class:`aiotfm.tribe.Member` or None
@@ -76,6 +77,7 @@ class Member:
 	online: :class:`bool`
 		True if the member is online.
 	"""
+
 	def __init__(self, tribe: Tribe, packet: Packet):
 		self.tribe: Tribe = tribe
 		self.id: int = packet.read32()
@@ -88,7 +90,7 @@ class Member:
 		self.room: str = packet.readUTF()
 
 	@property
-	def rank(self) -> 'Rank':
+	def rank(self) -> "Rank":
 		"""return the :class:`Rank` of the member."""
 		return self.tribe.ranks[self.rank_id]
 
@@ -96,10 +98,10 @@ class Member:
 	def avatar(self) -> str:
 		"""Return the player's avatar's url."""
 		if self.hasAvatar:
-			return f'https://avatars.atelier801.com/{self.id % 10000}/{self.id}.jpg'
+			return f"https://avatars.atelier801.com/{self.id % 10000}/{self.id}.jpg"
 
 		# default avatar
-		return 'https://avatars.atelier801.com/0/0.jpg'
+		return "https://avatars.atelier801.com/0/0.jpg"
 
 	@property
 	def online(self) -> bool:
@@ -119,6 +121,7 @@ class Rank:
 	perm: :class:`int`
 		The rank's permissions.
 	"""
+
 	def __init__(self, id_: int, name: str, perm: int):
 		self.id: int = id_
 		self.name: str = name

@@ -32,6 +32,7 @@ class Shop:
 	shaman_objects: :class:`set`[:class:`aiotfm.shop.ShamanObject`]
 		All shaman object available in the shop.
 	"""
+
 	def __init__(self, packet: Packet):
 		self.cheese: int = packet.read32()
 		self.fraise: int = packet.read32()
@@ -54,14 +55,9 @@ class Shop:
 		"""
 		items = [item.to_dict() for item in sorted(self.items, key=lambda i: i.uid)]
 
-		return {
-			"cheese": self.cheese,
-			"fraise": self.fraise,
-			"look": self.look,
-			"items": items
-		}
+		return {"cheese": self.cheese, "fraise": self.fraise, "look": self.look, "items": items}
 
-	def cost(self, outfit: 'Outfit') -> Tuple[int, int, int]:
+	def cost(self, outfit: "Outfit") -> Tuple[int, int, int]:
 		"""Compute and return the total price of an outfit.
 		:param outfit: :class:`aiotfm.shop.Outfit`
 		:return: :class:`tuple`[:class:`int`]
@@ -93,7 +89,7 @@ class Shop:
 
 		return cheese, fraise, fraise_sup
 
-	def getItem(self, item: 'Item') -> Optional['ShopItem']:
+	def getItem(self, item: "Item") -> Optional["ShopItem"]:
 		"""Return the shop item with the same id.
 		:param item: :class:`aiotfm.shop.Item` the item you want to price of.
 		:return: :class:`aiotfm.shop.ShopItem` the item with the prices.
@@ -103,7 +99,7 @@ class Shop:
 				return i
 		return None
 
-	def category(self, id_: int) -> Set['ShopItem']:
+	def category(self, id_: int) -> Set["ShopItem"]:
 		"""Return the items from a category.
 		:param id_: :class:`int` the category's id?
 		:return: :class:`set`[:class:`aiotfm.shop.Item`] the items.
@@ -134,6 +130,7 @@ class Item:
 	colors: :class:`int`
 		The item's colors.
 	"""
+
 	def __init__(self, category: int, id_: int, colors: Optional[List[int]] = None):
 		self.category: int = int(category)
 		self.id: int = int(id_)
@@ -175,19 +172,19 @@ class Item:
 		return cls(cat, id_, colors)
 
 	@classmethod
-	def parse(cls, cat: int, string: Union[List[str], str]) -> 'Item':
+	def parse(cls, cat: int, string: Union[List[str], str]) -> "Item":
 		"""Parse an Item from a string.
 		:param cat: :class:`int` the item's category.
 		:param string: :class:`str` the item.
 		:return: :class:`aiotfm.shop.Item`
 		"""
 		if isinstance(string, str):
-			string = string.split('_')
+			string = string.split("_")
 
 		id_ = int(string[0])
 		if len(string) == 1:
 			return cls(cat, id_)
-		return cls(cat, id_, [int(color, 16) for color in string[1].split('+')])
+		return cls(cat, id_, [int(color, 16) for color in string[1].split("+")])
 
 
 class ShopItem(Item):
@@ -235,9 +232,9 @@ class ShopItem(Item):
 	special: :class:`int`
 		The item's special data.
 	"""
+
 	def __init__(
-		self, category: int, id_: int, colors: int, is_new: bool,
-		flags: int, cheese: int, fraise: int, special: int
+		self, category: int, id_: int, colors: int, is_new: bool, flags: int, cheese: int, fraise: int, special: int
 	):
 		super().__init__(category, id_)
 
@@ -253,19 +250,19 @@ class ShopItem(Item):
 		:return: :class:`dict`
 		"""
 		data = {
-			'category': self.category,
-			'cheese': self.cheese,
-			'colors': self.nbr_colors,
-			'fraise': self.fraise,
-			'id': self.id
+			"category": self.category,
+			"cheese": self.cheese,
+			"colors": self.nbr_colors,
+			"fraise": self.fraise,
+			"id": self.id,
 		}
 		if self.cheese == 1000001:
-			data['purchasable'] = False
-			data['cheese'] = 0
+			data["purchasable"] = False
+			data["cheese"] = 0
 		if self.flags == 13:
-			data['collector'] = self.flags == 13
+			data["collector"] = self.flags == 13
 		if self.is_new:
-			data['new'] = self.is_new
+			data["new"] = self.is_new
 		return data
 
 	@classmethod
@@ -275,8 +272,14 @@ class ShopItem(Item):
 		:return: :class:`aiotfm.shop.ShopItem`
 		"""
 		return cls(
-			packet.read16(), packet.read16(), packet.read8(), packet.readBool(),
-			packet.read8(), packet.read32(), packet.read32(), packet.read32() if packet.readBool() else 0
+			packet.read16(),
+			packet.read16(),
+			packet.read8(),
+			packet.readBool(),
+			packet.read8(),
+			packet.read32(),
+			packet.read32(),
+			packet.read32() if packet.readBool() else 0,
 		)
 
 
@@ -302,6 +305,7 @@ class Outfit:
 		Contains the outfit's metadata.
 
 	"""
+
 	def __init__(self, look: str, id_: int = -1, flags: int = -1):
 		self.look: str = look
 		self.id: int = id_
@@ -339,13 +343,13 @@ class Outfit:
 	@property
 	def fur(self) -> int:
 		"""The fur's id of the outfit."""
-		return int(self.look.split(';')[0])
+		return int(self.look.split(";")[0])
 
 	@property
 	def items(self) -> List[Item]:
 		"""The outfit's items."""
 		items = []
-		for i, item in enumerate(self.look.split(';')[1].split(',')):
+		for i, item in enumerate(self.look.split(";")[1].split(",")):
 			items.append(Item.parse(i, item))
 		return items
 
@@ -429,6 +433,7 @@ class ShamanObject:
 		The obect's pricein fraise.
 
 	"""
+
 	def __init__(self, id_: int, colors: int, is_new: bool, flags: int, cheese: int, fraise: int):
 		self.id: int = id_
 		self.colors: int = colors
@@ -451,10 +456,7 @@ class ShamanObject:
 		:param packet: :class:`aiotfm.Packet`
 		:return: :class:`aiotfm.shop.ShamanObject`
 		"""
-		return cls(
-			packet.read32(), packet.read8(), packet.readBool(), packet.read8(),
-			packet.read32(), packet.read16()
-		)
+		return cls(packet.read32(), packet.read8(), packet.readBool(), packet.read8(), packet.read32(), packet.read16())
 
 
 class OwnedShamanObject:
@@ -479,6 +481,7 @@ class OwnedShamanObject:
 		The custom colors the object has.
 
 	"""
+
 	def __init__(self, id_: int, equiped: bool, colors: List[int]):
 		self.id: int = id_
 		self.equiped: bool = equiped
