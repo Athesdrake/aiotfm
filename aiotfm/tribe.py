@@ -1,4 +1,4 @@
-from typing import List, Union, Optional
+from typing import List, Optional, Union
 
 from aiotfm.enums import Game, Permissions
 from aiotfm.packet import Packet

@@ -6,8 +6,16 @@ from typing import AnyStr, ByteString, Callable, List, Optional, Union
 
 from aiotfm.connection import Connection
 from aiotfm.enums import Community, GameMode, TradeError
-from aiotfm.errors import AiotfmException, AlreadyConnected, CommunityPlatformError, \
-	IncorrectPassword, InvalidEvent, LoginError, MaintenanceError, ServerUnreachable
+from aiotfm.errors import (
+	AiotfmException,
+	AlreadyConnected,
+	CommunityPlatformError,
+	IncorrectPassword,
+	InvalidEvent,
+	LoginError,
+	MaintenanceError,
+	ServerUnreachable,
+)
 from aiotfm.friend import Friend, FriendList
 from aiotfm.inventory import Inventory, InventoryItem, Trade
 from aiotfm.message import Channel, ChannelMessage, Message, Whisper

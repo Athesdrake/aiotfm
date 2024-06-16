@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from asyncio import AbstractEventLoop, Protocol, BaseTransport, Transport
+from asyncio import AbstractEventLoop, BaseTransport, Protocol, Transport
 from typing import Optional, Tuple
 
 import aiotfm  # circular import, don't `import from`

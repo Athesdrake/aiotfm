@@ -1,6 +1,7 @@
-import aiotfm
 import asyncio
 import json
+
+import aiotfm
 
 
 class Bot(aiotfm.Client):
