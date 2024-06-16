@@ -1,0 +1,38 @@
+[project]
+name = "aiotfm"
+description = "An asynchronous event based client for Transformice"
+requires-python = ">=3.8"
+license = { file = "LICENSE.txt" }
+keywords = ["TRANFORMICE", "CLIENT", "ASYNC", "ATELIER801", "EVENT"]
+authors = [{ name = "Athesdrake" }]
+maintainers = [{ name = "Athesdrake", email = "athesdrake@gmail.com" }]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Framework :: AsyncIO",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries",
+]
+dependencies = ["aiohttp"]
+dynamic = ["version", "readme"]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+
+[project.urls]
+"Homepage" = "https://github.com/Athesdrake/aiotfm"
+"Bug Reports" = "https://github.com/Athesdrake/aiotfm/issues"
+"Source" = "https://github.com/Athesdrake/aiotfm"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+version = { attr = "aiotfm.__version__.__version__" }
+readme = { file = ["README.md"] }
