@@ -1,10 +1,14 @@
+from __future__ import annotations
+
 import asyncio
 import logging
 from asyncio import AbstractEventLoop, BaseTransport, Protocol, Transport
-from typing import Optional, Tuple
+from typing import TYPE_CHECKING
 
-import aiotfm  # circular import, don't `import from`
 from aiotfm.errors import AiotfmException
+
+if TYPE_CHECKING:
+	from aiotfm import Client, Packet
 
 logger = logging.getLogger('aiotfm')
 
@@ -12,7 +16,7 @@ logger = logging.getLogger('aiotfm')
 class TFMProtocol(Protocol):
 	def __init__(self, conn):
 		self.buffer: bytearray = bytearray()
-		self.client: aiotfm.Client = conn.client
+		self.client: Client = conn.client
 		self.connection: Connection = conn
 		self.length: int = 0
 
@@ -41,7 +45,7 @@ class TFMProtocol(Protocol):
 		self.connection.open = True
 		self.client.dispatch('connection_made', self.connection)
 
-	def connection_lost(self, exc: Optional[Exception] = None):
+	def connection_lost(self, exc: Exception | None = None):
 		self.connection.open = False
 
 		if exc is None:
@@ -61,12 +65,12 @@ class Connection:
 	"""Represents the connection between the client and the host."""
 	PROTOCOL = TFMProtocol
 
-	def __init__(self, name: str, client: 'aiotfm.Client', loop: AbstractEventLoop):
+	def __init__(self, name: str, client: Client, loop: AbstractEventLoop):
 		self.name: str = name
-		self.client: aiotfm.Client = client
+		self.client: Client = client
 		self.loop: AbstractEventLoop = loop
 
-		self.address: Tuple[str, int] = None
+		self.address: tuple[str, int] = None
 		self.protocol: Protocol = None
 		self.transport: Transport = None
 
@@ -84,9 +88,12 @@ class Connection:
 		Connect the client to the host:port
 		"""
 		self.address = (host, port)
-		self.transport, self.protocol = await asyncio.wait_for(self.loop.create_connection(self._factory, host, port), 3)
+		self.transport, self.protocol = await asyncio.wait_for(
+			self.loop.create_connection(self._factory, host, port),
+			timeout=3,
+		)
 
-	async def send(self, packet: 'aiotfm.Packet', cipher: bool = False):
+	async def send(self, packet: Packet, cipher: bool = False):
 		"""|coro|
 		Send a packet to the socket
 

@@ -9,7 +9,7 @@ class LoginError(AiotfmException):
 	"""Exception thrown when the login failed."""
 	def __init__(self, code: int):
 		self.code = code
-		super().__init__('Login Failed ! Error code: {.code}.'.format(self))
+		super().__init__(f'Login Failed ! Error code: {self.code}.')
 
 
 class AlreadyConnected(LoginError):
@@ -82,7 +82,7 @@ class XXTEAInvalidKeys(XXTEAError):
 class CommunityPlatformError(AiotfmException):
 	"""Exception thrown when the community platform send an error code."""
 	def __init__(self, category: int, code: int):
-		super().__init__('Internal error: {}-{}'.format(category, code))
+		super().__init__(f'Internal error: {category}-{code}')
 		self.category = category
 		self.code = code
 

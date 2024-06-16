@@ -48,4 +48,3 @@ ignore = ["ISC001", "W191"]
 
 [tool.ruff.format]
 indent-style = "tab"
-docstring-code-format = true

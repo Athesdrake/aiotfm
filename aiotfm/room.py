@@ -24,7 +24,7 @@ class Room:
 		self.players: dict = {}
 
 	def __repr__(self):
-		return "<Room name={} official={}>".format(self.name, self.official)
+		return f"<Room name={self.name} official={self.official}>"
 
 	@property
 	def community(self) -> str:
@@ -101,8 +101,10 @@ class RoomEntry:
 		limit: int = 0, is_funcorp: bool = False, is_pinned: bool = False,
 		command: str = '', args: str = '', is_modified: bool = False, shaman_skills: bool = True,
 		consumables: bool = True, adventure: bool = True, collision: bool = False, aie: bool = False,
-		map_duration: int = 100, mice_mass: int = 100, map_rotation: list = []
+		map_duration: int = 100, mice_mass: int = 100, map_rotation: list = None
 	):
+		if map_rotation is None:
+			map_rotation = []
 		self.name: str = name
 		self.language: str = language
 		self.country: str = country
@@ -125,7 +127,7 @@ class RoomEntry:
 	def __repr__(self):
 		return '<{} {}>'.format(
 			self.__class__.__name__,
-			' '.join('{}={!r}'.format(key, getattr(self, key)) for key in self.__slots__)
+			' '.join(f'{key}={getattr(self, key)!r}' for key in self.__slots__)
 		)
 
 
@@ -223,7 +225,7 @@ class RoomList:
 					mice_mass = packet.read32()
 					map_rotation = []
 
-					for i in range(0, packet.read8()):
+					for _ in range(0, packet.read8()):
 						map_rotation.append(packet.read8())
 
 					# Append the room's specific properties

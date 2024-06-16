@@ -1,12 +1,16 @@
+from __future__ import annotations
+
 import asyncio
 from functools import cmp_to_key
-from typing import List, Optional, Union
+from typing import TYPE_CHECKING
 
-import aiotfm
 from aiotfm.enums import TradeState
 from aiotfm.errors import TradeOnWrongState
 from aiotfm.packet import Packet
 from aiotfm.player import Player
+
+if TYPE_CHECKING:
+	from aiotfm import Client
 
 
 class InventoryItem:
@@ -34,7 +38,7 @@ class InventoryItem:
 	def __init__(self, item_id: int, **kwargs):
 		self.id: int = item_id
 		self.quantity: int = kwargs.get("quantity", 0)
-		self.inventory: Optional[Inventory] = kwargs.get("inventory", None)
+		self.inventory: Inventory | None = kwargs.get("inventory", None)
 
 		self.can_use: bool = kwargs.get("can_use", True)
 		self.category: int = kwargs.get("category", 0)
@@ -110,9 +114,9 @@ class Inventory:
 	client: `aiotfm.client.Client`
 		The client that this inventory belongs to.
 	"""
-	def __init__(self, client: 'aiotfm.Client' = None, items: dict = None):
+	def __init__(self, client: Client = None, items: dict = None):
 		self.items: dict = items or {}
-		self.client: aiotfm.Client = client
+		self.client: Client = client
 
 		for item in self:
 			item.inventory = self
@@ -152,13 +156,13 @@ class Inventory:
 		Shorthand for :class:`aiotfm.inventory.Inventory`.items.get"""
 		return self.items.get(item_id, InventoryItem(item_id))
 
-	def getEquipped(self) -> List[InventoryItem]:
+	def getEquipped(self) -> list[InventoryItem]:
 		"""Return all equipped items. Items are sorted.
 		:return: List[:class:`aiotfm.inventory.InventoryItem`]
 		"""
 		return sorted((i for i in self.items.values() if i.is_equipped), key=lambda i: i.slot)
 
-	def sort(self) -> List[InventoryItem]:
+	def sort(self) -> list[InventoryItem]:
 		"""Sort the inventory the same way the client does.
 		:return: List[:class:`aiotfm.inventory.InventoryItem`]
 		"""
@@ -176,9 +180,9 @@ class Inventory:
 
 class TradeContainer:
 	"""Represents the content of a Trade."""
-	def __init__(self, trade: 'Trade'):
+	def __init__(self, trade: Trade):
 		self.trade: Trade = trade
-		self._content: List[InventoryItem] = []
+		self._content: list[InventoryItem] = []
 
 	def __iter__(self):
 		return iter(self._content)
@@ -239,10 +243,10 @@ class Trade:
 			TRADING:   the only state of the trade where you are able to add items.
 			CANCELLED: the trade has been cancelled by one of the parties.
 			SUCCESS:   the trade finished successfully."""
-	def __init__(self, client: 'aiotfm.Client', trader: Union[Player, str]):
-		self.client: aiotfm.Client = client
+	def __init__(self, client: Client, trader: Player | str):
+		self.client: Client = client
 		self.trader: str = trader
-		self.locked: List[bool] = [False, False] # 0: trader, 1: client
+		self.locked: list[bool] = [False, False] # 0: trader, 1: client
 
 		self.imports: TradeContainer = TradeContainer(self)
 		self.exports: TradeContainer = TradeContainer(self)
@@ -329,12 +333,12 @@ class Trade:
 		packet = Packet.new(31, 8).write16(item_id).writeBool(True).buffer
 
 		ten = packet + b'\x01'
-		for i in range(quantity // 10):
+		for _ in range(quantity // 10):
 			await self.client.main.send(Packet(ten))
 			await asyncio.sleep(.05)
 
 		unit = packet + b'\x00'
-		for i in range(quantity % 10):
+		for _ in range(quantity % 10):
 			await self.client.main.send(Packet(unit))
 			await asyncio.sleep(.05)
 
@@ -351,12 +355,12 @@ class Trade:
 		packet = Packet.new(31, 8).write16(item_id).writeBool(False).buffer
 
 		ten = packet + b'\x01'
-		for i in range(quantity // 10):
+		for _ in range(quantity // 10):
 			await self.client.main.send(Packet(ten))
 			await asyncio.sleep(.05)
 
 		unit = packet + b'\x00'
-		for i in range(quantity % 10):
+		for _ in range(quantity % 10):
 			await self.client.main.send(Packet(unit))
 			await asyncio.sleep(.05)
 

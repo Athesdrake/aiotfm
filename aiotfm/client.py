@@ -757,9 +757,9 @@ class Client:
 		"""
 		name = coro.__name__
 		if not name.startswith('on_'):
-			raise InvalidEvent("'{}' isn't a correct event naming.".format(name))
+			raise InvalidEvent(f"{name!r} isn't a correct event naming.")
 		if not asyncio.iscoroutinefunction(coro):
-			message = "Couldn't register a non-coroutine function for the event {}.".format(name)
+			message = f"Couldn't register a non-coroutine function for the event {name}."
 			raise InvalidEvent(message)
 
 		setattr(self, name, coro)
@@ -906,7 +906,7 @@ class Client:
 			try:
 				await self.main.connect(self.keys.server_ip, port)
 			except Exception:
-				logger.debug(f'Unable to connect to the server "{self.keys.server_ip}:{port}".')
+				logger.debug("Unable to connect to the server %s:%s.", self.keys.server_ip, port)
 			else:
 				break
 		else:
@@ -950,7 +950,7 @@ class Client:
 			self.keys = keys or await get_ip()
 		else:
 			if self.auto_restart and api_tfmid is None or api_token is None:
-				warnings.warn("The api token were not provided. The Client won't be able to restart.")
+				warnings.warn("The api token were not provided. The Client won't be able to restart.", stacklevel=2)
 				self.auto_restart = False
 
 			self.keys = keys
@@ -960,7 +960,7 @@ class Client:
 		if 'username' in kwargs and 'password' in kwargs:
 			# Monkey patch the on_login_ready event
 			if hasattr(self, 'on_login_ready'):
-				event = getattr(self, 'on_login_ready')
+				event = self.on_login_ready
 				self.on_login_ready = lambda *a: asyncio.gather(self.login(**kwargs), event(*a))
 			else:
 				self.on_login_ready = lambda *a: self.login(**kwargs)
@@ -1039,7 +1039,9 @@ class Client:
 		:param delay: :class:`float` the delay before restarting. Default is 5 seconds.
 		:param args: arguments to pass to the :meth:`Client.restart` method.
 		:param kwargs: keyword arguments to pass to the :meth:`Client.restart` method."""
-		warnings.warn('`Client.restart_soon` is deprecated, use `Client.restart` instead.', DeprecationWarning)
+		warnings.warn(
+			"`Client.restart_soon` is deprecated, use `Client.restart` instead.", DeprecationWarning, stacklevel=2
+		)
 		await self.restart(delay, **kwargs)
 
 	async def restart(self, delay: float = 0, keys: Optional[Keys] = None):
@@ -1109,7 +1111,8 @@ class Client:
 			loop.run_forever()
 		"""
 		try:
-			self.loop.run_until_complete(self.start(api_tfmid, api_token, username=username, password=password, **kwargs))
+			kwargs.update({"username": username, "password": password})
+			self.loop.run_until_complete(self.start(api_tfmid, api_token, **kwargs))
 		finally:
 			self.loop.run_until_complete(self.loop.shutdown_asyncgens())
 			self.loop.close()

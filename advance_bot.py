@@ -27,7 +27,7 @@ class Bot(aiotfm.Client):
 			return p.username.lower() == username
 
 		try:
-			await self.sendCommand('profile {}'.format(username))
+			await self.sendCommand(f'profile {username}')
 			return await self.wait_for('on_profile', check, timeout=timeout)
 		except asyncio.TimeoutError:
 			return None
