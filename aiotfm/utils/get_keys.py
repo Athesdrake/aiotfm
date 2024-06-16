@@ -90,4 +90,4 @@ async def get_keys(tfm_id, token):
 	if len(keys.packet) > 0 and len(keys.identification) > 0 and len(keys.msg) > 0 and keys.version != 0:
 		return keys
 
-	raise EndpointError('Something went wrong: A key is empty ! {}'.format(data))
+	raise EndpointError(f'Something went wrong: A key is empty ! {data}')

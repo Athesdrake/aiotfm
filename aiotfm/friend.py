@@ -1,11 +1,15 @@
-from typing import Iterable, List, Optional, Union
+from __future__ import annotations
 
-import aiotfm
+from typing import TYPE_CHECKING, Iterable
+
 from aiotfm.enums import Game
 from aiotfm.errors import CantFriendPlayerError, CommunityPlatformError, FriendLimitError, InvalidAccountError
 from aiotfm.packet import Packet
 from aiotfm.player import Player
 from aiotfm.utils import Date
+
+if TYPE_CHECKING:
+	from aiotfm import Client
 
 
 class FriendList:
@@ -18,24 +22,24 @@ class FriendList:
 	friends: :class:`list`
 		Your friends.
 	"""
-	def __init__(self, client: 'aiotfm.Client', packet: Packet):
-		self.friends: List[Friend] = []
-		self.soulmate: Optional[Friend] = None
+	def __init__(self, client: Client, packet: Packet):
+		self.friends: list[Friend] = []
+		self.soulmate: Friend | None = None
 
 		soulmate = Friend(self, packet, True)
 		if soulmate.id != 0:
 			self.soulmate = soulmate
 			self.friends.append(soulmate)
 
-		for i in range(packet.read16()):
+		for _ in range(packet.read16()):
 			self.friends.append(Friend(self, packet))
 
-		self._client: aiotfm.Client = client
+		self._client: Client = client
 
-	def __iter__(self) -> Iterable['Friend']:
+	def __iter__(self) -> Iterable[Friend]:
 		return iter(self.friends)
 
-	def get_friend(self, search: Union[Player, str, int]) -> Optional['Friend']:
+	def get_friend(self, search: Player | str | int) -> Friend | None:
 		"""Returns a friend from their name (or id) or None if not found.
 		:param search: :class:`str` or :class:`aiotfm.Player` or :class:`int` search query
 		:return: :class:`aiotfm.friend.Friend` or None
@@ -54,7 +58,7 @@ class FriendList:
 				if search == f.name:
 					return f
 
-	async def remove(self, friend: Union[Player, 'Friend', str]):
+	async def remove(self, friend: Player | Friend | str):
 		"""|coro|
 		Remove a friend. If they're your soulmate, divorce them.
 		:param friend: :class:`str` or :class:`aiotfm.Player` or :class:`aiotfm.friend.Friend`
@@ -88,7 +92,7 @@ class FriendList:
 			self.soulmate = None
 		self.friends.remove(friend)
 
-	async def add(self, name: Union[Player, str]) -> Optional['Friend']:
+	async def add(self, name: Player | str) -> Friend | None:
 		"""|coro|
 		Add a friend.
 		:param name: :class:`str` or :class:`aiotfm.Player`

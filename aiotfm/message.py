@@ -1,9 +1,12 @@
-from typing import List
+from __future__ import annotations
 
-import aiotfm
+from typing import TYPE_CHECKING
+
 from aiotfm.enums import ChatCommunity
 from aiotfm.packet import Packet
-from aiotfm.player import Player
+
+if TYPE_CHECKING:
+	from aiotfm import Client, Player
 
 
 class Message:
@@ -17,13 +20,13 @@ class Message:
 	content: `str`
 		The actual content of the message.
 	"""
-	def __init__(self, author: Player, content: str, client: 'aiotfm.Client'):
+	def __init__(self, author: Player, content: str, client: Client):
 		self.author: Player = author
 		self.content: str = content
-		self._client: aiotfm.Client = client
+		self._client: Client = client
 
 	def __str__(self):
-		return '[{0.author}] {0.content}'.format(self)
+		return f'[{self.author}] {self.content}'
 
 	def __repr__(self):
 		return '<{.__class__.__name__} {}>'.format(self, ' '.join(
@@ -49,7 +52,7 @@ class Whisper(Message):
 	sent: `bool`
 		True if the author is the client.
 	"""
-	def __init__(self, author: Player, community: ChatCommunity, receiver: Player, content: str, client: 'aiotfm.Client'):
+	def __init__(self, author: Player, community: ChatCommunity, receiver: Player, content: str, client: Client):
 		super().__init__(author, content, client)
 		self.receiver: Player = receiver
 		self.community: ChatCommunity = ChatCommunity(community)
@@ -58,7 +61,7 @@ class Whisper(Message):
 	def __str__(self):
 		direction = '<' if self.sent else '>'
 		author = self.receiver if self.sent else self.author
-		commu = '' if self.sent else '[{}] '.format(self.community.name)
+		commu = '' if self.sent else f'[{self.community.name}] '
 		return f'{direction} {commu}[{author}] {self.content}'
 
 	async def reply(self, msg: str):
@@ -76,12 +79,12 @@ class Channel:
 	name: `str`
 		The actual channel's name.
 	"""
-	def __init__(self, name: str, client: 'aiotfm.Client'):
+	def __init__(self, name: str, client: Client):
 		self.name: str = name
-		self._client: aiotfm.Client = client
+		self._client: Client = client
 
 	def __repr__(self):
-		return '<Channel name={.name}>'.format(self)
+		return f'<Channel name={self.name}>'
 
 	def __eq__(self, other):
 		if isinstance(other, str):
@@ -100,7 +103,7 @@ class Channel:
 		Leaves the channel."""
 		await self._client.leaveChannel(self)
 
-	async def who(self) -> List[Player]:
+	async def who(self) -> list[Player]:
 		"""|coro|
 		Sends the command /who to the channel and returns the list of players.
 
@@ -140,4 +143,4 @@ class ChannelMessage(Message):
 		await self.channel.send(message)
 
 	def __str__(self):
-		return '(#{0.channel.name}) [{0.community.value}] [{0.author}] {0.content}'.format(self)
+		return f'(#{self.channel.name}) [{self.community.value}] [{self.author}] {self.content}'

@@ -30,7 +30,7 @@ class Packet:
 		self.pos: int = 0
 
 	def __repr__(self):
-		return '<Packet {!r}>'.format(bytes(self))
+		return f'<Packet {bytes(self)!r}>'
 
 	def __bytes__(self):
 		return bytes(self.buffer)

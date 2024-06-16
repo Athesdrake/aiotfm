@@ -32,7 +32,7 @@ class Tribe:
 		self.members: List[Member] = []
 		self.ranks: List[Rank] = []
 
-		for i in range(packet.read16()):
+		for _ in range(packet.read16()):
 			self.members.append(Member(self, packet))
 
 		for i in range(packet.read16()):
