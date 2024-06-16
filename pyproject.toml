@@ -48,3 +48,4 @@ ignore = ["ISC001", "W191"]
 
 [tool.ruff.format]
 indent-style = "tab"
+preview = true

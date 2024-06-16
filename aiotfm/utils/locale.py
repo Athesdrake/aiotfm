@@ -23,6 +23,7 @@ class Translation:
 	value: :class:`str`
 		The translated text.
 	"""
+
 	def __init__(self, key, value):
 		self.key = key
 		self.value = value
@@ -31,20 +32,21 @@ class Translation:
 		return self.value
 
 	def __repr__(self):
-		return f'{self.key}={self.value}'
+		return f"{self.key}={self.value}"
 
 	def format(self, *args):
 		"""Format the translation value, replacing %N place holders by arguments.
 
 		:params: the values to inject.
 		:return: :class:`str` the formatted output."""
+
 		def repl(match):
 			index = int(match.group(1))
 			if index > len(args) or index == 0:
 				return match.group(0)
 			return str(args[index - 1])
 
-		return re.sub(r'%(\d+)', repl, self.value)
+		return re.sub(r"%(\d+)", repl, self.value)
 
 
 class Locale:
@@ -62,9 +64,10 @@ class Locale:
 	locale: :class:`str`
 		The locale name.
 	"""
-	BASE_URL = 'http://transformice.com/langues/tfm-{}.gz'
 
-	def __init__(self, locale='en'):
+	BASE_URL = "http://transformice.com/langues/tfm-{}.gz"
+
+	def __init__(self, locale="en"):
 		self._locale = locale
 		self.locales = {}
 
@@ -75,7 +78,7 @@ class Locale:
 		:return: :class:`aiotfm.locale.Translation`
 		"""
 		table = self.locales.get(self.locale, {})
-		value = table.get(key[1:] if key[0] == '$' else key, None)
+		value = table.get(key[1:] if key[0] == "$" else key, None)
 
 		if value is None:
 			return Translation(key, key)
@@ -122,7 +125,7 @@ class Locale:
 					raise InvalidLocale()
 
 				# Decompress the file and parse it
-				content = zlib.decompress(await r.read()).decode('utf-8')
-				table = {k: v for k, v in (t.split('=', 1) for t in content.split('\n-\n') if t)}
+				content = zlib.decompress(await r.read()).decode("utf-8")
+				table = {k: v for k, v in (t.split("=", 1) for t in content.split("\n-\n") if t)}
 				# Add the translation table
 				self.locales[self._locale] = table

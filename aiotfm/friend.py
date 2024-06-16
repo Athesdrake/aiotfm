@@ -22,6 +22,7 @@ class FriendList:
 	friends: :class:`list`
 		Your friends.
 	"""
+
 	def __init__(self, client: Client, packet: Packet):
 		self.friends: list[Friend] = []
 		self.soulmate: Friend | None = None
@@ -44,7 +45,7 @@ class FriendList:
 		:param search: :class:`str` or :class:`aiotfm.Player` or :class:`int` search query
 		:return: :class:`aiotfm.friend.Friend` or None
 		"""
-		if isinstance(search, int): # Search by id
+		if isinstance(search, int):  # Search by id
 			for f in self.friends:
 				if search == f.id:
 					return f
@@ -79,7 +80,7 @@ class FriendList:
 		def is_deletion(tc, packet):
 			return tc == result and packet.read32() == sid
 
-		tc, packet = await self._client.wait_for('on_raw_cp', is_deletion, timeout=5)
+		tc, packet = await self._client.wait_for("on_raw_cp", is_deletion, timeout=5)
 		result = packet.read8()
 
 		if result != 1:
@@ -110,7 +111,7 @@ class FriendList:
 		def is_addition(tc, packet):
 			return tc == 19 and packet.read32() == sid
 
-		tc, packet = await self._client.wait_for('on_raw_cp', is_addition, timeout=5)
+		tc, packet = await self._client.wait_for("on_raw_cp", is_addition, timeout=5)
 		result = packet.read8()
 
 		if result == 12:
@@ -173,10 +174,10 @@ class Friend:
 	def avatar(self) -> str:
 		"""Return the player's avatar's url."""
 		if self.hasAvatar:
-			return f'https://avatars.atelier801.com/{self.id % 10000}/{self.id}.jpg'
+			return f"https://avatars.atelier801.com/{self.id % 10000}/{self.id}.jpg"
 
 		# default avatar
-		return 'https://avatars.atelier801.com/0/0.jpg'
+		return "https://avatars.atelier801.com/0/0.jpg"
 
 	def remove(self):
 		"""|coro|

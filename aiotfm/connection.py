@@ -10,7 +10,7 @@ from aiotfm.errors import AiotfmException
 if TYPE_CHECKING:
 	from aiotfm import Client, Packet
 
-logger = logging.getLogger('aiotfm')
+logger = logging.getLogger("aiotfm")
 
 
 class TFMProtocol(Protocol):
@@ -32,37 +32,38 @@ class TFMProtocol(Protocol):
 					if not byte & 0x80:
 						break
 				else:
-					raise Exception("wtf") # pragma: no cover
+					raise Exception("wtf")  # pragma: no cover
 
 			if len(self.buffer) >= self.length:
-				self.client.data_received(self.buffer[:self.length], self.connection)
-				del self.buffer[:self.length]
+				self.client.data_received(self.buffer[: self.length], self.connection)
+				del self.buffer[: self.length]
 				self.length = 0
 
 	def connection_made(self, transport: BaseTransport):
 		# :desc: Called when a connection has been successfully made with the server.
 		# :param connection: :class:`Connection` the connection that has been made.
 		self.connection.open = True
-		self.client.dispatch('connection_made', self.connection)
+		self.client.dispatch("connection_made", self.connection)
 
 	def connection_lost(self, exc: Exception | None = None):
 		self.connection.open = False
 
 		if exc is None:
-			logger.info('Connection %s has been lost.', self.connection.name)
+			logger.info("Connection %s has been lost.", self.connection.name)
 		else:
-			logger.error('Connection %s has been lost. Reason:', self.connection.name, exc_info=exc)
+			logger.error("Connection %s has been lost. Reason:", self.connection.name, exc_info=exc)
 			# :desc: Called when a connection has been lost due to an error.
 			# :param connection: :class:`Connection` the connection that has been lost.
 			# :param exception: :class:`Exception` the error which occurred.
-			self.client.dispatch('connection_error', self.connection, exc)
+			self.client.dispatch("connection_error", self.connection, exc)
 
 		if self.connection.name == "main" and not self.client._close_event.done():
-			self.client._close_event.set_result(('connection_lost', 10, None))
+			self.client._close_event.set_result(("connection_lost", 10, None))
 
 
 class Connection:
 	"""Represents the connection between the client and the host."""
+
 	PROTOCOL = TFMProtocol
 
 	def __init__(self, name: str, client: Client, loop: AbstractEventLoop):
@@ -101,7 +102,7 @@ class Connection:
 		:param cipher: :class:`bool` whether or not the packet should be ciphered before sending it.
 		"""
 		if not self.open:
-			raise AiotfmException('Cannot send a packet to a closed Connection.')
+			raise AiotfmException("Cannot send a packet to a closed Connection.")
 
 		if not self.client.bot_role and cipher:
 			packet.xor_cipher(self.client.keys.msg, self.fingerprint)

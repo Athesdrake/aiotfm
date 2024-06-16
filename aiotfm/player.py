@@ -55,24 +55,25 @@ class Player:
 	jumping: :class:`bool`
 		True if the player is jumping.
 	"""
+
 	def __init__(self, username, uid=-1, pid=-1, **kwargs):
-		self.gender = kwargs.get('gender', 0)
-		self.look = kwargs.get('look', '')
+		self.gender = kwargs.get("gender", 0)
+		self.look = kwargs.get("look", "")
 		self.id = uid
 		self.pid = pid
-		self.title = kwargs.get('title', 0)
-		self.title_stars = kwargs.get('title_stars', 0)
+		self.title = kwargs.get("title", 0)
+		self.title_stars = kwargs.get("title_stars", 0)
 		self.username = username
 
-		self.cheeses = kwargs.get('cheeses', 0)
-		self.isDead = kwargs.get('isDead', False)
-		self.isShaman = kwargs.get('isShaman', False)
-		self.isVampire = kwargs.get('isVampire', False)
-		self.score = kwargs.get('score', 0)
+		self.cheeses = kwargs.get("cheeses", 0)
+		self.isDead = kwargs.get("isDead", False)
+		self.isShaman = kwargs.get("isShaman", False)
+		self.isVampire = kwargs.get("isVampire", False)
+		self.score = kwargs.get("score", 0)
 
-		self.mouseColor = kwargs.get('mouseColor', 0)
-		self.nameColor = kwargs.get('nameColor', -1)
-		self.shamanColor = kwargs.get('shamanColor', 0)
+		self.mouseColor = kwargs.get("mouseColor", 0)
+		self.nameColor = kwargs.get("nameColor", -1)
+		self.shamanColor = kwargs.get("shamanColor", 0)
 
 		self.facingRight = True
 		self.movingLeft = False
@@ -86,10 +87,10 @@ class Player:
 		self.jumping = False
 
 	def __repr__(self):
-		info = ' '.join([f'{field}={getattr(self, field)!r}' for field in ('id', 'pid') if getattr(self, field) != -1])
+		info = " ".join([f"{field}={getattr(self, field)!r}" for field in ("id", "pid") if getattr(self, field) != -1])
 		if info:
-			info = ' ' + info
-		return f'<Player username={self.username!r}{info}>'
+			info = " " + info
+		return f"<Player username={self.username!r}{info}>"
 
 	@classmethod
 	def from_packet(cls, packet: Packet):
@@ -100,37 +101,37 @@ class Player:
 		name = packet.readUTF()
 		pid = packet.read32()
 		kwargs = {
-			'isShaman': packet.readBool(),
-			'isDead': packet.read8() > 0, # may be bigger than 1?
-			'score': packet.read16(),
-			'cheeses': packet.read8(),
-			'title': packet.read16(),
-			'title_stars': packet.read8() - 1,
-			'gender': packet.read8(),
+			"isShaman": packet.readBool(),
+			"isDead": packet.read8() > 0,  # may be bigger than 1?
+			"score": packet.read16(),
+			"cheeses": packet.read8(),
+			"title": packet.read16(),
+			"title_stars": packet.read8() - 1,
+			"gender": packet.read8(),
 		}
-		packet.readUTF() # ???
+		packet.readUTF()  # ???
 
 		look = packet.readUTF()
-		packet.readBool() # rasterisation ? wth
+		packet.readBool()  # rasterisation ? wth
 		mouseColor = packet.read32()
 		shamanColor = packet.read32()
-		packet.read32() # ???
+		packet.read32()  # ???
 		color = packet.read32()
-		packet.read8() # respawn id?
+		packet.read8()  # respawn id?
 		nameColor = -1 if color == 0xFFFFFFFF else color
 
 		kwargs.update({
-			'look': look,
-			'mouseColor': mouseColor,
-			'shamanColor': shamanColor,
-			'color': color,
-			'nameColor': nameColor
+			"look": look,
+			"mouseColor": mouseColor,
+			"shamanColor": shamanColor,
+			"color": color,
+			"nameColor": nameColor,
 		})
 
 		return cls(name, pid=pid, **kwargs)
 
 	def __str__(self):
-		return self.username.capitalize().replace('#0000', '')
+		return self.username.capitalize().replace("#0000", "")
 
 	def __eq__(self, other):
 		if isinstance(other, str):
@@ -144,7 +145,7 @@ class Player:
 	@property
 	def isGuest(self):
 		"""Return True if the player is a guest (Souris)"""
-		return self.username.startswith('*')
+		return self.username.startswith("*")
 
 	@property
 	def hasCheese(self):
@@ -194,6 +195,7 @@ class Profile:
 	adventurePoints: `int`
 		Number of adventure points the player has.
 	"""
+
 	def __init__(self, packet: Packet):
 		self.username = packet.readUTF()
 		self.id = packet.read32()
@@ -265,6 +267,7 @@ class Stats:
 	noSkillDivineModeSaves: `int`
 		Number of shaman saves in divine mode without skills.
 	"""
+
 	def __init__(self, stats, modeStats):
 		self.normalModeSaves = stats[0]
 		self.hardModeSaves = stats[4]
@@ -277,4 +280,4 @@ class Stats:
 		self.noSkillHardModeSaves = stats[8]
 		self.noSkillDivineModeSaves = stats[9]
 
-		self.modeStats = modeStats # id, progress, progressLimit, imageId
+		self.modeStats = modeStats  # id, progress, progressLimit, imageId

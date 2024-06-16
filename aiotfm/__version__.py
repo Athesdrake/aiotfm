@@ -1,12 +1,14 @@
-__title__ = 'aiotfm'
+__title__ = "aiotfm"
 __description__ = "An asynchronous event based client for Transformice."
-__url__ = 'https://github.com/Athesdrake/aiotfm'
+__url__ = "https://github.com/Athesdrake/aiotfm"
 
-__version__ = '1.4.8'
-__author__ = 'Athesdrake'
+__version__ = "1.4.8"
+__author__ = "Athesdrake"
 __credits__ = [
-	'Tocutoeltuco', 'https://github.com/Tocutoeltuco/transfromage',
-	'Lautenschlager-id', 'https://github.com/Lautenschlager-id/Transfromage'
+	"Tocutoeltuco",
+	"https://github.com/Tocutoeltuco/transfromage",
+	"Lautenschlager-id",
+	"https://github.com/Lautenschlager-id/Transfromage",
 ]
 
 __license__ = """MIT License

@@ -6,6 +6,7 @@ class Date(datetime):
 
 	Inherit from datetime.datetime class.
 	"""
+
 	@classmethod
 	def fromtimestamp(cls, t, tz=None):
 		"""Return a date from a timestamp
