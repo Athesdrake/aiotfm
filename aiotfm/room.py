@@ -1,3 +1,4 @@
+from dataclasses import dataclass, field
 from typing import Any, Callable, List, Optional, Union
 
 from aiotfm.enums import GameMode
@@ -91,68 +92,31 @@ class Room:
 		return default
 
 
+@dataclass(slots=True)
 class RoomEntry:
-	__slots__ = (
-		"name", "language", "country", "player_count", "limit",
-		"is_funcorp", "is_pinned", "command", "args", "is_modified",
-		"shaman_skills", "consumables", "adventure", "collision",
-		"aie", "map_duration", "mice_mass", "map_rotation",
-	)  # fmt: off
-
-	def __init__(
-		self,
-		name: str,
-		language: str,
-		country: str,
-		player_count: int,
-		limit: int = 0,
-		is_funcorp: bool = False,
-		is_pinned: bool = False,
-		command: str = "",
-		args: str = "",
-		is_modified: bool = False,
-		shaman_skills: bool = True,
-		consumables: bool = True,
-		adventure: bool = True,
-		collision: bool = False,
-		aie: bool = False,
-		map_duration: int = 100,
-		mice_mass: int = 100,
-		map_rotation: list = None,
-	):
-		if map_rotation is None:
-			map_rotation = []
-		self.name: str = name
-		self.language: str = language
-		self.country: str = country
-		self.player_count: int = player_count
-		self.limit: int = limit
-		self.is_funcorp: bool = is_funcorp
-		self.is_pinned: bool = is_pinned
-		self.command: str = command
-		self.args: str = args
-		self.is_modified: bool = is_modified
-		self.shaman_skills: bool = shaman_skills
-		self.consumables: bool = consumables
-		self.adventure: bool = adventure
-		self.collision: bool = collision
-		self.aie: bool = aie
-		self.map_duration: int = map_duration
-		self.mice_mass: int = mice_mass
-		self.map_rotation: list = map_rotation
-
-	def __repr__(self):
-		return "<{} {}>".format(
-			self.__class__.__name__, " ".join(f"{key}={getattr(self, key)!r}" for key in self.__slots__)
-		)
+	name: str
+	language: str
+	country: str
+	player_count: int
+	limit: int = 0
+	is_funcorp: bool = False
+	is_pinned: bool = False
+	command: str = ""
+	args: str = ""
+	is_modified: bool = False
+	shaman_skills: bool = True
+	consumables: bool = True
+	adventure: bool = True
+	collision: bool = False
+	aie: bool = False
+	map_duration: int = 100
+	mice_mass: int = 100
+	map_rotation: list = field(default_factory=list)
 
 
+@dataclass(slots=True)
 class DropdownRoomEntry(RoomEntry):
-	__slots__ = ("entries",)
-
-	def __init__(self, entries, *args, **kwargs):
-		super().__init__(*args, **kwargs, is_pinned=True)
-		self.entries = entries
+	entries: list[RoomEntry] = field(default_factory=list)
 
 
 class RoomList:
@@ -201,7 +165,7 @@ class RoomList:
 
 				if command == "lm":
 					entries: List[RoomEntry] = []
-					room = DropdownRoomEntry(entries, name, language, country, player_count)
+					room = DropdownRoomEntry(name, language, country, player_count, entries=entries, is_pinned=True)
 
 					for mode in args.split("&~"):
 						if "," not in mode:
