@@ -1,4 +1,4 @@
-from typing import List, Optional, Union, Iterable
+from typing import Iterable, List, Optional, Union
 
 import aiotfm
 from aiotfm.enums import Game
